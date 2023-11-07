@@ -1,0 +1,39 @@
+# source: https://github.com/sindre0830/Workflow-Templates
+name: Continuous Integration (CI)
+# when to run the workflow
+on:
+  push:
+    paths:
+    - '.github/workflows/continuous-integration.yml'
+    - 'CMakeLists.txt'
+    - 'source/**'
+  pull_request:
+  workflow_dispatch:
+# instructions the workflow will perform
+jobs:
+  build:
+    # environment to run on
+    runs-on: ubuntu-latest
+    # steps to perform
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up C++
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc g++ cmake
+
+    - name: Install dependencies
+      working-directory: build
+      run: cmake ..
+
+    - name: Build program
+      working-directory: build
+      run: cmake --build .
+
+    - name: Syntax checker
+      working-directory: source
+      run: |
+        sudo apt-get install python3-pip
+        pip3 install cpplint
+        cpplint --root=. --linelength=150 --filter=-build/include_subdir --recursive --exclude=external/* --exclude=build/* *
