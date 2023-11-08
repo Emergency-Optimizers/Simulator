@@ -9,10 +9,14 @@
 
 /* external libraries */
 #include <iostream>
+/* internal libraries */
+#include "ODMatrix.hpp"
 
 /**
  * Main program.
  */
 int main() {
-    std::cout << "Hello, World!\n";
+    ODMatrix odMatrix;
+    odMatrix.loadFromFile("../../Data-Processing/data/enhanced/oslo/od_matrix.txt");
+    std::cout << "Travel time from id1 to id2: " << odMatrix.getTravelTime(-1269655260, 528999580) << std::endl;
 }
