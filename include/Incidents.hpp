@@ -51,6 +51,7 @@ class Incidents {
  public:
     Incidents();
     void loadFromFile(const std::string& filePath);
+    void printRow(const int& index);
 };
 
 #endif  // INCIDENTS_HPP_

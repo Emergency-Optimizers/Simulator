@@ -23,6 +23,7 @@ int main() {
 
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+    incidents.printRow(99);
 
     return 0;
 }

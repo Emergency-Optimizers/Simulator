@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iomanip>
 #include <optional>
+#include <iostream>
 /* internal libraries */
 #include "Incidents.hpp"
 
@@ -89,4 +90,30 @@ void Incidents::convertRowToTypedData(const CSVRow& row) {
         typedRow[header] = schemaMapping[header](row[header]);
     }
     typedData.push_back(std::move(typedRow));
+}
+
+void Incidents::printRow(const int& index) {
+    std::cout << "Row " << index << ":\n";
+    for (const auto& header : reader.getHeaders()) {
+        const auto& cell = typedData[index][header];
+        std::cout << header << ": ";
+        std::visit([](auto&& value) {
+            using T = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<T, int> ||
+                          std::is_same_v<T, float> ||
+                          std::is_same_v<T, std::string> ||
+                          std::is_same_v<T, bool>) {
+                std::cout << value;
+            } else if constexpr (std::is_same_v<T, std::optional<std::tm>>) {
+                if (value) {
+                    // If the optional has a value, print it using the standard format
+                    std::cout << std::put_time(&value.value(), "%Y-%m-%d %H:%M:%S");
+                } else {
+                    // If the optional is empty, print a placeholder
+                    std::cout << "n/a";
+                }
+            }
+        }, cell);
+        std::cout << '\n';
+    }
 }
