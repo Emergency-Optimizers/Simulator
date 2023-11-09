@@ -39,13 +39,6 @@ class Incidents {
     CSVReader reader;
     SchemaMapping schemaMapping;
     std::vector<std::map<std::string, CellType>> typedData;
-
-    static int toInt(const std::string& str);
-    static float toFloat(const std::string& str);
-    static std::string toString(const std::string& str);
-    static bool toBool(const std::string& str);
-    static std::optional<std::tm> toDateTime(const std::string& str);
-
     void convertRowToTypedData(const CSVRow& row);
 
  public:

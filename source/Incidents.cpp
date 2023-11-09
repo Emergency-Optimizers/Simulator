@@ -15,64 +15,33 @@
 #include <iostream>
 /* internal libraries */
 #include "Incidents.hpp"
-
-// Implement the helper conversion functions
-int Incidents::toInt(const std::string& str) {
-    return std::stoi(str);
-}
-
-float Incidents::toFloat(const std::string& str) {
-    return std::stof(str);
-}
-
-std::string Incidents::toString(const std::string& str) {
-    return str;
-}
-
-bool Incidents::toBool(const std::string& str) {
-    return str == "True" || str == "true";
-}
-
-std::optional<std::tm> Incidents::toDateTime(const std::string& str) {
-    if (str.empty()) {
-        return std::nullopt;
-    }
-    std::tm tm = {};
-    std::istringstream ss(str);
-    ss >> std::get_time(&tm, "%Y.%m.%dT%H:%M:%S");
-
-    if (ss.fail()) {
-        return std::nullopt;
-    }
-
-    return tm;
-}
+#include "Utils.hpp"
 
 // Constructor
 Incidents::Incidents() {
     // Initialize the schema mapping here
     schemaMapping = {
-        {"id", [](const std::string& str) -> CellType { return toInt(str); }},
-        {"synthetic", [](const std::string& str) -> CellType { return toBool(str); }},
-        {"triage_impression_during_call", [](const std::string& str) -> CellType { return toString(str); }},
-        {"time_call_received", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_call_processed", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_ambulance_notified", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_dispatch", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_arrival_scene", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_departure_scene", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_arrival_hospital", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"time_available", [](const std::string& str) -> CellType { return toDateTime(str); }},
-        {"response_time_sec", [](const std::string& str) -> CellType { return toFloat(str); }},
-        {"longitude", [](const std::string& str) -> CellType { return toFloat(str); }},
-        {"latitude", [](const std::string& str) -> CellType { return toFloat(str); }},
-        {"easting", [](const std::string& str) -> CellType { return toInt(str); }},
-        {"northing", [](const std::string& str) -> CellType { return toInt(str); }},
-        {"grid_id", [](const std::string& str) -> CellType { return toInt(str); }},
-        {"grid_row", [](const std::string& str) -> CellType { return toInt(str); }},
-        {"grid_col", [](const std::string& str) -> CellType { return toInt(str); }},
-        {"region", [](const std::string& str) -> CellType { return toString(str); }},
-        {"urban_settlement", [](const std::string& str) -> CellType { return toBool(str); }},
+        {"id", [](const std::string& str) -> CellType { return Utils::toInt(str); }},
+        {"synthetic", [](const std::string& str) -> CellType { return Utils::toBool(str); }},
+        {"triage_impression_during_call", [](const std::string& str) -> CellType { return Utils::toString(str); }},
+        {"time_call_received", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_call_processed", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_ambulance_notified", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_dispatch", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_arrival_scene", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_departure_scene", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_arrival_hospital", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"time_available", [](const std::string& str) -> CellType { return Utils::toDateTime(str); }},
+        {"response_time_sec", [](const std::string& str) -> CellType { return Utils::toFloat(str); }},
+        {"longitude", [](const std::string& str) -> CellType { return Utils::toFloat(str); }},
+        {"latitude", [](const std::string& str) -> CellType { return Utils::toFloat(str); }},
+        {"easting", [](const std::string& str) -> CellType { return Utils::toInt(str); }},
+        {"northing", [](const std::string& str) -> CellType { return Utils::toInt(str); }},
+        {"grid_id", [](const std::string& str) -> CellType { return Utils::toInt(str); }},
+        {"grid_row", [](const std::string& str) -> CellType { return Utils::toInt(str); }},
+        {"grid_col", [](const std::string& str) -> CellType { return Utils::toInt(str); }},
+        {"region", [](const std::string& str) -> CellType { return Utils::toString(str); }},
+        {"urban_settlement", [](const std::string& str) -> CellType { return Utils::toBool(str); }},
     };
 }
 
