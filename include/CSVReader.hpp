@@ -7,26 +7,41 @@
  * @copyright Copyright (c) 2023 Sindre Eiklid
  */
 
-#ifndef CSVREADER_HPP_
-#define CSVREADER_HPP_
+#pragma once
 
 /* external libraries */
-#include <fstream>
 #include <string>
 #include <vector>
+#include <variant>
+#include <unordered_map>
+#include <functional>
+#include <optional>
 /* internal libraries */
 #include "CSVRow.hpp"
 
+using CellType = std::variant<
+    int,
+    float,
+    std::string,
+    bool,
+    std::optional<std::tm>
+>;
+
+using SchemaMapping = std::unordered_map<std::string, std::function<CellType(const std::string&)>>;
+
 class CSVReader {
- private:
-    std::vector<CSVRow> rows;
+ protected:
+    SchemaMapping schemaMapping;
+    std::vector<std::vector<CellType>> typedData;
     std::vector<std::string> headers;
 
+    virtual void parseRow(const std::string& line);
+
  public:
-    void readCSV(const std::string& filename);
-    const CSVRow& operator[](std::size_t index) const;
+    virtual ~CSVReader() = default;
+    virtual void loadFromFile(const std::string& filename);
+    const std::vector<CellType>& operator[](std::size_t index) const;
     std::size_t size() const;
     const std::vector<std::string>& getHeaders() const;
+    void printRow(const int& index);
 };
-
-#endif  // CSVREADER_HPP_

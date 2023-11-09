@@ -7,44 +7,12 @@
  * @copyright Copyright (c) 2023 Sindre Eiklid
  */
 
-#ifndef INCIDENTS_HPP_
-#define INCIDENTS_HPP_
+#pragma once
 
-/* external libraries */
-#include <string>
-#include <unordered_map>
-#include <functional>
-#include <variant>
-#include <map>
-#include <vector>
-#include <ctime>
-#include <optional>
 /* internal libraries */
 #include "CSVReader.hpp"
 
-// Define a variant to hold any type of cell data.
-using CellType = std::variant<
-    int,
-    float,
-    std::string,
-    bool,
-    std::optional<std::tm>
->;
-
-// Alias for a mapping of header names to their corresponding types.
-using SchemaMapping = std::unordered_map<std::string, std::function<CellType(const std::string&)>>;
-
-class Incidents {
- private:
-    CSVReader reader;
-    SchemaMapping schemaMapping;
-    std::vector<std::map<std::string, CellType>> typedData;
-    void convertRowToTypedData(const CSVRow& row);
-
+class Incidents : public CSVReader {
  public:
     Incidents();
-    void loadFromFile(const std::string& filePath);
-    void printRow(const int& index);
 };
-
-#endif  // INCIDENTS_HPP_

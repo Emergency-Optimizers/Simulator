@@ -12,27 +12,26 @@
 #include <sstream>
 #include <iomanip>
 #include <optional>
-#include <iostream>
 /* internal libraries */
 #include "Utils.hpp"
 
-int Utils::toInt(const std::string& str) {
+CellType Utils::toInt(const std::string& str) {
     return std::stoi(str);
 }
 
-float Utils::toFloat(const std::string& str) {
+CellType Utils::toFloat(const std::string& str) {
     return std::stof(str);
 }
 
-std::string Utils::toString(const std::string& str) {
+CellType Utils::toString(const std::string& str) {
     return str;
 }
 
-bool Utils::toBool(const std::string& str) {
+CellType Utils::toBool(const std::string& str) {
     return str == "True" || str == "true";
 }
 
-std::optional<std::tm> Utils::toDateTime(const std::string& str) {
+CellType Utils::toDateTime(const std::string& str) {
     if (str.empty()) {
         return std::nullopt;
     }

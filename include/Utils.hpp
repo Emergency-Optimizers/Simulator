@@ -11,17 +11,23 @@
 
 /* external libraries */
 #include <string>
-#include <vector>
 #include <ctime>
 #include <optional>
-/* internal libraries */
-#include "CSVReader.hpp"
+#include <variant>
+
+using CellType = std::variant<
+    int,
+    float,
+    std::string,
+    bool,
+    std::optional<std::tm>
+>;
 
 class Utils {
  public:
-    static int toInt(const std::string& str);
-    static float toFloat(const std::string& str);
-    static std::string toString(const std::string& str);
-    static bool toBool(const std::string& str);
-    static std::optional<std::tm> toDateTime(const std::string& str);
+    static CellType toInt(const std::string& str);
+    static CellType toFloat(const std::string& str);
+    static CellType toString(const std::string& str);
+    static CellType toBool(const std::string& str);
+    static CellType toDateTime(const std::string& str);
 };
