@@ -18,21 +18,16 @@
 #include <optional>
 /* internal libraries */
 #include "CSVRow.hpp"
+#include "Utils.hpp"
 
-using CellType = std::variant<
-    int,
-    float,
-    std::string,
-    bool,
-    std::optional<std::tm>
->;
+using ToCellType = CellType(*)(const std::string&);
 
-using SchemaMapping = std::unordered_map<std::string, std::function<CellType(const std::string&)>>;
+using SchemaMapping = std::unordered_map<std::string, ToCellType>;
 
 class CSVReader {
  protected:
     SchemaMapping schemaMapping;
-    std::vector<std::vector<CellType>> typedData;
+    std::vector<std::vector<CellType>> rows;
     std::vector<std::string> headers;
 
     virtual void parseRow(const std::string& line);
