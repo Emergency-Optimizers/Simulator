@@ -9,7 +9,6 @@
 
 /* internal libraries */
 #include "Incidents.hpp"
-#include "Utils.hpp"
 
 Incidents::Incidents() {
     schemaMapping = {
