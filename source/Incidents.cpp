@@ -93,10 +93,9 @@ void Incidents::convertRowToTypedData(const CSVRow& row) {
 }
 
 void Incidents::printRow(const int& index) {
-    std::cout << "Row " << index << ":\n";
     for (const auto& header : reader.getHeaders()) {
         const auto& cell = typedData[index][header];
-        std::cout << header << ": ";
+        std::cout << '\t' << header << ": ";
         std::visit([](auto&& value) {
             using T = std::decay_t<decltype(value)>;
             if constexpr (std::is_same_v<T, int> ||
