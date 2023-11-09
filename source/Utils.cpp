@@ -12,6 +12,8 @@
 #include <sstream>
 #include <iomanip>
 #include <optional>
+#include <vector>
+#include <algorithm>
 /* internal libraries */
 #include "Utils.hpp"
 
@@ -44,4 +46,15 @@ CellType Utils::toDateTime(const std::string& str) {
     }
 
     return tm;
+}
+
+template <typename T>
+static int findIndex(const std::vector<T>& vec, const T& value) {
+    auto it = std::find(vec.begin(), vec.end(), value);
+
+    if (it != vec.end()) {
+        return std::distance(vec.begin(), it);
+    } else {
+        return -1;
+    }
 }

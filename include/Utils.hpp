@@ -23,6 +23,7 @@ using CellType = std::variant<
     std::optional<std::tm>
 >;
 
+
 class Utils {
  public:
     static CellType toInt(const std::string& str);
@@ -30,4 +31,6 @@ class Utils {
     static CellType toString(const std::string& str);
     static CellType toBool(const std::string& str);
     static CellType toDateTime(const std::string& str);
+    template <typename T>
+    static int findIndex(const std::vector<T>& vec, const T& value);
 };
