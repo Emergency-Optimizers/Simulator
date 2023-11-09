@@ -18,8 +18,8 @@
  */
 int main() {
     ODMatrix odMatrix;
-    odMatrix.loadFromFile("../../Data-Processing/data/enhanced/oslo/od_matrix.txt");
-    std::cout << "Travel time from id1 to id2: " << odMatrix.getTravelTime(-1269655260, 528999580) << std::endl;
+    odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
+    std::cout << "Travel time from id1 to id2: " << odMatrix.getTravelTime(-1269655260, 852853940) << std::endl;
 
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
