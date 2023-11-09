@@ -64,11 +64,12 @@ const std::vector<std::string>& CSVReader::getHeaders() const {
     return headers;
 }
 
-void CSVReader::printRow(const int& index) {
+void CSVReader::printRow(const std::size_t index) {
     if (index >= size()) {
-        throw std::out_of_range("Index out of range");
+        std::cout << "Index out of range" << std::endl;
+        return;
     }
-    
+    std::cout << "Row " << index << ": " << std::endl;
     const auto& row = rows[index];
     for (std::size_t i = 0; i < row.size(); ++i) {
         const auto& cell = row[i];

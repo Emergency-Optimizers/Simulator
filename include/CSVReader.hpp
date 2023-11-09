@@ -38,5 +38,5 @@ class CSVReader {
     const std::vector<CellType>& operator[](std::size_t index) const;
     std::size_t size() const;
     const std::vector<std::string>& getHeaders() const;
-    void printRow(const int& index);
+    void printRow(std::size_t index);
 };
