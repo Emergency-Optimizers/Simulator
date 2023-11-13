@@ -71,25 +71,9 @@ void CSVReader::printRow(const std::size_t index) {
     }
     std::cout << "Row " << index << ": " << std::endl;
     const auto& row = rows[index];
-    for (std::size_t i = 0; i < row.size(); ++i) {
+    for (std::size_t i = 0; i < headers.size(); ++i) {
         const auto& cell = row[i];
-        std::cout << '\t' << headers[i] << ": ";
-        std::visit([](auto&& value) {
-            using T = std::decay_t<decltype(value)>;
-            if constexpr (std::is_same_v<T, int> ||
-                          std::is_same_v<T, float> ||
-                          std::is_same_v<T, std::string> ||
-                          std::is_same_v<T, bool>) {
-                std::cout << value;
-            } else if constexpr (std::is_same_v<T, std::optional<std::tm>>) {
-                if (value) {
-                    std::cout << std::put_time(&value.value(), "%Y-%m-%d %H:%M:%S");
-                } else {
-                    std::cout << "n/a";
-                }
-            }
-        }, cell);
-        std::cout << '\n';
+        std::cout << '\t' << headers[i] << ": " << Utils::cellTypeToString(cell) << std::endl;
     }
 }
 
