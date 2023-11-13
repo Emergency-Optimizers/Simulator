@@ -14,6 +14,7 @@
 #include <ctime>
 #include <optional>
 #include <variant>
+#include <vector>
 
 using CellType = std::variant<
     int,
@@ -31,6 +32,16 @@ class Utils {
     static CellType toString(const std::string& str);
     static CellType toBool(const std::string& str);
     static CellType toDateTime(const std::string& str);
+    static std::string tmToString(const std::tm& time);
+    static std::string cellTypeToString(const CellType& cell);
     template <typename T>
-    static int findIndex(const std::vector<T>& vec, const T& value);
+    static int findIndex(const std::vector<T>& vec, const T& value) {
+        auto it = std::find(vec.begin(), vec.end(), value);
+
+        if (it != vec.end()) {
+            return std::distance(vec.begin(), it);
+        } else {
+            return -1;
+        }
+    }
 };

@@ -48,13 +48,25 @@ CellType Utils::toDateTime(const std::string& str) {
     return tm;
 }
 
-template <typename T>
-static int findIndex(const std::vector<T>& vec, const T& value) {
-    auto it = std::find(vec.begin(), vec.end(), value);
+std::string Utils::tmToString(const std::tm& time) {
+    std::stringstream ss;
+    ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
+    return ss.str();
+}
 
-    if (it != vec.end()) {
-        return std::distance(vec.begin(), it);
-    } else {
-        return -1;
-    }
+std::string Utils::cellTypeToString(const CellType& cell) {
+    return std::visit([](auto&& arg) -> std::string {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, int>) {
+            return std::to_string(arg);
+        } else if constexpr (std::is_same_v<T, float>) {
+            return std::to_string(arg);
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return arg;
+        } else if constexpr (std::is_same_v<T, bool>) {
+            return arg ? "true" : "false";
+        } else if constexpr (std::is_same_v<T, std::optional<std::tm>>) {
+            return arg ? tmToString(arg.value()) : "n/a";
+        }
+    }, cell);
 }
