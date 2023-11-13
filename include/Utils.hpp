@@ -34,6 +34,8 @@ class Utils {
     static CellType toDateTime(const std::string& str);
     static std::string tmToString(const std::tm& time);
     static std::string cellTypeToString(const CellType& cell);
+    static std::tm stringToTm(const std::string& str);
+    static int Utils::compareTime(const std::tm& time_1, const std::tm& time_2);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);

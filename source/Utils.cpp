@@ -70,3 +70,26 @@ std::string Utils::cellTypeToString(const CellType& cell) {
         }
     }, cell);
 }
+
+std::tm Utils::stringToTm(const std::string& str) {
+    std::tm time{};
+    std::istringstream ss(str);
+    ss >> std::get_time(&time, "%Y-%m-%d %H:%M:%S");
+    return time;
+}
+
+int Utils::compareTime(const std::tm& time_1, const std::tm& time_2) {
+    if (time_1.tm_year > time_2.tm_year) return 1;
+    if (time_1.tm_year < time_2.tm_year) return -1;
+    if (time_1.tm_mon > time_2.tm_mon) return 1;
+    if (time_1.tm_mon < time_2.tm_mon) return -1;
+    if (time_1.tm_mday > time_2.tm_mday) return 1;
+    if (time_1.tm_mday < time_2.tm_mday) return -1;
+    if (time_1.tm_hour > time_2.tm_hour) return 1;
+    if (time_1.tm_hour < time_2.tm_hour) return -1;
+    if (time_1.tm_min > time_2.tm_min) return 1;
+    if (time_1.tm_min < time_2.tm_min) return -1;
+    if (time_1.tm_sec > time_2.tm_sec) return 1;
+    if (time_1.tm_sec < time_2.tm_sec) return -1;
+    return 0;
+}
