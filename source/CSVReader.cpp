@@ -77,6 +77,6 @@ void CSVReader::printRow(const std::size_t index) {
     }
 }
 
-CellType CSVReader::get(const std::string& header, int index) {
+const CellType CSVReader::get(const std::string& header, const int index) {
     return rows[index][Utils::findIndex(headers, header)];
 }
