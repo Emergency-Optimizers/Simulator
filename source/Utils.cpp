@@ -16,6 +16,7 @@
 #include <algorithm>
 /* internal libraries */
 #include "Utils.hpp"
+#include "CSVReader.hpp"
 
 CellType Utils::toInt(const std::string& str) {
     return std::stoi(str);
@@ -99,4 +100,33 @@ float Utils::timeDifferenceInSeconds(const std::tm& time1, const std::tm& time2)
     time_t t2 = std::mktime(const_cast<std::tm*>(&time2));
 
     return std::difftime(t2, t1);
+}
+
+int Utils::findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times) {
+    if (times.empty()) return -1;
+
+    auto lower = std::lower_bound(times.begin(), times.end(), target, tm_less);
+
+    if (lower == times.end()) return times.size() - 1;
+    if (lower == times.begin()) return 0;
+
+    auto prev = lower - 1;
+
+    auto diff1 = std::mktime(const_cast<std::tm*>(&*lower)) - std::mktime(const_cast<std::tm*>(&target));
+    auto diff2 = std::mktime(const_cast<std::tm*>(&target)) - std::mktime(const_cast<std::tm*>(&*prev));
+
+    if (diff1 < diff2) {
+        return std::distance(times.begin(), lower);
+    } else {
+        return std::distance(times.begin(), prev);
+    }
+}
+
+bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
+    if (lhs.tm_year != rhs.tm_year) return lhs.tm_year < rhs.tm_year;
+    if (lhs.tm_mon != rhs.tm_mon) return lhs.tm_mon < rhs.tm_mon;
+    if (lhs.tm_mday != rhs.tm_mday) return lhs.tm_mday < rhs.tm_mday;
+    if (lhs.tm_hour != rhs.tm_hour) return lhs.tm_hour < rhs.tm_hour;
+    if (lhs.tm_min != rhs.tm_min) return lhs.tm_min < rhs.tm_min;
+    return lhs.tm_sec < rhs.tm_sec;
 }

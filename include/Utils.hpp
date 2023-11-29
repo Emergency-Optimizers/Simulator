@@ -26,6 +26,9 @@ using CellType = std::variant<
 
 
 class Utils {
+ private:
+    static bool tm_less(const std::tm& lhs, const std::tm& rhs);
+
  public:
     static CellType toInt(const std::string& str);
     static CellType toFloat(const std::string& str);
@@ -35,8 +38,9 @@ class Utils {
     static std::string tmToString(const std::tm& time);
     static std::string cellTypeToString(const CellType& cell);
     static std::tm stringToTm(const std::string& str);
-    static int Utils::compareTime(const std::tm& time_1, const std::tm& time_2);
+    static int compareTime(const std::tm& time_1, const std::tm& time_2);
     static float timeDifferenceInSeconds(const std::tm& time1, const std::tm& time2);
+    static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);
