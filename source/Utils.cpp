@@ -74,7 +74,7 @@ std::string Utils::cellTypeToString(const CellType& cell) {
 std::tm Utils::stringToTm(const std::string& str) {
     std::tm time{};
     std::istringstream ss(str);
-    ss >> std::get_time(&time, "%Y-%m-%d %H:%M:%S");
+    ss >> std::get_time(&time, "%Y.%m.%dT%H:%M:%S");
     return time;
 }
 
