@@ -10,7 +10,6 @@
 #pragma once
 
 enum class IncidentStatus {
-    STANDBY,
     TRAVELLING_TO_SCENE,
     ARRIVED_AT_SCENE,
     TRAVELLING_TO_HOSPITAL,
