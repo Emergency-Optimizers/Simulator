@@ -40,4 +40,5 @@ class CSVReader {
     const std::vector<std::string>& getHeaders() const;
     void printRow(std::size_t index);
     const CellType get(const std::string& header, const int index);
+    const std::vector<std::tm> getColumnOfTimes(const std::string& header);
 };
