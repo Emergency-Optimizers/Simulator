@@ -31,9 +31,5 @@ int main() {
     EventHandler eventHandler;
     eventHandler.populate(incidents, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
 
-    const std::vector<std::tm> times = incidents.getColumnOfTimes("time_call_received");
-    int index = Utils::findClosestTimeIndex(Utils::stringToTm("2016.11.29T11:02:00"), times);
-    incidents.printRow(index);
-
     return 0;
 }

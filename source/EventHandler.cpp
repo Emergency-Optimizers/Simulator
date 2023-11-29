@@ -13,29 +13,28 @@
 #include "Utils.hpp"
 
 void EventHandler::populate(Incidents& incidents, const std::string& start, const std::string& end) {
-    std::tm startTime = Utils::stringToTm(start);
-    std::tm endTime = Utils::stringToTm(end);
+    const std::tm startTime = Utils::stringToTm(start);
+    const std::tm endTime = Utils::stringToTm(end);
 
-    for (std::size_t i = 0; i < incidents.size(); ++i) {
-        const CellType cell = incidents.get("time_call_received", i);
+    const std::vector<std::tm> times = incidents.getColumnOfTimes("time_call_received");
+    int startIndex = Utils::findClosestTimeIndex(startTime, times);
+    int endIndex = Utils::findClosestTimeIndex(endTime, times);
 
-        if (std::holds_alternative<std::optional<std::tm>>(cell)) {
-            const auto& optTime = std::get<std::optional<std::tm>>(cell);
-            if (optTime.has_value()) {
-                const std::tm& incidentTime = optTime.value();
-                if (Utils::compareTime(incidentTime, startTime) >= 0 && Utils::compareTime(incidentTime, endTime) <= 0) {
-                    const CellType cellIncidentDispatchSceneTime = incidents.get("time_call_processed", i);
-                    const std::tm& incidentDispatchSceneTime = std::get<std::optional<std::tm>>(cellIncidentDispatchSceneTime).value();
+    events.clear();
 
-                    Event event;
-                    event.incidentIndex = i;
-                    event.status = IncidentStatus::DISPATCH_TO_SCENE;
-                    event.assignedAmbulanceIndex = -1;
-                    event.timeSeconds = Utils::timeDifferenceInSeconds(incidentTime, incidentDispatchSceneTime);
+    for (std::size_t i = startIndex; i < endIndex + 1; i++) {
+        const CellType cellTimeCallReceived = incidents.get("time_call_received", i);
+        const std::tm& timeCallReceived = std::get<std::optional<std::tm>>(cellTimeCallReceived).value();
 
-                    events.push_back(event);
-                }
-            }
-        }
+        const CellType cellTimeCallProcessed = incidents.get("time_call_processed", i);
+        const std::tm& timeCallProcessed = std::get<std::optional<std::tm>>(cellTimeCallProcessed).value();
+
+        Event event;
+        event.incidentIndex = i;
+        event.status = IncidentStatus::DISPATCH_TO_SCENE;
+        event.assignedAmbulanceIndex = -1;
+        event.timeSeconds = Utils::timeDifferenceInSeconds(timeCallReceived, timeCallProcessed);
+
+        events.push_back(event);
     }
 }
