@@ -14,10 +14,11 @@
 #include <vector>
 /* internal libraries */
 #include "Incidents.hpp"
+#include "Event.hpp"
 
 class EventHandler {
- protected:
-    std::vector<int> events;
+ private:
+    std::vector<Event> events;
 
  public:
     ~EventHandler() = default;

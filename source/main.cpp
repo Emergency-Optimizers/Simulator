@@ -13,6 +13,7 @@
 #include "ODMatrix.hpp"
 #include "Incidents.hpp"
 #include "Stations.hpp"
+#include "EventHandler.hpp"
 
 /**
  * Main program.
@@ -29,6 +30,9 @@ int main() {
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
     incidents.printRow(99);
+
+    EventHandler eventHandler;
+    eventHandler.populate(incidents, "2016.11.29T11:01:07", "2016.11.29T12:00:50");
 
     return 0;
 }
