@@ -93,3 +93,10 @@ int Utils::compareTime(const std::tm& time_1, const std::tm& time_2) {
     if (time_1.tm_sec < time_2.tm_sec) return -1;
     return 0;
 }
+
+float Utils::timeDifferenceInSeconds(const std::tm& time1, const std::tm& time2) {
+    time_t t1 = std::mktime(const_cast<std::tm*>(&time1));
+    time_t t2 = std::mktime(const_cast<std::tm*>(&time2));
+
+    return std::difftime(t2, t1);
+}
