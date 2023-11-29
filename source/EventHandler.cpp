@@ -29,7 +29,7 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
 
                     Event event;
                     event.incidentIndex = i;
-                    event.status = IncidentStatus::TRAVELLING_TO_SCENE;
+                    event.status = IncidentStatus::DISPATCH_TO_SCENE;
                     event.assignedAmbulanceIndex = -1;
                     event.timeSeconds = Utils::timeDifferenceInSeconds(incidentTime, incidentDispatchSceneTime);
 

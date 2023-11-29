@@ -29,7 +29,7 @@ int main() {
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
     EventHandler eventHandler;
-    eventHandler.populate(incidents, "2016.11.29T11:01:07", "2016.11.29T12:00:50");
+    eventHandler.populate(incidents, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
 
     const std::vector<std::tm> times = incidents.getColumnOfTimes("time_call_received");
     int index = Utils::findClosestTimeIndex(Utils::stringToTm("2016.11.29T11:02:00"), times);
