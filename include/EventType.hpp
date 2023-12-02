@@ -1,5 +1,5 @@
 /**
- * @file IncidentStatus.hpp
+ * @file EventType.hpp
  * @author Sindre Eiklid
  * @version 1.0
  * @date 2023-11-09
@@ -9,7 +9,7 @@
 
 #pragma once
 
-enum class IncidentStatus {
+enum class EventType {
     DISPATCH_TO_SCENE,
     ARRIVED_AT_SCENE,
     DISPATCH_TO_HOSPITAL,

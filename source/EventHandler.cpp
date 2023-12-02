@@ -30,8 +30,8 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
         const std::tm& timeCallProcessed = std::get<std::optional<std::tm>>(cellTimeCallProcessed).value();
 
         Event event;
+        event.type = EventType::DISPATCH_TO_SCENE;
         event.incidentIndex = i;
-        event.status = IncidentStatus::DISPATCH_TO_SCENE;
         event.assignedAmbulanceIndex = -1;
         event.timeSeconds = Utils::timeDifferenceInSeconds(timeCallReceived, timeCallProcessed);
 

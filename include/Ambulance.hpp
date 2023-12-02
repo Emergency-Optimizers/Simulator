@@ -10,13 +10,13 @@
 #pragma once
 
 /* internal libraries */
-#include "IncidentStatus.hpp"
+#include "EventType.hpp"
 
 struct Ambulance {
     int id;
     int allocatedGridId;
     int currentGridId;
     int targetGridId;
-    IncidentStatus currentStatus;
-    IncidentStatus nextStatus;
+    EventType currentStatus;
+    EventType nextStatus;
 };

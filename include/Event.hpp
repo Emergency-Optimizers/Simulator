@@ -11,13 +11,13 @@
 #include <iostream>
 #include <ctime>
 /* internal libraries */
-#include "IncidentStatus.hpp"
+#include "EventType.hpp"
 
 #pragma once
 
 struct Event {
+    EventType type;
     int incidentIndex;
-    IncidentStatus status;
     int assignedAmbulanceIndex;
     float timeSeconds;
 };
