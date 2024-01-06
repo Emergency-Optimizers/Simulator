@@ -27,7 +27,7 @@ void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulanc
             ambulance.allocatedDepotId = depotId;
             ambulance.currentGridId = depotGridId;
             ambulance.targetGridId = -1;
-            ambulance.currentStatus = EventType::NONE;
+            ambulance.assignedEventIndex = -1;
 
             ambulances.push_back(ambulance);
         }
