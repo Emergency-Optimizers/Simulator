@@ -10,7 +10,6 @@
 /* internal libraries */
 #include "AmbulanceAllocator.hpp"
 #include "Ambulance.hpp"
-#include <iostream>
 
 AmbulanceAllocator::AmbulanceAllocator(Stations& stations) : stations(stations) {}
 
