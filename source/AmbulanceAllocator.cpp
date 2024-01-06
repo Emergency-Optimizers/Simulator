@@ -15,6 +15,8 @@
 AmbulanceAllocator::AmbulanceAllocator(Stations& stations) : stations(stations) {}
 
 void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots) {
+    ambulances.clear();
+
     int ambulanceId = 0;
     for (int depotId = 0; depotId < totalAllocatedAmbulancesAtDepots.size(); depotId++) {
         int numberOfAmbulancesInDepot = totalAllocatedAmbulancesAtDepots[depotId];
