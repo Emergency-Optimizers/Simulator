@@ -23,11 +23,8 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
     events.clear();
 
     for (std::size_t i = startIndex; i < endIndex + 1; i++) {
-        const CellType cellTimeCallReceived = incidents.get("time_call_received", i);
-        const std::tm& timeCallReceived = std::get<std::optional<std::tm>>(cellTimeCallReceived).value();
-
-        const CellType cellTimeCallProcessed = incidents.get("time_call_processed", i);
-        const std::tm& timeCallProcessed = std::get<std::optional<std::tm>>(cellTimeCallProcessed).value();
+        const std::tm& timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        const std::tm& timeCallProcessed = incidents.get<std::optional<std::tm>>("time_call_processed", i).value();
 
         Event event;
         event.type = EventType::DISPATCH_TO_SCENE;

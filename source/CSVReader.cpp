@@ -77,16 +77,15 @@ void CSVReader::printRow(const std::size_t index) {
     }
 }
 
-const CellType CSVReader::get(const std::string& header, const int index) {
-    return rows[index][Utils::findIndex(headers, header)];
+void CSVReader::print() {
+    for (int i = 0; i < size(); i++) printRow(i);
 }
 
 const std::vector<std::tm> CSVReader::getColumnOfTimes(const std::string& header) {
     std::vector<std::tm> times;
 
     for (int i = 0; i < size(); i++) {
-        const CellType cell = get(header, i);
-        const std::tm time = std::get<std::optional<std::tm>>(cell).value();
+        const std::tm time = get<std::optional<std::tm>>(header, i).value();
 
         times.push_back(time);
     }
