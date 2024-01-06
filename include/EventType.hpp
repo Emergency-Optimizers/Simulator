@@ -10,6 +10,7 @@
 #pragma once
 
 enum class EventType {
+    NONE,
     DISPATCH_TO_SCENE,
     ARRIVED_AT_SCENE,
     DISPATCH_TO_HOSPITAL,
