@@ -10,6 +10,7 @@
 #pragma once
 
 /* external libraries */
+#include <random>
 #include <vector>
 /* internal libraries */
 #include "Incidents.hpp"
@@ -19,6 +20,7 @@
 
 class Simulator {
  private:
+    std::mt19937 rng;
     Incidents& incidents;
     Stations& stations;
     AmbulanceAllocator& ambulanceAllocator;
@@ -26,6 +28,7 @@ class Simulator {
 
  public:
     Simulator(
+        const unsigned seed,
         Incidents& incidents,
         Stations& stations,
         AmbulanceAllocator& ambulanceAllocator,

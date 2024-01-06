@@ -11,11 +11,14 @@
 #include "Simulator.hpp"
 
 Simulator::Simulator(
+    const unsigned seed,
     Incidents& incidents,
     Stations& stations,
     AmbulanceAllocator& ambulanceAllocator,
     const std::string& start,
     const std::string& end
 ) : incidents(incidents), stations(stations), ambulanceAllocator(ambulanceAllocator) {
+    std::mt19937 rng(seed);
+    
     eventHandler.populate(incidents, start, end);
 }

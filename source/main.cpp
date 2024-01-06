@@ -20,6 +20,8 @@
  * Main program.
  */
 int main() {
+    const unsigned seed = 0;
+
     ODMatrix odMatrix;
     odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
@@ -33,7 +35,7 @@ int main() {
     std::vector<int> v = {1, 2, 3, 4, 5};
     ambulanceAllocator.allocate(v);
 
-    Simulator simulator(incidents, stations, ambulanceAllocator, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
+    Simulator simulator(seed, incidents, stations, ambulanceAllocator, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
 
     return 0;
 }
