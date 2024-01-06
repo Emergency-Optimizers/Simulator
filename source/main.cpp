@@ -14,6 +14,7 @@
 #include "Incidents.hpp"
 #include "Stations.hpp"
 #include "EventHandler.hpp"
+#include "AmbulanceAllocator.hpp"
 
 /**
  * Main program.
@@ -24,6 +25,10 @@ int main() {
 
     Stations stations;
     stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
+
+    AmbulanceAllocator ambulanceAllocator(stations);
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    ambulanceAllocator.allocate(v);
 
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");

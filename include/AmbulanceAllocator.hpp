@@ -10,19 +10,17 @@
 #pragma once
 
 /* external libraries */
-#include <fstream>
-#include <string>
 #include <vector>
 /* internal libraries */
-#include "AmbulanceAllocatorStrategy.hpp"
+#include "Stations.hpp"
 #include "Ambulance.hpp"
 
 class AmbulanceAllocator {
  private:
-    AmbulanceAllocatorStrategy strategy;
+    Stations& stations;
 
  public:
     std::vector<Ambulance> ambulances;
-    void loadDepotsFromFile(const std::string& filename);
-    void allocate(AmbulanceAllocatorStrategy strategy, int totalAmbulances);
+    AmbulanceAllocator(Stations& stations);
+    void allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots);
 };
