@@ -13,8 +13,8 @@
 #include "ODMatrix.hpp"
 #include "Incidents.hpp"
 #include "Stations.hpp"
-#include "EventHandler.hpp"
 #include "AmbulanceAllocator.hpp"
+#include "Simulator.hpp"
 
 /**
  * Main program.
@@ -26,15 +26,14 @@ int main() {
     Stations stations;
     stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
 
+    Incidents incidents;
+    incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+
     AmbulanceAllocator ambulanceAllocator(stations);
     std::vector<int> v = {1, 2, 3, 4, 5};
     ambulanceAllocator.allocate(v);
 
-    Incidents incidents;
-    incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
-
-    EventHandler eventHandler;
-    eventHandler.populate(incidents, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
+    Simulator simulator(incidents, stations, ambulanceAllocator, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
 
     return 0;
 }
