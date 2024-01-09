@@ -11,12 +11,32 @@
 
 /* external libraries */
 #include <vector>
+#include <random>
 /* internal libraries */
 #include "DispatchEngineStrategy.hpp"
 #include "Ambulance.hpp"
 #include "Event.hpp"
+#include "Incidents.hpp"
+#include "Stations.hpp"
+#include "ODMatrix.hpp"
 
 class DispatchEngine {
  public:
-    static void dispatch(const DispatchEngineStrategy strategy, std::vector<Ambulance>& ambulances, Event& event);
+    static void dispatch(
+        const DispatchEngineStrategy strategy,
+        std::mt19937& rng,
+        Incidents& incidents,
+        Stations& stations,
+        ODMatrix& odMatrix,
+        std::vector<Ambulance>& ambulances,
+        Event& event
+    );
+    static void randomStrategy(
+        std::mt19937& rng,
+        Incidents& incidents,
+        Stations& stations,
+        ODMatrix& odMatrix,
+        std::vector<Ambulance>& ambulances,
+        Event& event
+    );
 };

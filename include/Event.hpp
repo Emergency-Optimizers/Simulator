@@ -19,5 +19,7 @@ struct Event {
     EventType type;
     int incidentIndex;
     int assignedAmbulanceIndex;
+    int currentGridId;
+    int targetGridId;
     float timeSeconds;
 };
