@@ -40,7 +40,7 @@ void DispatchEngine::randomStrategy(
         event.assignedAmbulanceIndex = Utils::getRandomElement(rng, availableAmbulanceIndicies);
     }
 
-    int incrementSeconds;
+    int incrementSeconds = 0;
 
     switch (event.type) {
         case EventType::CALL_PROCESSED:
@@ -71,8 +71,8 @@ void DispatchEngine::randomStrategy(
         case EventType::ARRIVED_AT_SCENE:
             if (incidents.get<std::optional<std::tm>>("time_departure_scene", event.incidentIndex).has_value()) {
                 incrementSeconds = incidents.timeDifferenceBetweenHeaders(
-                    "time_departure_scene",
                     "time_arrival_scene",
+                    "time_departure_scene",
                     event.incidentIndex
                 );
                 event.timer += incrementSeconds;
@@ -135,6 +135,8 @@ void DispatchEngine::randomStrategy(
             event.metrics.dispatchToDepotTime = incrementSeconds;
             
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
+            ambulances[event.assignedAmbulanceIndex].assignedEventIndex = -1;
+            event.assignedAmbulanceIndex = -1;
 
             event.type = EventType::NONE;
 
