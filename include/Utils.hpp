@@ -42,7 +42,7 @@ class Utils {
     static std::string cellTypeToString(const CellType& cell);
     static std::tm stringToTm(const std::string& str);
     static int compareTime(const std::tm& time_1, const std::tm& time_2);
-    static float timeDifferenceInSeconds(const std::tm& time1, const std::tm& time2);
+    static float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
     static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
     static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances);
     template <typename T>
