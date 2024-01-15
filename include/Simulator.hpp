@@ -41,6 +41,6 @@ class Simulator {
         const std::string& start,
         const std::string& end
     );
-
     void run();
+    void printAverageEventPerformanceMetrics();
 };

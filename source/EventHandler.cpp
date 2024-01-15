@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2023 Sindre Eiklid
  */
 
+/* external libraries */
 #include <ctime>
 /* internal libraries */
 #include "EventHandler.hpp"

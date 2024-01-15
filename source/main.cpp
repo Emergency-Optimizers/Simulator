@@ -32,12 +32,14 @@ int main() {
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
     AmbulanceAllocator ambulanceAllocator(stations);
-    std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+    std::vector<int> v = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     ambulanceAllocator.allocate(v);
 
-    Simulator simulator(seed, incidents, stations, odMatrix, ambulanceAllocator, DispatchEngineStrategy::RANDOM, "2019.01.01T00:00:00", "2019.01.02T00:00:00");
+    Simulator simulator(seed, incidents, stations, odMatrix, ambulanceAllocator, DispatchEngineStrategy::RANDOM, "2018.01.01T00:00:00", "2018.01.02T00:00:00");
 
     simulator.run();
+
+    simulator.printAverageEventPerformanceMetrics();
 
     return 0;
 }
