@@ -18,9 +18,11 @@
 
 class EventHandler {
  private:
-    std::vector<Event> events;
+   std::vector<Event> events;
+   int currentIndex;
 
  public:
-    ~EventHandler() = default;
-    void populate(Incidents& incidents, const std::string& start, const std::string& end);
+   ~EventHandler() = default;
+   void populate(Incidents& incidents, const std::string& start, const std::string& end);
+   int getNextEventIndex();
 };

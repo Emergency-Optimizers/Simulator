@@ -33,3 +33,11 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
         events.push_back(event);
     }
 }
+
+int EventHandler::getNextEventIndex() {
+    for (; currentIndex < events.size(); currentIndex++) {
+        if (events[currentIndex].type != EventType::NONE) return currentIndex;
+    }
+
+    return -1;
+}
