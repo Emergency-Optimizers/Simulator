@@ -31,7 +31,7 @@ Simulator::Simulator(
 
 void Simulator::run() {
     std::cout << "\nSimulator started. Total events to simulate: " << eventHandler.events.size() << std::endl;
-    std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
 
     int eventIndex = eventHandler.getNextEventIndex();
 
@@ -52,8 +52,8 @@ void Simulator::run() {
         eventIndex = eventHandler.getNextEventIndex();
     }
 
-    std::chrono::steady_clock::time_point stop = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = std::chrono::duration<double>(stop - start);
+    auto stop = std::chrono::steady_clock::now();
+    std::chrono::duration<double> duration = stop - start;
     std::cout << "\nSimulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
 }
 
