@@ -21,6 +21,7 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
     int endIndex = Utils::findClosestTimeIndex(endTime, times);
 
     events.clear();
+    currentIndex = 0;
 
     for (std::size_t i = startIndex; i < endIndex + 1; i++) {
         Event event;
