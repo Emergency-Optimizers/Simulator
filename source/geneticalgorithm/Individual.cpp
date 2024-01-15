@@ -38,15 +38,15 @@ public:
         return totalAmbulances == numAmbulances;
         }
 
+    /**
+     * @brief Prints the chromosome (genotype) of the individual.
+     */
     void printChromosome() const {
         for (int i = 0; i < genotype.size(); ++i) {
             std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
         }
     }
 
-    /**
-     * @brief Prints the chromosome (genotype) of the individual.
-     */
     const std::vector<int>& getGenotype() const {
         return genotype;
     }
