@@ -17,9 +17,8 @@
 
 struct Event {
     EventType type;
+    std::time_t timer;
     int incidentIndex;
     int assignedAmbulanceIndex;
-    int currentGridId;
     int targetGridId;
-    float timeSeconds;
 };

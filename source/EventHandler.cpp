@@ -23,14 +23,12 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
     events.clear();
 
     for (std::size_t i = startIndex; i < endIndex + 1; i++) {
-        const std::tm& timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
-        const std::tm& timeCallProcessed = incidents.get<std::optional<std::tm>>("time_call_processed", i).value();
-
         Event event;
-        event.type = EventType::DISPATCH_TO_SCENE;
+        event.type = EventType::CALL_RECEIVED;
+        event.timer = std::mktime(&incidents.get<std::optional<std::tm>>("time_call_received", i).value());
         event.incidentIndex = i;
         event.assignedAmbulanceIndex = -1;
-        event.timeSeconds = Utils::timeDifferenceInSeconds(timeCallReceived, timeCallProcessed);
+        event.targetGridId = incidents.get<int>("grid_id", i);
 
         events.push_back(event);
     }
