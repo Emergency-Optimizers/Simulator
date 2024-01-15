@@ -35,29 +35,33 @@ void DispatchEngine::randomStrategy(
 ) {
     if (event.assignedAmbulanceIndex == -1) {
         std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
-        /// TODO: Add some time before checking again (maybe 1 second after next event so we constantly check for available ambulances).
+        /// TODO: Add some time before checking again (maybe 1 second after next event so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
         if (availableAmbulanceIndicies.empty()) return;
         event.assignedAmbulanceIndex = Utils::getRandomElement(rng, availableAmbulanceIndicies);
     }
 
+    int incrementSeconds;
+
     switch (event.type) {
-        case EventType::CALL_RECEIVED:
-            int incrementSeconds = incidents.timeDifferenceBetweenHeaders(
+        case EventType::CALL_PROCESSED:
+            incrementSeconds = incidents.timeDifferenceBetweenHeaders(
                 "time_call_received",
                 "time_call_processed",
                 event.incidentIndex
             );
             event.timer += incrementSeconds;
+            event.metrics.callProcessedTime = incrementSeconds;
 
             event.type = EventType::DISPATCH_TO_SCENE;
 
             break;
         case EventType::DISPATCH_TO_SCENE:
-            int incrementSeconds = odMatrix.getTravelTime(
+            incrementSeconds = odMatrix.getTravelTime(
                 ambulances[event.assignedAmbulanceIndex].currentGridId,
                 event.targetGridId
             );
             event.timer += incrementSeconds;
+            event.metrics.dispatchToSceneTime = incrementSeconds;
 
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
 
@@ -66,12 +70,13 @@ void DispatchEngine::randomStrategy(
             break;
         case EventType::ARRIVED_AT_SCENE:
             if (incidents.get<std::optional<std::tm>>("time_departure_scene", event.incidentIndex).has_value()) {
-                int incrementSeconds = incidents.timeDifferenceBetweenHeaders(
+                incrementSeconds = incidents.timeDifferenceBetweenHeaders(
                     "time_departure_scene",
                     "time_arrival_scene",
                     event.incidentIndex
                 );
                 event.timer += incrementSeconds;
+                event.metrics.arrivalAtSceneTime = incrementSeconds;
 
                 event.targetGridId = stations.get<int>(
                     "grid_id",
@@ -92,11 +97,12 @@ void DispatchEngine::randomStrategy(
 
             break;
         case EventType::DISPATCH_TO_HOSPITAL:
-            int incrementSeconds = odMatrix.getTravelTime(
+            incrementSeconds = odMatrix.getTravelTime(
                 ambulances[event.assignedAmbulanceIndex].currentGridId,
                 event.targetGridId
             );
             event.timer += incrementSeconds;
+            event.metrics.dispatchToHospitalTime = incrementSeconds;
 
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
 
@@ -104,12 +110,13 @@ void DispatchEngine::randomStrategy(
 
             break;
         case EventType::ARRIVED_AT_HOSPITAL:
-            int incrementSeconds = incidents.timeDifferenceBetweenHeaders(
+            incrementSeconds = incidents.timeDifferenceBetweenHeaders(
                 "time_arrival_hospital",
                 "time_available",
                 event.incidentIndex
             );
             event.timer += incrementSeconds;
+            event.metrics.arrivalAtHospitalTime = incrementSeconds;
 
             event.targetGridId = stations.get<int>(
                 "grid_id",
@@ -120,11 +127,12 @@ void DispatchEngine::randomStrategy(
 
             break;
         case EventType::DISPATCH_TO_DEPOT:
-            int incrementSeconds = odMatrix.getTravelTime(
+            incrementSeconds = odMatrix.getTravelTime(
                 ambulances[event.assignedAmbulanceIndex].currentGridId,
                 event.targetGridId
             );
             event.timer += incrementSeconds;
+            event.metrics.dispatchToDepotTime = incrementSeconds;
             
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
 

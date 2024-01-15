@@ -12,6 +12,7 @@
 #include <ctime>
 /* internal libraries */
 #include "EventType.hpp"
+#include "EventPerformanceMetrics.hpp"
 
 #pragma once
 
@@ -21,4 +22,5 @@ struct Event {
     int incidentIndex;
     int assignedAmbulanceIndex;
     int targetGridId;
+    EventPerformanceMetrics metrics;
 };

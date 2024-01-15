@@ -15,6 +15,7 @@
 #include <optional>
 #include <variant>
 #include <vector>
+#include <random>
 /* internal libraries */
 #include "Ambulance.hpp"
 
