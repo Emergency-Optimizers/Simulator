@@ -35,7 +35,8 @@ void DispatchEngine::randomStrategy(
 ) {
     if (event.assignedAmbulanceIndex == -1) {
         std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
-        /// TODO: Add some time before checking again (maybe 1 second after next event so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
+        /// TODO: Add some time before checking again (maybe 1 second after next event
+        /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
         if (availableAmbulanceIndicies.empty()) {
             event.timer += 60;
             event.metrics.waitingForAmbulanceTime += 60;
@@ -144,7 +145,7 @@ void DispatchEngine::randomStrategy(
             );
             event.timer += incrementSeconds;
             event.metrics.dispatchToDepotTime += incrementSeconds;
-            
+
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
             ambulances[event.assignedAmbulanceIndex].assignedEventIndex = -1;
             event.assignedAmbulanceIndex = -1;

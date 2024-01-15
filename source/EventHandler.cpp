@@ -45,7 +45,7 @@ int EventHandler::getNextEventIndex() {
     return -1;
 }
 
-void EventHandler::sort(size_t eventIndex) {
+void EventHandler::sortEvent(size_t eventIndex) {
     std::vector<Event>::iterator newPosition = std::lower_bound(
         events.begin() + eventIndex,
         events.end(),

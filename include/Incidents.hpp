@@ -9,6 +9,8 @@
 
 #pragma once
 
+/* external libraries */
+#include <string>
 /* internal libraries */
 #include "CSVReader.hpp"
 

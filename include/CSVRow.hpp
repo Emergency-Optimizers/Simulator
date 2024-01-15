@@ -7,8 +7,7 @@
  * @copyright Copyright (c) 2023 Sindre Eiklid
  */
 
-#ifndef CSVROW_HPP_
-#define CSVROW_HPP_
+#pragma once
 
 /* external libraries */
 #include <iostream>
@@ -25,5 +24,3 @@ class CSVRow {
     void readNextRow(std::istream& str, const std::vector<std::string>& headers);
     const std::string& operator[](const std::string& column) const;
 };
-
-#endif  // CSVROW_HPP_

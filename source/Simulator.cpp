@@ -25,7 +25,7 @@ Simulator::Simulator(
     const std::string& end
 ) : incidents(incidents), stations(stations), odMatrix(odMatrix), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
     std::mt19937 rng(seed);
-    
+
     eventHandler.populate(incidents, start, end);
 }
 
@@ -47,7 +47,7 @@ void Simulator::run() {
             event
         );
 
-        eventHandler.sort(eventIndex);
+        eventHandler.sortEvent(eventIndex);
 
         eventIndex = eventHandler.getNextEventIndex();
     }
@@ -74,11 +74,18 @@ void Simulator::printAverageEventPerformanceMetrics() {
     }
 
     std::cout << std::fixed << std::setprecision(2);
-    std::cout << "\nAverage time spent on processing call: " << static_cast<double>(totalMetrics.callProcessedTime) / totalEvents << " seconds\n";
-    std::cout << "Average time spent on dispatching to scene: " << static_cast<double>(totalMetrics.dispatchToSceneTime) / totalEvents << " seconds\n";
-    std::cout << "Average time spent on arrival at scene: " << static_cast<double>(totalMetrics.arrivalAtSceneTime) / totalEvents << " seconds\n";
-    std::cout << "Average time spent on dispatching to hospital: " << static_cast<double>(totalMetrics.dispatchToHospitalTime) / totalEvents << " seconds\n";
-    std::cout << "Average time spent on arrival at hospital: " << static_cast<double>(totalMetrics.arrivalAtHospitalTime) / totalEvents << " seconds\n";
-    std::cout << "Average time spent on dispatching to depot: " << static_cast<double>(totalMetrics.dispatchToDepotTime) / totalEvents << " seconds\n";
-    std::cout << "Average time spent on waiting for ambulance: " << static_cast<double>(totalMetrics.waitingForAmbulanceTime) / totalEvents << " seconds\n";
+    std::cout << "\nAverage time spent on processing call: "
+        << static_cast<double>(totalMetrics.callProcessedTime) / totalEvents << " seconds\n";
+    std::cout << "Average time spent on dispatching to scene: "
+        << static_cast<double>(totalMetrics.dispatchToSceneTime) / totalEvents << " seconds\n";
+    std::cout << "Average time spent on arrival at scene: "
+        << static_cast<double>(totalMetrics.arrivalAtSceneTime) / totalEvents << " seconds\n";
+    std::cout << "Average time spent on dispatching to hospital: "
+        << static_cast<double>(totalMetrics.dispatchToHospitalTime) / totalEvents << " seconds\n";
+    std::cout << "Average time spent on arrival at hospital: "
+        << static_cast<double>(totalMetrics.arrivalAtHospitalTime) / totalEvents << " seconds\n";
+    std::cout << "Average time spent on dispatching to depot: "
+        << static_cast<double>(totalMetrics.dispatchToDepotTime) / totalEvents << " seconds\n";
+    std::cout << "Average time spent on waiting for ambulance: "
+        << static_cast<double>(totalMetrics.waitingForAmbulanceTime) / totalEvents << " seconds\n";
 }

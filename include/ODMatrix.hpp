@@ -7,8 +7,7 @@
  * @copyright Copyright (c) 2023 Sindre Eiklid
  */
 
-#ifndef ODMATRIX_HPP_
-#define ODMATRIX_HPP_
+#pragma once
 
 /* external libraries */
 #include <string>
@@ -25,5 +24,3 @@ class ODMatrix {
     void loadFromFile(const std::string& filename);
     int getTravelTime(const int& id1, const int& id2);
 };
-
-#endif  // ODMATRIX_HPP_

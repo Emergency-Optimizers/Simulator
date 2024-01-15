@@ -12,6 +12,7 @@
 /* external libraries */
 #include <random>
 #include <vector>
+#include <string>
 /* internal libraries */
 #include "Incidents.hpp"
 #include "Stations.hpp"

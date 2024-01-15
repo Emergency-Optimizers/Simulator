@@ -35,7 +35,16 @@ int main() {
     std::vector<int> v = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     ambulanceAllocator.allocate(v);
 
-    Simulator simulator(seed, incidents, stations, odMatrix, ambulanceAllocator, DispatchEngineStrategy::RANDOM, "2018.01.01T00:00:00", "2018.01.02T00:00:00");
+    Simulator simulator(
+        seed,
+        incidents,
+        stations,
+        odMatrix,
+        ambulanceAllocator,
+        DispatchEngineStrategy::RANDOM,
+        "2018.01.01T00:00:00",
+        "2018.01.02T00:00:00"
+    );
 
     simulator.run();
 
