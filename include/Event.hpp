@@ -23,4 +23,12 @@ struct Event {
     int assignedAmbulanceIndex;
     int targetGridId;
     EventPerformanceMetrics metrics;
+
+    void print() const {
+        std::cout << "Event Type: " << static_cast<int>(type) << std::endl;
+        std::cout << "Timer: " << std::asctime(std::localtime(&timer));
+        std::cout << "Incident Index: " << incidentIndex << std::endl;
+        std::cout << "Assigned Ambulance Index: " << assignedAmbulanceIndex << std::endl;
+        std::cout << "Target Grid ID: " << targetGridId << std::endl;
+    }
 };
