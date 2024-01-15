@@ -15,4 +15,5 @@
 class Incidents : public CSVReader {
  public:
     Incidents();
+    float timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, unsigned index);
 };
