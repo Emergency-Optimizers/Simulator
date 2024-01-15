@@ -36,7 +36,12 @@ void DispatchEngine::randomStrategy(
     if (event.assignedAmbulanceIndex == -1) {
         std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
         /// TODO: Add some time before checking again (maybe 1 second after next event so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
-        if (availableAmbulanceIndicies.empty()) return;
+        if (availableAmbulanceIndicies.empty()) {
+            event.timer += 60;
+            event.metrics.waitingForAmbulanceTime += 60;
+            return;
+        }
+
         event.assignedAmbulanceIndex = Utils::getRandomElement(rng, availableAmbulanceIndicies);
     }
 
@@ -50,7 +55,7 @@ void DispatchEngine::randomStrategy(
                 event.incidentIndex
             );
             event.timer += incrementSeconds;
-            event.metrics.callProcessedTime = incrementSeconds;
+            event.metrics.callProcessedTime += incrementSeconds;
 
             event.type = EventType::DISPATCH_TO_SCENE;
 
@@ -61,7 +66,7 @@ void DispatchEngine::randomStrategy(
                 event.targetGridId
             );
             event.timer += incrementSeconds;
-            event.metrics.dispatchToSceneTime = incrementSeconds;
+            event.metrics.dispatchToSceneTime += incrementSeconds;
 
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
 
@@ -76,7 +81,7 @@ void DispatchEngine::randomStrategy(
                     event.incidentIndex
                 );
                 event.timer += incrementSeconds;
-                event.metrics.arrivalAtSceneTime = incrementSeconds;
+                event.metrics.arrivalAtSceneTime += incrementSeconds;
 
                 event.targetGridId = stations.get<int>(
                     "grid_id",
@@ -85,7 +90,13 @@ void DispatchEngine::randomStrategy(
 
                 event.type = EventType::DISPATCH_TO_HOSPITAL;
             } else {
-                /// TODO: Add some time.
+                incrementSeconds = incidents.timeDifferenceBetweenHeaders(
+                    "time_arrival_scene",
+                    "time_available",
+                    event.incidentIndex
+                );
+                event.timer += incrementSeconds;
+                event.metrics.arrivalAtSceneTime += incrementSeconds;
 
                 event.targetGridId = stations.get<int>(
                     "grid_id",
@@ -102,7 +113,7 @@ void DispatchEngine::randomStrategy(
                 event.targetGridId
             );
             event.timer += incrementSeconds;
-            event.metrics.dispatchToHospitalTime = incrementSeconds;
+            event.metrics.dispatchToHospitalTime += incrementSeconds;
 
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
 
@@ -116,7 +127,7 @@ void DispatchEngine::randomStrategy(
                 event.incidentIndex
             );
             event.timer += incrementSeconds;
-            event.metrics.arrivalAtHospitalTime = incrementSeconds;
+            event.metrics.arrivalAtHospitalTime += incrementSeconds;
 
             event.targetGridId = stations.get<int>(
                 "grid_id",
@@ -132,7 +143,7 @@ void DispatchEngine::randomStrategy(
                 event.targetGridId
             );
             event.timer += incrementSeconds;
-            event.metrics.dispatchToDepotTime = incrementSeconds;
+            event.metrics.dispatchToDepotTime += incrementSeconds;
             
             ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
             ambulances[event.assignedAmbulanceIndex].assignedEventIndex = -1;

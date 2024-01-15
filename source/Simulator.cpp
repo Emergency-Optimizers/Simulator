@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2023 Sindre Eiklid
  */
 
+#include <chrono>
 /* internal libraries */
 #include "Simulator.hpp"
 #include "DispatchEngine.hpp"
@@ -27,88 +28,29 @@ Simulator::Simulator(
 }
 
 void Simulator::run() {
+    std::cout << "Simulator starded. Total events to simulate: " << eventHandler.events.size() << std::endl;
+    std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
+
     int eventIndex = eventHandler.getNextEventIndex();
-    std::cout << "eventIndex: " << eventIndex << std::endl;
-    std::cout <<std::endl;
 
-    Event& currentEvent = eventHandler.events[eventIndex];
-    currentEvent.print();
-    std::cout <<std::endl;
+    while (eventIndex != -1) {
+        Event& event = eventHandler.events[eventIndex];
+        DispatchEngine::dispatch(
+            dispatchStrategy,
+            rng,
+            incidents,
+            stations,
+            odMatrix,
+            ambulanceAllocator.ambulances,
+            event
+        );
 
-    DispatchEngine::dispatch(
-        dispatchStrategy,
-        rng,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator.ambulances,
-        currentEvent
-    );
-    currentEvent.print();
-    std::cout <<std::endl;
+        eventHandler.sort(eventIndex);
 
-    DispatchEngine::dispatch(
-        dispatchStrategy,
-        rng,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator.ambulances,
-        currentEvent
-    );
-    currentEvent.print();
-    std::cout <<std::endl;
+        eventIndex = eventHandler.getNextEventIndex();
+    }
 
-    DispatchEngine::dispatch(
-        dispatchStrategy,
-        rng,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator.ambulances,
-        currentEvent
-    );
-    currentEvent.print();
-    std::cout <<std::endl;
-
-    DispatchEngine::dispatch(
-        dispatchStrategy,
-        rng,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator.ambulances,
-        currentEvent
-    );
-    currentEvent.print();
-    std::cout <<std::endl;
-
-    DispatchEngine::dispatch(
-        dispatchStrategy,
-        rng,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator.ambulances,
-        currentEvent
-    );
-    currentEvent.print();
-    std::cout <<std::endl;
-
-    DispatchEngine::dispatch(
-        dispatchStrategy,
-        rng,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator.ambulances,
-        currentEvent
-    );
-    currentEvent.print();
-    std::cout <<std::endl;
-
-    currentEvent.metrics.print();
-    std::cout <<std::endl;
-
-    incidents.printRow(currentEvent.incidentIndex);
+    std::chrono::steady_clock::time_point stop = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = std::chrono::duration<double>(stop - start);
+    std::cout << std::endl << "Simulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
 }

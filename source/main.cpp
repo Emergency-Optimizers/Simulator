@@ -35,7 +35,7 @@ int main() {
     std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
     ambulanceAllocator.allocate(v);
 
-    Simulator simulator(seed, incidents, stations, odMatrix, ambulanceAllocator, DispatchEngineStrategy::RANDOM, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
+    Simulator simulator(seed, incidents, stations, odMatrix, ambulanceAllocator, DispatchEngineStrategy::RANDOM, "2019.01.01T00:00:00", "2019.01.02T00:00:00");
 
     simulator.run();
 

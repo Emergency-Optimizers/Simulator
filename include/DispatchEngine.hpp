@@ -21,9 +21,8 @@
 #include "ODMatrix.hpp"
 
 class DispatchEngine {
- public:
-    static void dispatch(
-        const DispatchEngineStrategy strategy,
+ private:
+    static void randomStrategy(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
@@ -31,7 +30,10 @@ class DispatchEngine {
         std::vector<Ambulance>& ambulances,
         Event& event
     );
-    static void randomStrategy(
+
+ public:
+    static void dispatch(
+        const DispatchEngineStrategy strategy,
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
