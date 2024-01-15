@@ -25,4 +25,5 @@ class EventHandler {
    ~EventHandler() = default;
    void populate(Incidents& incidents, const std::string& start, const std::string& end);
    int getNextEventIndex();
+   void sort(size_t eventIndex);
 };

@@ -41,3 +41,16 @@ int EventHandler::getNextEventIndex() {
 
     return -1;
 }
+
+void EventHandler::sort(size_t eventIndex) {
+    std::vector<Event>::iterator newPosition = std::lower_bound(
+        events.begin() + eventIndex,
+        events.end(),
+        events[eventIndex],
+        [](const Event& a, const Event& b) { return a.timer < b.timer; }
+    );
+
+    if (newPosition != events.begin() + eventIndex) {
+        std::rotate(events.begin() + eventIndex, events.begin() + eventIndex + 1, newPosition);
+    }
+}
