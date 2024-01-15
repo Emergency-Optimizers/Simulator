@@ -27,7 +27,8 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
     for (std::size_t i = startIndex; i < endIndex + 1; i++) {
         Event event;
         event.type = EventType::CALL_PROCESSED;
-        event.timer = std::mktime(&incidents.get<std::optional<std::tm>>("time_call_received", i).value());
+        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        event.timer = std::mktime(&timeCallReceived);
         event.incidentIndex = i;
         event.assignedAmbulanceIndex = -1;
         event.targetGridId = incidents.get<int>("grid_id", i);
