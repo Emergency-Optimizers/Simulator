@@ -130,3 +130,13 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     if (lhs.tm_min != rhs.tm_min) return lhs.tm_min < rhs.tm_min;
     return lhs.tm_sec < rhs.tm_sec;
 }
+
+std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances) {
+    std::vector<unsigned> availableAmbulanceIndicies;
+    
+    for (int i = 0; i < ambulances.size(); i++) {
+        if (ambulances[i].assignedEventIndex == -1) availableAmbulanceIndicies.push_back(i);
+    }
+
+    return availableAmbulanceIndicies;
+}
