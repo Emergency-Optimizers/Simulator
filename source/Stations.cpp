@@ -23,3 +23,23 @@ Stations::Stations() {
         {"grid_col", Utils::toInt},
     };
 }
+
+std::vector<unsigned> Stations::getDepotIndices() {
+    std::vector<unsigned> depotIndices;
+
+    for (int i = 0; i < size(); i++) {
+        if (get<std::string>("type", i) == "Depot") depotIndices.push_back(i);
+    }
+
+    return depotIndices;
+}
+
+std::vector<unsigned> Stations::getHospitalIndices() {
+    std::vector<unsigned> hospitalIndices;
+
+    for (int i = 0; i < size(); i++) {
+        if (get<std::string>("type", i) == "Hospital") hospitalIndices.push_back(i);
+    }
+
+    return hospitalIndices;
+}
