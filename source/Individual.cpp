@@ -35,6 +35,22 @@ bool Individual::isValid() const {
     }
 
 /**
+ * @brief Evaluates the fitness of an individual
+ * @return the fitness of the individual.
+ */
+ void Individual::evaluateFitness() const {
+        const double ideal = static_cast<double>(numAmbulances) / numDepots;
+
+        for (int ambulancesInDepot : genotype) {
+            // Penalize deviation from the ideal number of ambulances per depot
+            fitness += 1.0 - abs(ambulancesInDepot - ideal) / ideal;
+        }
+
+        // Normalize fitness to a value between 0 and 1
+        fitness = std::max(0.0, fitness / numDepots);
+    }
+
+/**
  * @brief Prints the chromosome (genotype) of the individual.
  */
 void Individual::printChromosome() const {
@@ -50,6 +66,14 @@ const std::vector<int>& Individual::getGenotype() const {
 void Individual::setGenotype(const std::vector<int>& newGenotype) {
     genotype = newGenotype;
 }
+
+double Individual::getFitness() const {
+    return fitness;
+};
+
+void Individual::setFitness(double newFitness) {
+    fitness = newFitness;
+};
 
 void Individual::setAmbulancesAtDepot(int depotIndex, int count) {
     if (depotIndex >= 0 && depotIndex < genotype.size()) {
