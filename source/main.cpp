@@ -23,7 +23,7 @@ int main() {
     const unsigned seed = 0;
 
     ODMatrix odMatrix;
-    odMatrix.loadFromFile("../../tmp/od_matrix.txt");
+    odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
     Stations stations;
     stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
