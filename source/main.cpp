@@ -1,41 +1,38 @@
-/**
- * @file main.cpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-07
- *
- * @copyright Copyright (c) 2023 Sindre Eiklid
- */
+// main.cpp
 
-/* external libraries */
 #include <iostream>
-/* internal libraries */
-#include "ODMatrix.hpp"
-#include "Incidents.hpp"
-#include "Stations.hpp"
-#include "AmbulanceAllocator.hpp"
-#include "Simulator.hpp"
+#include "Individual.hpp"
+#include "GAUtils.hpp"
 
-/**
- * Main program.
- */
 int main() {
-    const unsigned seed = 0;
+    // Create an Individual with a specified number of depots
+    int numDepots = 10;
+    Individual individual(numDepots);
 
-    ODMatrix odMatrix;
-    odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
+    // Set a known state of ambulances for testing
+    individual.setNumAmbulances(5);
+    std::vector<int> testGenotype(numDepots, 1);
+    individual.setGenotype(testGenotype);
 
-    Stations stations;
-    stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
+    // Test the randomizeAmbulances method
+    individual.randomizeAmbulances();
+    std::cout << "Randomized Ambulances:" << std::endl;
+    individual.printChromosome();
+    std::cout << "Is valid: " << (individual.isValid() ? "Yes" : "No") << std::endl;
 
-    Incidents incidents;
-    incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+    // Test setting ambulances at a specific depot
+    individual.setAmbulancesAtDepot(2, 3);
+    std::cout << "\nSet 3 ambulances at depot 2:" << std::endl;
+    individual.printChromosome();
+    std::cout << "Is valid: " << (individual.isValid() ? "Yes" : "No") << std::endl;
 
-    AmbulanceAllocator ambulanceAllocator(stations);
-    std::vector<int> v = {1, 2, 3, 4, 5};
-    ambulanceAllocator.allocate(v);
+    // Test getting the number of ambulances at a specific depot
+    int ambulancesAtDepot = individual.getAmbulancesAtDepot(2);
+    std::cout << "\nNumber of ambulances at depot 2: " << ambulancesAtDepot << std::endl;
 
-    Simulator simulator(seed, incidents, stations, ambulanceAllocator, "2016.11.29T00:00:00", "2016.11.29T23:59:59");
+    // Test getting the total number of ambulances
+    int totalAmbulances = individual.getNumAmbulances();
+    std::cout << "Total number of ambulances: " << totalAmbulances << std::endl;
 
     return 0;
 }
