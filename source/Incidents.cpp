@@ -35,3 +35,10 @@ Incidents::Incidents() {
         {"urban_settlement", Utils::toBool},
     };
 }
+
+float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, unsigned index) {
+    std::tm time1 = get<std::optional<std::tm>>(header1, index).value();
+    std::tm time2 = get<std::optional<std::tm>>(header2, index).value();
+
+    return Utils::timeDifferenceInSeconds(time1, time2);
+}

@@ -95,9 +95,9 @@ int Utils::compareTime(const std::tm& time_1, const std::tm& time_2) {
     return 0;
 }
 
-float Utils::timeDifferenceInSeconds(const std::tm& time1, const std::tm& time2) {
-    time_t t1 = std::mktime(const_cast<std::tm*>(&time1));
-    time_t t2 = std::mktime(const_cast<std::tm*>(&time2));
+float Utils::timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
+    time_t t1 = std::mktime(&time1);
+    time_t t2 = std::mktime(&time2);
 
     return std::difftime(t2, t1);
 }
@@ -129,4 +129,14 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     if (lhs.tm_hour != rhs.tm_hour) return lhs.tm_hour < rhs.tm_hour;
     if (lhs.tm_min != rhs.tm_min) return lhs.tm_min < rhs.tm_min;
     return lhs.tm_sec < rhs.tm_sec;
+}
+
+std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances) {
+    std::vector<unsigned> availableAmbulanceIndicies;
+
+    for (int i = 0; i < ambulances.size(); i++) {
+        if (ambulances[i].assignedEventIndex == -1) availableAmbulanceIndicies.push_back(i);
+    }
+
+    return availableAmbulanceIndicies;
 }

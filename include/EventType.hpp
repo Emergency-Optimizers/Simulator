@@ -11,6 +11,7 @@
 
 enum class EventType {
     NONE,
+    CALL_PROCESSED,
     DISPATCH_TO_SCENE,
     ARRIVED_AT_SCENE,
     DISPATCH_TO_HOSPITAL,

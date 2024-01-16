@@ -16,7 +16,6 @@
 
 ODMatrix::ODMatrix() { }
 
-// method to load data from file
 void ODMatrix::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -55,12 +54,11 @@ void ODMatrix::loadFromFile(const std::string& filename) {
     file.close();
 }
 
-// other methods as needed, such as accessing travel times
 int ODMatrix::getTravelTime(const int& id1, const int& id2) {
-    // check if the ids exist in the map
     if (idToIndexMap.find(id1) == idToIndexMap.end() || idToIndexMap.find(id2) == idToIndexMap.end()) {
-        std::cerr << "Invalid IDs\n";
-        return -1;
+        /// TODO: FIX THIS TEMP FIX
+        // std::cerr << "Invalid IDs\n";
+        return 300;
     }
     return matrix[idToIndexMap[id1]][idToIndexMap[id2]];
 }

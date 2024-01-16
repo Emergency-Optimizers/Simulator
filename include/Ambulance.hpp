@@ -14,8 +14,7 @@
 
 struct Ambulance {
     int id;
-    int allocatedDepotId;
+    int allocatedDepotIndex;
     int currentGridId;
-    int targetGridId;
     int assignedEventIndex;
 };

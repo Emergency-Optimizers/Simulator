@@ -15,6 +15,9 @@
 #include <optional>
 #include <variant>
 #include <vector>
+#include <random>
+/* internal libraries */
+#include "Ambulance.hpp"
 
 using CellType = std::variant<
     int,
@@ -39,8 +42,9 @@ class Utils {
     static std::string cellTypeToString(const CellType& cell);
     static std::tm stringToTm(const std::string& str);
     static int compareTime(const std::tm& time_1, const std::tm& time_2);
-    static float timeDifferenceInSeconds(const std::tm& time1, const std::tm& time2);
+    static float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
     static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
+    static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);
@@ -50,5 +54,10 @@ class Utils {
         } else {
             return -1;
         }
+    }
+    template <typename T>
+    static T getRandomElement(std::mt19937& rng, const std::vector<T>& vec) {
+        std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
+        return vec[rndBetween(rng)];
     }
 };

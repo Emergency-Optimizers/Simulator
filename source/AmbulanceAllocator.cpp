@@ -16,17 +16,19 @@ AmbulanceAllocator::AmbulanceAllocator(Stations& stations) : stations(stations) 
 void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots) {
     ambulances.clear();
 
+    std::vector<unsigned> depotIndices = stations.getDepotIndices();
+
     int ambulanceId = 0;
     for (int depotId = 0; depotId < totalAllocatedAmbulancesAtDepots.size(); depotId++) {
+        int depotIndex = depotIndices[depotId];
         int numberOfAmbulancesInDepot = totalAllocatedAmbulancesAtDepots[depotId];
-        const int depotGridId = stations.get<int>("grid_id", depotId);
+        const int depotGridId = stations.get<int>("grid_id", depotIndex);
 
         for (int i = 0; i < numberOfAmbulancesInDepot; i++) {
             Ambulance ambulance;
             ambulance.id = ambulanceId++;
-            ambulance.allocatedDepotId = depotId;
+            ambulance.allocatedDepotIndex = depotIndex;
             ambulance.currentGridId = depotGridId;
-            ambulance.targetGridId = -1;
             ambulance.assignedEventIndex = -1;
 
             ambulances.push_back(ambulance);

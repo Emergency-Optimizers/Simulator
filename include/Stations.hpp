@@ -9,10 +9,14 @@
 
 #pragma once
 
+/* external libraries */
+#include <vector>
 /* internal libraries */
 #include "CSVReader.hpp"
 
 class Stations : public CSVReader {
  public:
     Stations();
+    std::vector<unsigned> getDepotIndices();
+    std::vector<unsigned> getHospitalIndices();
 };

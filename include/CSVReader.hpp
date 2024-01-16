@@ -42,7 +42,7 @@ class CSVReader {
     void print();
     const std::vector<std::tm> getColumnOfTimes(const std::string& header);
     template <typename T>
-    const T get(const std::string& header, const int index) {
-      return std::get<T>(rows[index][Utils::findIndex(headers, header)]);
+    T get(const std::string& header, const int index) {
+        return std::get<T>(rows[index][Utils::findIndex(headers, header)]);
     }
 };

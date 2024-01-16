@@ -9,10 +9,13 @@
 
 #pragma once
 
+/* external libraries */
+#include <string>
 /* internal libraries */
 #include "CSVReader.hpp"
 
 class Incidents : public CSVReader {
  public:
     Incidents();
+    float timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, unsigned index);
 };
