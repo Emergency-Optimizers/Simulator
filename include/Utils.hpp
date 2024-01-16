@@ -51,4 +51,5 @@ class Utils {
             return -1;
         }
     }
+    static int randomInt(int min, int max);
 };
