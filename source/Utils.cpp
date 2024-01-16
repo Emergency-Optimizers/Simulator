@@ -14,6 +14,7 @@
 #include <optional>
 #include <vector>
 #include <algorithm>
+#include <random>
 /* internal libraries */
 #include "Utils.hpp"
 #include "CSVReader.hpp"
@@ -129,4 +130,11 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     if (lhs.tm_hour != rhs.tm_hour) return lhs.tm_hour < rhs.tm_hour;
     if (lhs.tm_min != rhs.tm_min) return lhs.tm_min < rhs.tm_min;
     return lhs.tm_sec < rhs.tm_sec;
+}
+
+int Utils::randomInt(int min, int max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(min, max);
+    return dis(gen);
 }
