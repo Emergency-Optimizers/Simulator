@@ -1,7 +1,7 @@
 // Individual.cpp
 
 #include "Individual.hpp"
-#include "GAUtils.hpp"
+#include "Utils.hpp"
 
 /**
  * @brief Construct a new Individual object with specified number of depots.
@@ -16,7 +16,7 @@ void Individual::randomizeAmbulances() {
     std::fill(genotype.begin(), genotype.end(), 0); // Reset all depots to 0 ambulances
 
     for (int i = 0; i < numAmbulances; ++i) {
-        int depotIndex = RandomUtil::randomInt(0, genotype.size() - 1);
+        int depotIndex = Utils::randomInt(0, genotype.size() - 1);
         genotype[depotIndex]++;
     }
 }
