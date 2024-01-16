@@ -4,10 +4,14 @@
 #include "Utils.hpp"
 
 /**
- * @brief Construct a new Individual object with specified number of depots.
+ * @brief Construct a new Individual object with a specified number of depots.
+ *        Randomizes the number of ambulances at each depot immediately after construction.
  * @param numDepots Number of depots in the genotype.
+ * @param numAmbulances Number of ambulances to distribute across the depots.
  */
-Individual::Individual(int numDepots) : genotype(numDepots, 0) {}
+Individual::Individual(int numDepots, int numAmbulances) : genotype(numDepots, 0), numAmbulances(numAmbulances) {
+    randomizeAmbulances(); // Randomize ambulances as part of the construction process.
+}
 
 /**
  * @brief Randomizes the number of ambulances at each depot.

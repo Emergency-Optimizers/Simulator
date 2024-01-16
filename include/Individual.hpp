@@ -10,11 +10,11 @@
 class Individual {
 private:
     std::vector<int> genotype;
-    int numAmbulances;
     int numDepots;
+    int numAmbulances;
 
 public:
-    Individual(int numDepots);
+    Individual(int numDepots, int numAmbulances);
 
     void randomizeAmbulances();
 
