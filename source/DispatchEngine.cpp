@@ -84,7 +84,7 @@ void DispatchEngine::randomStrategy(
                 event.timer += incrementSeconds;
                 event.metrics.arrivalAtSceneTime += incrementSeconds;
 
-                event.targetGridId = stations.get<int>(
+                event.targetGridId = stations.get<int64_t>(
                     "grid_id",
                     Utils::getRandomElement(rng, stations.getHospitalIndices())
                 );
@@ -99,7 +99,7 @@ void DispatchEngine::randomStrategy(
                 event.timer += incrementSeconds;
                 event.metrics.arrivalAtSceneTime += incrementSeconds;
 
-                event.targetGridId = stations.get<int>(
+                event.targetGridId = stations.get<int64_t>(
                     "grid_id",
                     ambulances[event.assignedAmbulanceIndex].allocatedDepotIndex
                 );
@@ -130,7 +130,7 @@ void DispatchEngine::randomStrategy(
             event.timer += incrementSeconds;
             event.metrics.arrivalAtHospitalTime += incrementSeconds;
 
-            event.targetGridId = stations.get<int>(
+            event.targetGridId = stations.get<int64_t>(
                 "grid_id",
                 ambulances[event.assignedAmbulanceIndex].allocatedDepotIndex
             );

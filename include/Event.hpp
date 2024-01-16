@@ -21,7 +21,7 @@ struct Event {
     std::time_t timer;
     int incidentIndex;
     int assignedAmbulanceIndex;
-    int targetGridId;
+    int64_t targetGridId;
     EventPerformanceMetrics metrics;
 
     void print() const {

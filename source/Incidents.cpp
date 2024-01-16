@@ -28,7 +28,7 @@ Incidents::Incidents() {
         {"latitude", Utils::toFloat},
         {"easting", Utils::toInt},
         {"northing", Utils::toInt},
-        {"grid_id", Utils::toInt},
+        {"grid_id", Utils::toInt64},
         {"grid_row", Utils::toInt},
         {"grid_col", Utils::toInt},
         {"region", Utils::toString},

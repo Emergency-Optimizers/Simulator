@@ -31,13 +31,13 @@ void ODMatrix::loadFromFile(const std::string& filename) {
         int index = 0;
         // split the line by commas and populate the idToIndexMap
         while (getline(ss, id, ',')) {
-            idToIndexMap[std::stoi(id)] = index++;
+            idToIndexMap[std::stoll(id)] = index++;
         }
     }
 
     // initialize the matrix now that we know the size
     int size = idToIndexMap.size();
-    matrix.resize(size, std::vector<int>(size));
+    matrix.resize(size, std::vector<float>(size));
 
     // read the matrix values
     int i = 0;
@@ -46,7 +46,7 @@ void ODMatrix::loadFromFile(const std::string& filename) {
         std::string value;
         int j = 0;
         while (getline(ss, value, ',')) {
-            matrix[i][j++] = std::stoi(value);
+            matrix[i][j++] = std::stof(value);
         }
         i++;
     }
@@ -54,11 +54,10 @@ void ODMatrix::loadFromFile(const std::string& filename) {
     file.close();
 }
 
-int ODMatrix::getTravelTime(const int& id1, const int& id2) {
+int ODMatrix::getTravelTime(const int64_t& id1, const int64_t& id2) {
     if (idToIndexMap.find(id1) == idToIndexMap.end() || idToIndexMap.find(id2) == idToIndexMap.end()) {
-        /// TODO: FIX THIS TEMP FIX
-        // std::cerr << "Invalid IDs\n";
-        return 300;
+        std::cerr << "Invalid IDs\n";
+        return 0;
     }
     return matrix[idToIndexMap[id1]][idToIndexMap[id2]];
 }

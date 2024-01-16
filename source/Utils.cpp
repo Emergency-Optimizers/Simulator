@@ -22,6 +22,10 @@ CellType Utils::toInt(const std::string& str) {
     return std::stoi(str);
 }
 
+CellType Utils::toInt64(const std::string& str) {
+    return std::stoll(str);
+}
+
 CellType Utils::toFloat(const std::string& str) {
     return std::stof(str);
 }
@@ -59,6 +63,8 @@ std::string Utils::cellTypeToString(const CellType& cell) {
     return std::visit([](auto&& arg) -> std::string {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, int>) {
+            return std::to_string(arg);
+        } else if constexpr (std::is_same_v<T, int64_t>) {
             return std::to_string(arg);
         } else if constexpr (std::is_same_v<T, float>) {
             return std::to_string(arg);

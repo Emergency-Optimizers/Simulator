@@ -21,6 +21,7 @@
 
 using CellType = std::variant<
     int,
+    int64_t,
     float,
     std::string,
     bool,
@@ -34,6 +35,7 @@ class Utils {
 
  public:
     static CellType toInt(const std::string& str);
+    static CellType toInt64(const std::string& str);
     static CellType toFloat(const std::string& str);
     static CellType toString(const std::string& str);
     static CellType toBool(const std::string& str);

@@ -22,7 +22,7 @@ void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulanc
     for (int depotId = 0; depotId < totalAllocatedAmbulancesAtDepots.size(); depotId++) {
         int depotIndex = depotIndices[depotId];
         int numberOfAmbulancesInDepot = totalAllocatedAmbulancesAtDepots[depotId];
-        const int depotGridId = stations.get<int>("grid_id", depotIndex);
+        const int64_t depotGridId = stations.get<int64_t>("grid_id", depotIndex);
 
         for (int i = 0; i < numberOfAmbulancesInDepot; i++) {
             Ambulance ambulance;
