@@ -3,13 +3,21 @@
 #include "Individual.hpp"
 #include "Utils.hpp"
 
+
+// Default constructor, not to be used but necessary to use resize() method
+Individual::Individual() {
+    // Print a debug message or throw an exception
+    std::cerr << "Warning: Default constructor of Individual called!" << std::endl;
+    throw std::runtime_error("Default constructor of Individual should not be used.");
+}
+
 /**
  * @brief Construct a new Individual object with a specified number of depots.
  *        Randomizes the number of ambulances at each depot immediately after construction.
  * @param numDepots Number of depots in the genotype.
  * @param numAmbulances Number of ambulances to distribute across the depots.
  */
-Individual::Individual(int numDepots, int numAmbulances) : genotype(numDepots, 0), numAmbulances(numAmbulances), fitness(0.0) {
+Individual::Individual(int numDepots, int numAmbulances, double mutationProbability) : genotype(numDepots, 0), numAmbulances(numAmbulances), fitness(0.0) {
     randomizeAmbulances(); // Randomize ambulances as part of the construction process.
     evaluateFitness();
 }

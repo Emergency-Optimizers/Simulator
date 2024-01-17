@@ -17,7 +17,8 @@ private:
     double mutationProbability;
 
 public:
-    Individual(int numDepots, int numAmbulances);
+    Individual();
+    Individual(int numDepots, int numAmbulances, double mutationProbability);
 
     void randomizeAmbulances();
     bool isValid() const;
