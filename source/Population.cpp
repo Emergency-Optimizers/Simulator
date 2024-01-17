@@ -7,9 +7,9 @@
  * @brief Construct a new Population object.
  * @param size Size of the population.
  */
-Population::Population(int populationSize, int numDepots, int numAmbulances) {
+Population::Population(int populationSize, int numDepots, int numAmbulances, double mutationProbability) {
     for (int i = 0; i < populationSize; ++i) {
-        individuals.push_back(Individual(numDepots, numAmbulances));
+        individuals.push_back(Individual(numDepots, numAmbulances, mutationProbability));
     }
 }
 

@@ -16,8 +16,10 @@ private:
     int populationSize;
     int numDepots;
     int numAmbulances;
+    double mutationProbability;
+
 public:
-    Population::Population(int populationSize, int numDepots, int numAmbulances);
+    Population::Population(int populationSize, int numDepots, int numAmbulances, double mutationProbability);
     void evaluateFitness();
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
     std::vector<Individual> survivorSelection(int numSurvivors);
