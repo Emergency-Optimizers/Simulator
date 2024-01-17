@@ -17,7 +17,7 @@ Individual::Individual() {
  * @param numDepots Number of depots in the genotype.
  * @param numAmbulances Number of ambulances to distribute across the depots.
  */
-Individual::Individual(int numDepots, int numAmbulances, double mutationProbability) : genotype(numDepots, 0), numAmbulances(numAmbulances), fitness(0.0) {
+Individual::Individual(int numDepots, int numAmbulances, double mutationProbability) : genotype(numDepots, 0), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability) {
     randomizeAmbulances(); // Randomize ambulances as part of the construction process.
     evaluateFitness();
 }
@@ -81,6 +81,8 @@ void Individual::mutate() {
             // Increment the current depot and decrement the other depot
             genotype[depot]++;
             genotype[otherDepot]--;
+
+            std::cout << "Mutation occured between " << depot << " and " << otherDepot << std::endl;
 
             // Ensure total number of ambulances remains constant
             if (!isValid()) {

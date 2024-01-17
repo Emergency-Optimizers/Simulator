@@ -1,30 +1,25 @@
 #include <iostream>
 #include "Individual.hpp"
+#include "Population.hpp"
 
 int main() {
-    const int numDepots = 10; // Number of depots
-    const int totalAmbulances = 45; // Total ambulances for medium and low fitness individuals
+    const int numDepots = 7;
+    const int numAmbulances = 15;
+    const double mutationProbability = 0.02; // Example mutation probability
 
-    // High Fitness Individual
-    Individual highFitnessIndividual(numDepots, totalAmbulances);
-    std::vector<int> highDistribution(numDepots, 2); // Close to but not exceeding the ideal max
-    highFitnessIndividual.setGenotype(highDistribution);
-    highFitnessIndividual.evaluateFitness();
-    std::cout << "High Fitness Individual: " << highFitnessIndividual.getFitness() << std::endl;
+    // Create an individual with a specific number of depots and ambulances
+    Individual individual(numDepots, numAmbulances, mutationProbability);
 
-    // Medium Fitness Individual
-    Individual mediumFitnessIndividual(numDepots, totalAmbulances);
-    std::vector<int> mediumDistribution(numDepots, 1); // Some depots underutilized
-    mediumFitnessIndividual.setGenotype(mediumDistribution);
-    mediumFitnessIndividual.evaluateFitness();
-    std::cout << "Medium Fitness Individual: " << mediumFitnessIndividual.getFitness() << std::endl;
+    // Print the initial state of the individual
+    std::cout << "Initial State:" << std::endl;
+    individual.printChromosome();
 
-    // Low Fitness Individual
-    Individual lowFitnessIndividual(numDepots, totalAmbulances);
-    std::vector<int> lowDistribution(numDepots, 7); // Most depots exceeding the ideal max
-    lowFitnessIndividual.setGenotype(lowDistribution);
-    lowFitnessIndividual.evaluateFitness();
-    std::cout << "Low Fitness Individual: " << lowFitnessIndividual.getFitness() << std::endl;
+    // Apply mutation
+    individual.mutate();
+
+    // Print the mutated state of the individual
+    std::cout << "\nAfter Mutation:" << std::endl;
+    individual.printChromosome();
 
     return 0;
 }
