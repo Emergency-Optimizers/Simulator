@@ -55,6 +55,34 @@ void Individual::evaluateFitness() const {
 }
 
 /**
+ * 
+*/
+void Individual::mutate() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> probDist(0.0, 1.0);
+    std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
+
+    for (int depot = 0; depot < genotype.size(); ++depot) {
+        if (probDist(gen) < mutationProbability) {
+            int otherDepot = depotDist(gen);
+            while (otherDepot == depot || genotype[otherDepot] == 0) {
+                otherDepot = depotDist(gen); // Find a different depot with at least one ambulance
+            }
+
+            // Increment the current depot and decrement the other depot
+            genotype[depot]++;
+            genotype[otherDepot]--;
+
+            // Ensure total number of ambulances remains constant
+            if (!isValid()) {
+                throw std::runtime_error("Total number of ambulances changed during mutation.");
+            }
+        }
+    }
+}
+
+/**
  * @brief Prints the chromosome (genotype) of the individual.
  */
 void Individual::printChromosome() const {
