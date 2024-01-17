@@ -20,6 +20,8 @@ public:
     Population::Population(int populationSize, int numDepots, int numAmbulances);
     void evaluateFitness();
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
+    std::vector<Individual> survivorSelection(int numSurvivors);
+    void addChildren(const std::vector<Individual>& children);
     std::vector<Individual> getIndividuals() const;
 
 };

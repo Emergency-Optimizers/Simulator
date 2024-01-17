@@ -52,12 +52,38 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
     return selectedParents;
 }
 
+/**
+ * @brief Performs survivor selection for the genetic algorithm.
+ * 
+ * This method sorts the current population based on fitness in descending order
+ * and then resizes the population to keep only the top 'numSurvivors' individuals.
+ * This ensures that only the fittest individuals are carried over to the next generation.
+ *
+ * @param numSurvivors The number of individuals to survive into the next generation.
+ * @return std::vector<Individual> The vector of survivors after selection.
+ */
+std::vector<Individual> Population::survivorSelection(int numSurvivors) {
+    std::sort(individuals.begin(), individuals.end(), 
+        [](const Individual &a, const Individual &b) { return a.getFitness() > b.getFitness(); });
+
+    if (numSurvivors < individuals.size()) {
+        individuals.resize(numSurvivors);  // Keep only the top individuals
+    }
+    return individuals; // Return the resized population
+}
 
 /**
- * @brief Selects individuals for reproduction based on their fitness.
- * @return std::vector<Individual> A vector of selected individuals.
+ * @brief Adds a vector of new children (offspring) to the existing population.
+ * 
+ * This method is used to insert a new generation of individuals (usually offspring
+ * created through crossover and mutation) into the current population. The children
+ * are added to the end of the population vector.
+ *
+ * @param children A vector of Individual objects representing the children to be added.
  */
-std::vector<Individual> survivorSelection();
+void Population::addChildren(const std::vector<Individual>& children) {
+    individuals.insert(individuals.end(), children.begin(), children.end());
+}
 
 /**
  * @brief Applies crossover operation to create new individuals.
