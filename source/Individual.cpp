@@ -9,8 +9,9 @@
  * @param numDepots Number of depots in the genotype.
  * @param numAmbulances Number of ambulances to distribute across the depots.
  */
-Individual::Individual(int numDepots, int numAmbulances) : genotype(numDepots, 0), numAmbulances(numAmbulances) {
+Individual::Individual(int numDepots, int numAmbulances) : genotype(numDepots, 0), numAmbulances(numAmbulances), fitness(0.0) {
     randomizeAmbulances(); // Randomize ambulances as part of the construction process.
+    evaluateFitness();
 }
 
 /**
