@@ -38,17 +38,20 @@ bool Individual::isValid() const {
  * @brief Evaluates the fitness of an individual
  * @return the fitness of the individual.
  */
- void Individual::evaluateFitness() const {
-        const double ideal = static_cast<double>(numAmbulances) / numDepots;
+void Individual::evaluateFitness() const {
+    fitness = 0.0;
+    const int maxAmbulancesPerDepot = 2;  // Maximum ideal ambulances per depot, 45/19 ~= 2.3
 
-        for (int ambulancesInDepot : genotype) {
-            // Penalize deviation from the ideal number of ambulances per depot
-            fitness += 1.0 - abs(ambulancesInDepot - ideal) / ideal;
+    for (int ambulancesInDepot : genotype) {
+        if (ambulancesInDepot <= maxAmbulancesPerDepot) {
+            fitness += ambulancesInDepot; // Add to fitness if within limit
+        } else {
+            fitness -= (ambulancesInDepot - maxAmbulancesPerDepot); // Penalize if over the limit
         }
-
-        // Normalize fitness to a value between 0 and 1
-        fitness = std::max(0.0, fitness / numDepots);
     }
+
+    fitness = std::max(0.0, fitness); // Ensure fitness is non-negative
+}
 
 /**
  * @brief Prints the chromosome (genotype) of the individual.

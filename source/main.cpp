@@ -1,27 +1,30 @@
-// main.cpp
-
 #include <iostream>
 #include "Individual.hpp"
 
 int main() {
-    // Constants for the number of depots and ambulances
-    const int numDepots = 10;
-    const int numAmbulances = 15;
+    const int numDepots = 10; // Number of depots
+    const int totalAmbulances = 45; // Total ambulances for medium and low fitness individuals
 
-    // Create three Individual objects
-    Individual individual1(numDepots, numAmbulances);
-    Individual individual2(numDepots, numAmbulances);
-    Individual individual3(numDepots, numAmbulances);
+    // High Fitness Individual
+    Individual highFitnessIndividual(numDepots, totalAmbulances);
+    std::vector<int> highDistribution(numDepots, 2); // Close to but not exceeding the ideal max
+    highFitnessIndividual.setGenotype(highDistribution);
+    highFitnessIndividual.evaluateFitness();
+    std::cout << "High Fitness Individual: " << highFitnessIndividual.getFitness() << std::endl;
 
-    // Array to easily iterate over the individuals
-    Individual individuals[3] = {individual1, individual2, individual3};
+    // Medium Fitness Individual
+    Individual mediumFitnessIndividual(numDepots, totalAmbulances);
+    std::vector<int> mediumDistribution(numDepots, 1); // Some depots underutilized
+    mediumFitnessIndividual.setGenotype(mediumDistribution);
+    mediumFitnessIndividual.evaluateFitness();
+    std::cout << "Medium Fitness Individual: " << mediumFitnessIndividual.getFitness() << std::endl;
 
-    // Test validity and print chromosome for each individual
-    for (int i = 0; i < 3; ++i) {
-        std::cout << "Individual " << (i + 1) << " chromosome:" << std::endl;
-        individuals[i].printChromosome();
-        std::cout << "Is valid: " << (individuals[i].isValid() ? "Yes" : "No") << "\n" << std::endl;
-    }
+    // Low Fitness Individual
+    Individual lowFitnessIndividual(numDepots, totalAmbulances);
+    std::vector<int> lowDistribution(numDepots, 7); // Most depots exceeding the ideal max
+    lowFitnessIndividual.setGenotype(lowDistribution);
+    lowFitnessIndividual.evaluateFitness();
+    std::cout << "Low Fitness Individual: " << lowFitnessIndividual.getFitness() << std::endl;
 
     return 0;
 }
