@@ -10,7 +10,7 @@
 #pragma once
 
 /* internal libraries */
-#include "EventType.hpp"
+#include "simulator/EventType.hpp"
 
 struct Ambulance {
     int id;

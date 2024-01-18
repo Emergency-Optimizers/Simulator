@@ -10,7 +10,7 @@
 /* external libraries */
 #include <ctime>
 /* internal libraries */
-#include "EventHandler.hpp"
+#include "simulator/EventHandler.hpp"
 #include "Utils.hpp"
 
 void EventHandler::populate(Incidents& incidents, const std::string& start, const std::string& end) {

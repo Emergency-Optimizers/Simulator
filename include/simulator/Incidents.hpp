@@ -12,7 +12,7 @@
 /* external libraries */
 #include <string>
 /* internal libraries */
-#include "CSVReader.hpp"
+#include "simulator/CSVReader.hpp"
 
 class Incidents : public CSVReader {
  public:

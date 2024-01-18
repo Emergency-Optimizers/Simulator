@@ -12,7 +12,7 @@
 #include <sstream>
 #include <iostream>
 /* internal libraries */
-#include "ODMatrix.hpp"
+#include "simulator/ODMatrix.hpp"
 
 ODMatrix::ODMatrix() { }
 

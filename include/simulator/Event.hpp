@@ -11,8 +11,8 @@
 #include <iostream>
 #include <ctime>
 /* internal libraries */
-#include "EventType.hpp"
-#include "EventPerformanceMetrics.hpp"
+#include "simulator/EventType.hpp"
+#include "simulator/EventPerformanceMetrics.hpp"
 
 #pragma once
 

@@ -16,7 +16,7 @@
 #include <algorithm>
 /* internal libraries */
 #include "Utils.hpp"
-#include "CSVReader.hpp"
+#include "simulator/CSVReader.hpp"
 
 CellType Utils::toInt(const std::string& str) {
     return std::stoi(str);

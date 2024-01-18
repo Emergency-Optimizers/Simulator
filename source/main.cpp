@@ -10,11 +10,11 @@
 /* external libraries */
 #include <iostream>
 /* internal libraries */
-#include "ODMatrix.hpp"
-#include "Incidents.hpp"
-#include "Stations.hpp"
-#include "AmbulanceAllocator.hpp"
-#include "Simulator.hpp"
+#include "simulator/ODMatrix.hpp"
+#include "simulator/Incidents.hpp"
+#include "simulator/Stations.hpp"
+#include "simulator/AmbulanceAllocator.hpp"
+#include "simulator/Simulator.hpp"
 
 /**
  * Main program.

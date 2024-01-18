@@ -11,7 +11,7 @@
 #include <fstream>
 #include <iomanip>
 /* internal libraries */
-#include "CSVReader.hpp"
+#include "simulator/CSVReader.hpp"
 
 void CSVReader::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);

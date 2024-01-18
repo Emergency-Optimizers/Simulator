@@ -8,7 +8,7 @@
  */
 
 /* internal libraries */
-#include "CSVRow.hpp"
+#include "simulator/CSVRow.hpp"
 
 void CSVRow::readNextRow(std::istream& str, const std::vector<std::string>& headers) {
     std::string line, cell;

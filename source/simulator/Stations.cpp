@@ -8,7 +8,7 @@
  */
 
 /* internal libraries */
-#include "Stations.hpp"
+#include "simulator/Stations.hpp"
 
 Stations::Stations() {
     schemaMapping = {

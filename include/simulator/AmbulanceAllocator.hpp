@@ -12,8 +12,8 @@
 /* external libraries */
 #include <vector>
 /* internal libraries */
-#include "Stations.hpp"
-#include "Ambulance.hpp"
+#include "simulator/Stations.hpp"
+#include "simulator/Ambulance.hpp"
 
 class AmbulanceAllocator {
  private:

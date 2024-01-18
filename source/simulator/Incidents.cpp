@@ -8,7 +8,7 @@
  */
 
 /* internal libraries */
-#include "Incidents.hpp"
+#include "simulator/Incidents.hpp"
 
 Incidents::Incidents() {
     schemaMapping = {

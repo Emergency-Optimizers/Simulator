@@ -17,7 +17,7 @@
 #include <vector>
 #include <random>
 /* internal libraries */
-#include "Ambulance.hpp"
+#include "simulator/Ambulance.hpp"
 
 using CellType = std::variant<
     int,

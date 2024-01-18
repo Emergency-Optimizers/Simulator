@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 /* internal libraries */
-#include "Incidents.hpp"
-#include "Event.hpp"
+#include "simulator/Incidents.hpp"
+#include "simulator/Event.hpp"
 
 class EventHandler {
  private:
