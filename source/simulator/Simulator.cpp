@@ -20,7 +20,7 @@ Simulator::Simulator(
     Stations& stations,
     ODMatrix& odMatrix,
     AmbulanceAllocator& ambulanceAllocator,
-    DispatchEngineStrategy dispatchStrategy,
+    DispatchEngineStrategyType dispatchStrategy,
     const std::string& start,
     const std::string& end
 ) : incidents(incidents), stations(stations), odMatrix(odMatrix), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {

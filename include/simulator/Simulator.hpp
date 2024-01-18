@@ -18,7 +18,7 @@
 #include "simulator/Stations.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/EventHandler.hpp"
-#include "simulator/DispatchEngineStrategy.hpp"
+#include "simulator/DispatchEngineStrategyType.hpp"
 #include "simulator/ODMatrix.hpp"
 
 class Simulator {
@@ -28,7 +28,7 @@ class Simulator {
     Stations& stations;
     ODMatrix& odMatrix;
     AmbulanceAllocator& ambulanceAllocator;
-    DispatchEngineStrategy dispatchStrategy;
+    DispatchEngineStrategyType dispatchStrategy;
     EventHandler eventHandler;
 
  public:
@@ -38,7 +38,7 @@ class Simulator {
         Stations& stations,
         ODMatrix& odMatrix,
         AmbulanceAllocator& ambulanceAllocator,
-        DispatchEngineStrategy dispatchStrategy,
+        DispatchEngineStrategyType dispatchStrategy,
         const std::string& start,
         const std::string& end
     );

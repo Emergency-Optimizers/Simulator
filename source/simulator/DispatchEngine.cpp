@@ -11,7 +11,7 @@
 #include "simulator/DispatchEngine.hpp"
 
 void DispatchEngine::dispatch(
-    const DispatchEngineStrategy strategy,
+    const DispatchEngineStrategyType strategy,
     std::mt19937& rng,
     Incidents& incidents,
     Stations& stations,

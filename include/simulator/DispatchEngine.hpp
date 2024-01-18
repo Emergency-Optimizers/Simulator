@@ -13,7 +13,7 @@
 #include <vector>
 #include <random>
 /* internal libraries */
-#include "simulator/DispatchEngineStrategy.hpp"
+#include "simulator/DispatchEngineStrategyType.hpp"
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
 #include "simulator/Incidents.hpp"
@@ -33,7 +33,7 @@ class DispatchEngine {
 
  public:
     static void dispatch(
-        const DispatchEngineStrategy strategy,
+        const DispatchEngineStrategyType strategy,
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,

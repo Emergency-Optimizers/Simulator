@@ -1,5 +1,5 @@
 /**
- * @file DispatchEngineStrategy.hpp
+ * @file DispatchEngineStrategyType.hpp
  * @author Sindre Eiklid
  * @version 1.0
  * @date 2024-01-06
@@ -9,6 +9,6 @@
 
 #pragma once
 
-enum class DispatchEngineStrategy {
+enum class DispatchEngineStrategyType {
     RANDOM,
 };
