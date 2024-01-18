@@ -63,8 +63,13 @@ void Individual::evaluateFitness() const {
 }
 
 /**
+ * @brief Mutates the individual by randomly redistributing ambulances between depots.
  * 
-*/
+ * This method iterates over each depot in the genotype and, with a probability
+ * equal to the mutation probability, transfers an ambulance from one depot to another.
+ * It ensures that the total number of ambulances remains constant and that no ambulance
+ * is removed from an empty depot. If the final state is not valid, an exception is thrown.
+ */
 void Individual::mutate() {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -88,6 +93,52 @@ void Individual::mutate() {
             if (!isValid()) {
                 throw std::runtime_error("Total number of ambulances changed during mutation.");
             }
+        }
+    }
+}
+
+/**
+ * @brief Adds a specified number of ambulances to random depots in the genotype.
+ * 
+ * This method uniformly selects random depots and increments their ambulance count.
+ * The default number of ambulances to add is 1, but this can be overridden by the caller.
+ * 
+ * @param ambulancesToAdd Number of ambulances to add. Default is 1.
+ */
+void Individual::addAmbulance(int ambulancesToAdd = 1) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    for (int i = 0; i < ambulancesToAdd; ++i) {
+        std::uniform_int_distribution<> dis(0, genotype.size() - 1);
+        int depotIndex = dis(gen);
+
+        genotype[depotIndex]++;
+    }
+}
+
+/**
+ * @brief Removes a specified number of ambulances from random depots in the genotype.
+ * 
+ * This method uniformly selects random depots and decrements their ambulance count,
+ * ensuring that no ambulance is removed from an empty depot. The default number of
+ * ambulances to remove is 1, but this can be overridden by the caller.
+ * 
+ * @param ambulancesToRemove Number of ambulances to remove. Default is 1.
+ */
+void Individual::removeAmbulance(int ambulancesToRemove = 1) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    for (int i = 0; i < ambulancesToRemove; ++i) {
+        std::uniform_int_distribution<> dis(0, genotype.size() - 1);
+        int depotIndex = dis(gen);
+
+        // Ensure we don't remove an ambulance from an empty depot
+        if (genotype[depotIndex] > 0) {
+            genotype[depotIndex]--;
+        } else {
+            // Optional: Try another depot or handle the case when there are no ambulances left
         }
     }
 }

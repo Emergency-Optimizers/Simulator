@@ -24,6 +24,8 @@ public:
     bool isValid() const;
     void evaluateFitness() const;
     void mutate();
+    void addAmbulance(int ambulancesToAdd = 1);
+    void removeAmbulance(int ambulancesToRemove = 1);
     void printChromosome() const;
     const std::vector<int>& getGenotype() const;
     void setGenotype(const std::vector<int>& newGenotype);
