@@ -12,7 +12,7 @@ int main() {
 
     // Create a population with the specified parameters
     unsigned int seed = 12345; // Example seed
-    Population population(populationSize, numDepots, numAmbulances, mutationProbability, seed);
+    Population population(populationSize, numDepots, numAmbulances, mutationProbability);
     std::cout << "Before evolve" << std::endl;
     // Run the genetic algorithm for the specified number of generations
     population.evolve(generations);
