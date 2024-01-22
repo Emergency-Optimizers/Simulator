@@ -24,6 +24,11 @@ public:
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
     std::vector<Individual> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<Individual>& children);
+    Individual crossover(const Individual& parent1, const Individual& parent2);
+    void evolve(int generations);
+    Individual findFittest() const;
+    Individual findLeastFit() const;
+    double averageFitness() const;
     std::vector<Individual> getIndividuals() const;
 
 };
