@@ -3,23 +3,24 @@
 #include "Population.hpp"
 
 int main() {
-    const int numDepots = 7;
-    const int numAmbulances = 15;
-    const double mutationProbability = 0.02; // Example mutation probability
+    // Define the parameters for the population
+    int populationSize = 50;  // Total number of individuals in the population
+    int numDepots = 19;        // Number of depots
+    int numAmbulances = 45;    // Total number of ambulances
+    double mutationProbability = 0.05;  // Probability of mutation
+    int generations = 100;      // Number of generations to evolve
 
-    // Create an individual with a specific number of depots and ambulances
-    Individual individual(numDepots, numAmbulances, mutationProbability);
-
-    // Print the initial state of the individual
-    std::cout << "Initial State:" << std::endl;
-    individual.printChromosome();
-
-    // Apply mutation
-    individual.mutate();
-
-    // Print the mutated state of the individual
-    std::cout << "\nAfter Mutation:" << std::endl;
-    individual.printChromosome();
+    // Create a population with the specified parameters
+    unsigned int seed = 12345; // Example seed
+    Population population(populationSize, numDepots, numAmbulances, mutationProbability, seed);
+    std::cout << "Before evolve" << std::endl;
+    // Run the genetic algorithm for the specified number of generations
+    population.evolve(generations);
+    // Find and print the fittest individual after the final generation
+    Individual fittest = population.findFittest();
+    std::cout << "Fittest Individual After Evolution: " << std::endl;
+    std::cout << "Valid: " << fittest.isValid() << std::endl;
+    fittest.printChromosome();
 
     return 0;
 }
