@@ -13,19 +13,21 @@ private:
     std::vector<int> genotype;
     int numDepots;
     int numAmbulances;
-    mutable double fitness;
+    mutable double fitness; // Reference?
     double mutationProbability;
+    bool child;
 
 public:
     Individual();
-    Individual(int numDepots, int numAmbulances, double mutationProbability);
+    Individual(int numDepots, int numAmbulances, double mutationProbability, bool child = true);
 
     void randomizeAmbulances();
     bool isValid() const;
     void evaluateFitness() const;
     void mutate();
-    void addAmbulance(int ambulancesToAdd = 1);
-    void removeAmbulance(int ambulancesToRemove = 1);
+    void repair();
+    void addAmbulances(int ambulancesToAdd = 1);
+    void removeAmbulances(int ambulancesToRemove = 1);
     void printChromosome() const;
     const std::vector<int>& getGenotype() const;
     void setGenotype(const std::vector<int>& newGenotype);
