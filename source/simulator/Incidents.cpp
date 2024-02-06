@@ -45,7 +45,7 @@ float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const 
     return Utils::timeDifferenceInSeconds(time1, time2);
 }
 
-Incidents Incidents::rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize, const bool dayTime) {
+Incidents Incidents::rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize) {
     Incidents filteredIncidents;
 
     // setup target date for comparison using a common year for all calculations
@@ -74,10 +74,7 @@ Incidents Incidents::rowsWithinTimeFrame(const int month, const int day, const u
 
         bool withinWindowSize = dayDiff <= windowSize;
 
-        // determine if the incident occurred during day or night
-        bool isDaytimeIncident = (timeCallReceived.tm_hour >= 6 && timeCallReceived.tm_hour < 18);
-
-        if (withinWindowSize && (dayTime == isDaytimeIncident)) {
+        if (withinWindowSize) {
             filteredIncidents.rows.push_back(rows[i]);
         }
     }

@@ -19,5 +19,5 @@ class Incidents : public CSVReader {
  public:
     Incidents();
     float timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, unsigned index);
-    Incidents rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize, const bool dayTime);
+    Incidents rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize);
 };
