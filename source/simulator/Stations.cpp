@@ -13,14 +13,13 @@
 Stations::Stations() {
     schemaMapping = {
         {"type", Utils::toString},
-        {"static", Utils::toBool},
+        {"grid_id", Utils::toInt64},
+        {"x", Utils::toInt},
+        {"y", Utils::toInt},
         {"longitude", Utils::toFloat},
         {"latitude", Utils::toFloat},
-        {"easting", Utils::toInt},
-        {"northing", Utils::toInt},
-        {"grid_id", Utils::toInt64},
-        {"grid_row", Utils::toInt},
-        {"grid_col", Utils::toInt},
+        {"region", Utils::toString},
+        {"urban_settlement", Utils::toBool},
     };
 }
 

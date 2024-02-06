@@ -12,9 +12,10 @@
 
 Incidents::Incidents() {
     schemaMapping = {
-        {"id", Utils::toInt},
-        {"synthetic", Utils::toBool},
         {"triage_impression_during_call", Utils::toString},
+        {"resource_id", Utils::toString},
+        {"resource_type", Utils::toString},
+        {"resources_sent", Utils::toInt},
         {"time_call_received", Utils::toDateTime},
         {"time_call_processed", Utils::toDateTime},
         {"time_ambulance_notified", Utils::toDateTime},
@@ -23,16 +24,13 @@ Incidents::Incidents() {
         {"time_departure_scene", Utils::toDateTime},
         {"time_arrival_hospital", Utils::toDateTime},
         {"time_available", Utils::toDateTime},
-        {"response_time_sec", Utils::toFloat},
+        {"grid_id", Utils::toInt64},
+        {"x", Utils::toInt},
+        {"y", Utils::toInt},
         {"longitude", Utils::toFloat},
         {"latitude", Utils::toFloat},
-        {"easting", Utils::toInt},
-        {"northing", Utils::toInt},
-        {"grid_id", Utils::toInt64},
-        {"grid_row", Utils::toInt},
-        {"grid_col", Utils::toInt},
         {"region", Utils::toString},
-        {"urban_settlement", Utils::toBool},
+        {"urban_settlement", Utils::toBool}
     };
 }
 
