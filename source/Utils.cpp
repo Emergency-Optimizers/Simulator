@@ -44,7 +44,7 @@ CellType Utils::toDateTime(const std::string& str) {
     }
     std::tm tm = {};
     std::istringstream ss(str);
-    ss >> std::get_time(&tm, "%Y.%m.%dT%H:%M:%S");
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
 
     if (ss.fail()) {
         return std::nullopt;
