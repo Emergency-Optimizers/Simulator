@@ -19,9 +19,12 @@ class MonteCarloSimulator {
     const int windowSize;
     const int month;
     const int day;
-    void generateIncidentProbabilityDistribution();
+    std::vector<double> weights;
+    void generateHourlyIncidentProbabilityDistribution();
+    void generateMinuteIncidentProbabilityDistribution();
  public:
-    std::vector<float> incidentProbabilityDistribution;
+    std::vector<float> hourlyIncidentProbabilityDistribution;
+    std::vector<std::vector<float>> minuteIncidentProbabilityDistribution;
     MonteCarloSimulator(Incidents& incidents, const int month, const int day, const unsigned windowSize);
     std::vector<double> generateWeights(int windowSize, double sigma = 1.0);
 };
