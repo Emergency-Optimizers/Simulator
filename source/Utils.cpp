@@ -146,3 +146,51 @@ std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Amb
 
     return availableAmbulanceIndicies;
 }
+
+int Utils::calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay) {
+    int year = baseDate.tm_year;
+    bool isLeapYear = (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
+    int totalDaysInYear = isLeapYear ? 365 : 364;
+
+    std::tm baseDateNormalized = baseDate;
+    baseDateNormalized.tm_hour = 0;
+    baseDateNormalized.tm_min = 0;
+    baseDateNormalized.tm_sec = 0;
+    mktime(&baseDateNormalized);
+
+    // create tm structure for the target date in the same year as the base date
+    std::tm targetDate = {0};
+    targetDate.tm_year = year;
+    targetDate.tm_mon = targetMonth - 1;
+    targetDate.tm_mday = targetDay;
+    targetDate.tm_hour = 0;
+    targetDate.tm_min = 0;
+    targetDate.tm_sec = 0;
+    mktime(&targetDate);
+
+    int targetDayOfYear = targetDate.tm_yday;
+    int baseDayOfYear = baseDateNormalized.tm_yday;
+    int dayDiff = 0;
+
+    if (targetDayOfYear == baseDayOfYear) return 0;
+
+    while (true) {
+        if (targetDayOfYear == baseDayOfYear) break;
+        if (++baseDayOfYear > totalDaysInYear) baseDayOfYear = 0;
+        dayDiff++;
+    }
+
+    targetDayOfYear = targetDate.tm_yday;
+    baseDayOfYear = baseDateNormalized.tm_yday;
+    int newDayDiff = 0;
+
+    while (dayDiff != newDayDiff) {
+        if (targetDayOfYear == baseDayOfYear) break;
+        if (--baseDayOfYear < 0) baseDayOfYear = totalDaysInYear;
+        newDayDiff++;
+    }
+
+    if (dayDiff > newDayDiff) dayDiff = newDayDiff;
+
+    return dayDiff;
+}

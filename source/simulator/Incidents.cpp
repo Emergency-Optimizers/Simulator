@@ -48,29 +48,10 @@ float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const 
 Incidents Incidents::rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize) {
     Incidents filteredIncidents;
 
-    // setup target date for comparison using a common year for all calculations
-    std::tm targetTm = {};
-    targetTm.tm_year = 120;  // uear 2020, a leap year
-    targetTm.tm_mon = month - 1;
-    targetTm.tm_mday = day;
-    targetTm.tm_hour = 0;
-    targetTm.tm_min = 0;
-    targetTm.tm_sec = 0;
-    targetTm.tm_isdst = -1;  // prevent DST affecting the calculation
-    mktime(&targetTm);
-
-    int targetDayOfYear = targetTm.tm_yday;
-
     for (std::size_t i = 0; i < rows.size(); ++i) {
         std::tm timeCallReceived = get<std::optional<std::tm>>("time_call_received", i).value();
 
-        timeCallReceived.tm_year = 120;  // normalize year for comparison
-        timeCallReceived.tm_isdst = -1;  // prevent DST affecting the calculation
-        mktime(&timeCallReceived);
-
-        int incidentDayOfYear = timeCallReceived.tm_yday;
-
-        int dayDiff = std::abs(incidentDayOfYear - targetDayOfYear);
+        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
 
         bool withinWindowSize = dayDiff <= windowSize;
 

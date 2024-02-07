@@ -15,18 +15,6 @@ MonteCarloSimulator::MonteCarloSimulator(
 ) : windowSize(windowSize), month(month), day(day) {
     filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
 
-    std::tm targetTm = {};
-    targetTm.tm_year = 120;  // uear 2020, a leap year
-    targetTm.tm_mon = month - 1;
-    targetTm.tm_mday = day;
-    targetTm.tm_hour = 0;
-    targetTm.tm_min = 0;
-    targetTm.tm_sec = 0;
-    targetTm.tm_isdst = -1;  // prevent DST affecting the calculation
-    mktime(&targetTm);
-
-    dayOfYear = targetTm.tm_yday;
-
     generateIncidentProbabilityDistribution();
 }
 
@@ -40,13 +28,8 @@ void MonteCarloSimulator::generateIncidentProbabilityDistribution() {
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
 
-        timeCallReceived.tm_year = 120;  // normalize year for comparison
-        timeCallReceived.tm_isdst = -1;  // prevent DST affecting the calculation
-        mktime(&timeCallReceived);
-
         // calculate weight based on how far away the incident is from the target
-        int incidentDayOfYear = timeCallReceived.tm_yday;
-        int dayDiff = abs(incidentDayOfYear - dayOfYear);
+        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
 
         totalIncidentsPerHour[timeCallReceived.tm_hour] += weight;
@@ -56,6 +39,7 @@ void MonteCarloSimulator::generateIncidentProbabilityDistribution() {
     // get the probability per hour
     for (int i = 0; i < totalIncidentsPerHour.size(); i++) {
         incidentProbabilityDistribution.push_back(totalIncidentsPerHour[i] / totalIncidents);
+        std::cout << (totalIncidentsPerHour[i] / totalIncidents) << std::endl;
     }
 }
 

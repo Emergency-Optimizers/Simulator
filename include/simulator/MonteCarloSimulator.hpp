@@ -18,7 +18,6 @@ class MonteCarloSimulator {
     const int windowSize;
     const int month;
     const int day;
-    int dayOfYear;
     void generateIncidentProbabilityDistribution();
  public:
     std::vector<float> incidentProbabilityDistribution;

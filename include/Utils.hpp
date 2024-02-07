@@ -47,6 +47,7 @@ class Utils {
     static float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
     static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
     static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances);
+    static int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);

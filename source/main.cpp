@@ -15,40 +15,16 @@
 #include "simulator/Stations.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
+#include "simulator/MonteCarloSimulator.hpp"
 
 /**
  * Main program.
  */
 int main() {
-    const unsigned seed = 0;
-
-    ODMatrix odMatrix;
-    odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
-
-    Stations stations;
-    stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
-
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
-    AmbulanceAllocator ambulanceAllocator(stations);
-    std::vector<int> v = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-    ambulanceAllocator.allocate(v);
-
-    Simulator simulator(
-        seed,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator,
-        DispatchEngineStrategyType::RANDOM,
-        "2018.01.01T00:00:00",
-        "2018.01.02T00:00:00"
-    );
-
-    simulator.run();
-
-    simulator.printAverageEventPerformanceMetrics();
+    MonteCarloSimulator sim(incidents, 2, 7, 2);
 
     return 0;
 }
