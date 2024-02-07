@@ -12,7 +12,7 @@ MonteCarloSimulator::MonteCarloSimulator(
     const int month,
     const int day,
     const unsigned windowSize
-) : windowSize(windowSize), month(month), day(day) {
+) : incidents(incidents), windowSize(windowSize), month(month), day(day) {
     filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
 
     generateIncidentProbabilityDistribution();

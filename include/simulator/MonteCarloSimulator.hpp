@@ -14,6 +14,7 @@
 
 class MonteCarloSimulator {
  private:
+    Incidents& incidents;
     Incidents filteredIncidents;
     const int windowSize;
     const int month;
