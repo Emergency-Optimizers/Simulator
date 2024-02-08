@@ -21,10 +21,12 @@
  * Main program.
  */
 int main() {
+    std::mt19937 rnd(100);
+
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
-    MonteCarloSimulator sim(incidents, 2, 7, 2);
+    MonteCarloSimulator sim(rnd, incidents, 2, 7, 2);
 
     return 0;
 }

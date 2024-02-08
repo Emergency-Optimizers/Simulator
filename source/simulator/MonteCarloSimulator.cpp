@@ -4,21 +4,32 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
+/* external libraries */
+#include <algorithm>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
 
 MonteCarloSimulator::MonteCarloSimulator(
+    std::mt19937& rnd,
     Incidents& incidents,
     const int month,
     const int day,
     const unsigned windowSize
-) : incidents(incidents), windowSize(windowSize), month(month), day(day) {
+) : rnd(rnd), incidents(incidents), windowSize(windowSize), month(month), day(day) {
     filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
 
     weights = generateWeights(windowSize);
 
     generateHourlyIncidentProbabilityDistribution();
     generateMinuteIncidentProbabilityDistribution();
+
+    std::vector<float> data;
+    for (int i = 0; i < filteredIncidents.size(); i++) {
+        float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders("time_call_received", "time_call_answered", i);
+        data.push_back(timeDiff);
+    }
+
+    std::map<std::pair<float, float>, float> histogram = createHistogram(data, 10);
 }
 
 std::vector<double> MonteCarloSimulator::generateWeights(int windowSize, double sigma) {
@@ -85,10 +96,68 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
         for (int indexMinute = 0; indexMinute < 60; indexMinute++) {
             float minuteIncidentProbability = totalIncidentsPerMinute[indexHour][indexMinute] / totalIncidents[indexHour];
             newMinuteIncidentProbabilityDistribution[indexHour][indexMinute] = minuteIncidentProbability;
-
-            if (indexHour == 11) std::cout << minuteIncidentProbability << ", ";
         }
     }
 
     minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
+}
+
+std::map<std::pair<float, float>, float> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int numBins) {
+    auto [minElem, maxElem] = std::minmax_element(data.begin(), data.end());
+    float minVal = *minElem;
+    float maxVal = *maxElem;
+    float range = maxVal - minVal;
+    float binSize = range / numBins;
+
+    std::map<std::pair<float, float>, float> histogram;
+
+    for (float value : data) {
+        int binIndex;
+        if (value == maxVal) {
+            binIndex = numBins - 1;
+        } else {
+            binIndex = (value - minVal) / binSize;
+        }
+
+        float binStart = minVal + binIndex * binSize;
+        float binEnd = binStart + binSize;
+
+        if (binIndex == numBins - 1) {
+            binEnd = maxVal;
+        }
+        std::pair<float, float> binRange(binStart, binEnd);
+
+        histogram[binRange]++;
+    }
+
+    float cumulativeProbability = 0.0;
+    int totalIncidents = data.size();
+
+    for (const auto& bin : histogram) {
+        float probability = bin.second / totalIncidents;
+        cumulativeProbability += probability;
+        histogram[bin.first] = cumulativeProbability;
+        // std::cout << "(" << "<" << bin.first.first << ", " << bin.first.second << ">" << ": " << bin.second << "), ";
+    }
+
+    return histogram;
+}
+
+float MonteCarloSimulator::generateRandomFromHistogram(const std::map<std::pair<float, float>, float>& histogram) {
+    float start = 0;
+    float end = 0;
+
+    std::uniform_real_distribution<> dis(0, 1);
+    float randomValue = dis(rnd);
+
+    for (const auto& bin : histogram) {
+        if (randomValue <= bin.second) {
+            start = bin.first.first;
+            end = bin.first.second;
+            break;
+        }
+    }
+
+    std::uniform_real_distribution<> valueDis(start, end);
+    return valueDis(rnd);
 }
