@@ -52,7 +52,7 @@ void DispatchEngine::randomStrategy(
         case EventType::CALL_PROCESSED:
             incrementSeconds = incidents.timeDifferenceBetweenHeaders(
                 "time_call_received",
-                "time_call_processed",
+                "time_call_answered",
                 event.incidentIndex
             );
             event.timer += incrementSeconds;

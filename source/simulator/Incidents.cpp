@@ -21,7 +21,7 @@ Incidents::Incidents() {
         {"resource_type", Utils::toString},
         {"resources_sent", Utils::toInt},
         {"time_call_received", Utils::toDateTime},
-        {"time_call_processed", Utils::toDateTime},
+        {"time_call_answered", Utils::toDateTime},
         {"time_ambulance_notified", Utils::toDateTime},
         {"time_dispatch", Utils::toDateTime},
         {"time_arrival_scene", Utils::toDateTime},
