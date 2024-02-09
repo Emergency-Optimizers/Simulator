@@ -124,13 +124,10 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     }
 
     for (int indexHour = 0; indexHour < 24; indexHour++) {
-        std::cout << "(";
         for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
             float triageIncidentProbability = totalIncidentsPerTriage[indexHour][indexTriage] / totalIncidents[indexHour];
             newTriageProbabilityDistribution[indexHour][indexTriage] = triageIncidentProbability;
-            std::cout << triageIncidentProbability << " ";
         }
-        std::cout << "), ";
     }
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
