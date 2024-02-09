@@ -22,6 +22,7 @@ MonteCarloSimulator::MonteCarloSimulator(
 
     generateHourlyIncidentProbabilityDistribution();
     generateMinuteIncidentProbabilityDistribution();
+    generateTriageProbabilityDistribution();
     generateWaitTimeHistograms();
 }
 
@@ -93,6 +94,46 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
     }
 
     minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
+}
+
+void MonteCarloSimulator::generateTriageProbabilityDistribution() {
+    std::vector<std::vector<float>> newTriageProbabilityDistribution(24, std::vector<float>(3, 0.0));
+
+    std::vector<std::vector<float>> totalIncidentsPerTriage(24, std::vector<float>(3, 0.0));
+    std::vector<float> totalIncidents(24, 0.0);
+
+    for (int i = 0; i < filteredIncidents.size(); i++) {
+        std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
+
+        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        double weight = weights[dayDiff];
+
+        std::string triageImpression = filteredIncidents.get<std::string>("triage_impression_during_call", i);
+
+        int indexTriage;
+        if (triageImpression == "A") {
+            indexTriage = 0;
+        } else if (triageImpression == "H") {
+            indexTriage = 1;
+        } else if (triageImpression == "V1") {
+            indexTriage = 2;
+        }
+
+        totalIncidentsPerTriage[timeCallReceived.tm_hour][indexTriage] += weight;
+        totalIncidents[timeCallReceived.tm_hour] += weight;
+    }
+
+    for (int indexHour = 0; indexHour < 24; indexHour++) {
+        std::cout << "(";
+        for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
+            float triageIncidentProbability = totalIncidentsPerTriage[indexHour][indexTriage] / totalIncidents[indexHour];
+            newTriageProbabilityDistribution[indexHour][indexTriage] = triageIncidentProbability;
+            std::cout << triageIncidentProbability << " ";
+        }
+        std::cout << "), ";
+    }
+
+    triageProbabilityDistribution = newTriageProbabilityDistribution;
 }
 
 void MonteCarloSimulator::generateWaitTimeHistograms() {
