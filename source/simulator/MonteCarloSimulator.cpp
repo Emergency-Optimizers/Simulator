@@ -22,14 +22,7 @@ MonteCarloSimulator::MonteCarloSimulator(
 
     generateHourlyIncidentProbabilityDistribution();
     generateMinuteIncidentProbabilityDistribution();
-
-    std::vector<float> data;
-    for (int i = 0; i < filteredIncidents.size(); i++) {
-        float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders("time_call_received", "time_call_answered", i);
-        data.push_back(timeDiff);
-    }
-
-    std::map<std::pair<float, float>, float> histogram = createHistogram(data, 10);
+    generateWaitTimeHistograms();
 }
 
 std::vector<double> MonteCarloSimulator::generateWeights(int windowSize, double sigma) {
@@ -102,6 +95,56 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
     minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
 }
 
+void MonteCarloSimulator::generateWaitTimeHistograms() {
+    generateWaitTimeHistogram("time_call_received", "time_call_answered", 10);
+    generateWaitTimeHistogram("time_call_answered", "time_ambulance_notified", 10);
+    generateWaitTimeHistogram("time_ambulance_notified", "time_dispatch", 10);
+    generateWaitTimeHistogram("time_arrival_scene", "time_departure_scene", 10);
+    generateWaitTimeHistogram("time_arrival_hospital", "time_available", 10);
+
+    // custom histogram for cancelled incidents
+    std::vector<std::string> triageImpressions = { "A", "H", "V1" };
+
+    for (std::string triageImpression : triageImpressions) {
+        std::vector<float> data;
+
+        for (int i = 0; i < filteredIncidents.size(); i++) {
+            // filter by triage impression
+            if (filteredIncidents.get<std::string>("triage_impression_during_call", i) != triageImpression) continue;
+            // filter out rows not cancelled
+            if (!filteredIncidents.get<std::optional<std::tm>>("time_departure_scene", i).has_value()) continue;
+
+            float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders("time_arrival_scene", "time_available", i);
+            data.push_back(timeDiff);
+        }
+        waitTimesHistograms[std::pair("time_arrival_scene", "time_available")][triageImpression] = createHistogram(data, 10);
+    }
+}
+
+void MonteCarloSimulator::generateWaitTimeHistogram(
+    const std::string fromEventColumn,
+    const std::string toEventColumn,
+    const int binSize
+) {
+    std::vector<std::string> triageImpressions = { "A", "H", "V1" };
+
+    for (std::string triageImpression : triageImpressions) {
+        std::vector<float> data;
+
+        for (int i = 0; i < filteredIncidents.size(); i++) {
+            // filter by triage impression
+            if (filteredIncidents.get<std::string>("triage_impression_during_call", i) != triageImpression) continue;
+            // filter out rows with NaN values
+            if (!filteredIncidents.get<std::optional<std::tm>>(fromEventColumn, i).has_value()) continue;
+            if (!filteredIncidents.get<std::optional<std::tm>>(toEventColumn, i).has_value()) continue;
+
+            float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders(fromEventColumn, toEventColumn, i);
+            data.push_back(timeDiff);
+        }
+        waitTimesHistograms[std::pair(fromEventColumn, toEventColumn)][triageImpression] = createHistogram(data, binSize);
+    }
+}
+
 std::map<std::pair<float, float>, float> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int numBins) {
     auto [minElem, maxElem] = std::minmax_element(data.begin(), data.end());
     float minVal = *minElem;
@@ -143,7 +186,7 @@ std::map<std::pair<float, float>, float> MonteCarloSimulator::createHistogram(co
     return histogram;
 }
 
-float MonteCarloSimulator::generateRandomFromHistogram(const std::map<std::pair<float, float>, float>& histogram) {
+float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<std::pair<float, float>, float>& histogram) {
     float start = 0;
     float end = 0;
 

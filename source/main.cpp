@@ -26,7 +26,7 @@ int main() {
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
-    MonteCarloSimulator sim(rnd, incidents, 2, 7, 2);
+    MonteCarloSimulator sim(rnd, incidents, 2, 7, 4);
 
     return 0;
 }
