@@ -8,6 +8,7 @@
 #include <algorithm>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
+#include "Constants.hpp"
 
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
@@ -19,10 +20,22 @@ MonteCarloSimulator::MonteCarloSimulator(
     filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
 
     weights = generateWeights(windowSize);
+    for (int i = 0, indexGridId = 0; i < incidents.size(); i++) {
+        int64_t gridId = incidents.get<int64_t>("grid_id", i);
+
+        if (gridIdToIndexMapping.count(gridId)) continue;
+
+        indexToGridIdMapping[indexGridId] = gridId;
+
+        gridIdToIndexMapping[gridId] = indexGridId;
+
+        indexGridId++;
+    }
 
     generateHourlyIncidentProbabilityDistribution();
     generateMinuteIncidentProbabilityDistribution();
     generateTriageProbabilityDistribution();
+    generateLocationProbabilityDistribution();
     generateWaitTimeHistograms();
 }
 
@@ -131,6 +144,57 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     }
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
+}
+
+void MonteCarloSimulator::generateLocationProbabilityDistribution() {
+    int gridIdSize = indexToGridIdMapping.size();
+
+    std::vector<std::vector<std::vector<double>>> newLocationProbabilityDistribution(
+        3,
+        std::vector<std::vector<double>>(2, std::vector<double>(gridIdSize, 0))
+    );
+
+    std::vector<std::vector<std::vector<double>>> totalIncidentsPerLocation(
+        3,
+        std::vector<std::vector<double>>(2, std::vector<double>(gridIdSize, 0))
+    );
+    std::vector<std::vector<double>> totalIncidents(3, std::vector<double>(2, 0));
+
+    std::vector<double> weightsYear = generateWeights(365);
+
+    for (int i = 0; i < incidents.size(); i++) {
+        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        double weight = weightsYear[dayDiff];
+
+        std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
+
+        int64_t gridId = incidents.get<int64_t>("grid_id", i);
+
+        int indexTriage;
+        if (triageImpression == "A") {
+            indexTriage = 0;
+        } else if (triageImpression == "H") {
+            indexTriage = 1;
+        } else if (triageImpression == "V1") {
+            indexTriage = 2;
+        }
+
+        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START || timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+
+        totalIncidentsPerLocation[indexTriage][indexShift][gridIdToIndexMapping[gridId]] += weight;
+        totalIncidents[indexTriage][indexShift] += weight;
+    }
+
+    for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
+        for (int indexShift = 0; indexShift < 2; indexShift++) {
+            for (int indexGridId = 0; indexGridId < gridIdSize; indexGridId++) {
+                double locationIncidentProbability = totalIncidentsPerLocation[indexTriage][indexShift][indexGridId] / totalIncidents[indexTriage][indexShift];
+                newLocationProbabilityDistribution[indexTriage][indexShift][indexGridId] = locationIncidentProbability;
+                // if (indexTriage == 0 && indexShift == 0) std::cout << locationIncidentProbability << ", ";
+            }
+        }
+    }
 }
 
 void MonteCarloSimulator::generateWaitTimeHistograms() {
