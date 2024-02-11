@@ -58,10 +58,10 @@ std::vector<double> MonteCarloSimulator::generateWeights(int windowSize, double 
 }
 
 void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
-    std::vector<float> newHourlyIncidentProbabilityDistribution(24, 0);
+    std::vector<double> newHourlyIncidentProbabilityDistribution(24, 0);
 
-    std::vector<float> totalIncidentsPerHour(24, 0);
-    int totalIncidents = 0;
+    std::vector<double> totalIncidentsPerHour(24, 0);
+    double totalIncidents = 0;
 
     // get total incidents per hour for each row in the filtered dataset
     for (int i = 0; i < filteredIncidents.size(); i++) {
@@ -84,10 +84,10 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
 }
 
 void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
-    std::vector<std::vector<float>> newMinuteIncidentProbabilityDistribution(24, std::vector<float>(60, 0.0));
+    std::vector<std::vector<double>> newMinuteIncidentProbabilityDistribution(24, std::vector<double>(60, 0));
 
-    std::vector<std::vector<float>> totalIncidentsPerMinute(24, std::vector<float>(60, 0.0));
-    std::vector<float> totalIncidents(24, 0.0);
+    std::vector<std::vector<double>> totalIncidentsPerMinute(24, std::vector<double>(60, 0));
+    std::vector<double> totalIncidents(24, 0);
 
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
@@ -101,7 +101,7 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
 
     for (int indexHour = 0; indexHour < 24; indexHour++) {
         for (int indexMinute = 0; indexMinute < 60; indexMinute++) {
-            float minuteIncidentProbability = totalIncidentsPerMinute[indexHour][indexMinute] / totalIncidents[indexHour];
+            double minuteIncidentProbability = totalIncidentsPerMinute[indexHour][indexMinute] / totalIncidents[indexHour];
             newMinuteIncidentProbabilityDistribution[indexHour][indexMinute] = minuteIncidentProbability;
         }
     }
@@ -110,10 +110,10 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
 }
 
 void MonteCarloSimulator::generateTriageProbabilityDistribution() {
-    std::vector<std::vector<float>> newTriageProbabilityDistribution(24, std::vector<float>(3, 0.0));
+    std::vector<std::vector<double>> newTriageProbabilityDistribution(24, std::vector<double>(3, 0));
 
-    std::vector<std::vector<float>> totalIncidentsPerTriage(24, std::vector<float>(3, 0.0));
-    std::vector<float> totalIncidents(24, 0.0);
+    std::vector<std::vector<double>> totalIncidentsPerTriage(24, std::vector<double>(3, 0));
+    std::vector<double> totalIncidents(24, 0);
 
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
@@ -138,7 +138,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
 
     for (int indexHour = 0; indexHour < 24; indexHour++) {
         for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
-            float triageIncidentProbability = totalIncidentsPerTriage[indexHour][indexTriage] / totalIncidents[indexHour];
+            double triageIncidentProbability = totalIncidentsPerTriage[indexHour][indexTriage] / totalIncidents[indexHour];
             newTriageProbabilityDistribution[indexHour][indexTriage] = triageIncidentProbability;
         }
     }
@@ -247,14 +247,14 @@ void MonteCarloSimulator::generateWaitTimeHistogram(
     }
 }
 
-std::map<std::pair<float, float>, float> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int numBins) {
+std::map<std::pair<float, float>, double> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int numBins) {
     auto [minElem, maxElem] = std::minmax_element(data.begin(), data.end());
     float minVal = *minElem;
     float maxVal = *maxElem;
     float range = maxVal - minVal;
     float binSize = range / numBins;
 
-    std::map<std::pair<float, float>, float> histogram;
+    std::map<std::pair<float, float>, double> histogram;
 
     for (float value : data) {
         int binIndex;
@@ -275,11 +275,11 @@ std::map<std::pair<float, float>, float> MonteCarloSimulator::createHistogram(co
         histogram[binRange]++;
     }
 
-    float cumulativeProbability = 0.0;
+    double cumulativeProbability = 0.0;
     int totalIncidents = data.size();
 
     for (const auto& bin : histogram) {
-        float probability = bin.second / totalIncidents;
+        double probability = bin.second / totalIncidents;
         cumulativeProbability += probability;
         histogram[bin.first] = cumulativeProbability;
         // std::cout << "(" << "<" << bin.first.first << ", " << bin.first.second << ">" << ": " << bin.second << "), ";
@@ -288,12 +288,12 @@ std::map<std::pair<float, float>, float> MonteCarloSimulator::createHistogram(co
     return histogram;
 }
 
-float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<std::pair<float, float>, float>& histogram) {
+float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<std::pair<float, float>, double>& histogram) {
     float start = 0;
     float end = 0;
 
     std::uniform_real_distribution<> dis(0, 1);
-    float randomValue = dis(rnd);
+    double randomValue = dis(rnd);
 
     for (const auto& bin : histogram) {
         if (randomValue <= bin.second) {
