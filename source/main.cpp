@@ -26,7 +26,9 @@ int main() {
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
-    MonteCarloSimulator sim(rnd, incidents, 2, 7, 4);
+    MonteCarloSimulator sim(rnd, incidents, 2019, 2, 7, 4);
+
+    std::vector<Event> events = sim.generateEvents();
 
     return 0;
 }

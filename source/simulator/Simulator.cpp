@@ -36,7 +36,7 @@ void Simulator::run() {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
-        Event& event = eventHandler.events[eventIndex];
+        EventOld& event = eventHandler.events[eventIndex];
         DispatchEngine::dispatch(
             dispatchStrategy,
             rng,

@@ -1,34 +1,36 @@
 /**
- * @file Utils.hpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-28
+ * @file Event.hpp
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
-
-/* external libraries */
-#include <iostream>
-#include <ctime>
-/* internal libraries */
-#include "simulator/EventType.hpp"
-#include "simulator/EventPerformanceMetrics.hpp"
 
 #pragma once
 
-struct Event {
-    EventType type;
-    std::time_t timer;
-    int incidentIndex;
-    int assignedAmbulanceIndex;
-    int64_t targetGridId;
-    EventPerformanceMetrics metrics;
+/* external libraries */
+#include <string>
+#include <ctime>
+#include <iostream>
+/* internal libraries */
+#include "Utils.hpp"
 
-    void print() const {
-        std::cout << "Event Type: " << static_cast<int>(type) << std::endl;
-        std::cout << "Timer: " << std::asctime(std::localtime(&timer));
-        std::cout << "Incident Index: " << incidentIndex << std::endl;
-        std::cout << "Assigned Ambulance Index: " << assignedAmbulanceIndex << std::endl;
-        std::cout << "Target Grid ID: " << targetGridId << std::endl;
+struct Event {
+    std::string triageImpression;
+    std::tm callReceived;
+    float secondsWaitCallAnswered = -1;
+    float secondsWaitAmbulanceNotified = -1;
+    float secondsWaitAmbulanceDispatch = -1;
+    float secondsWaitDepartureScene = -1;
+    float secondsWaitAvailable = -1;
+    int64_t gridId = -1;
+
+    void print() {
+        std::cout << "triageImpression: " << triageImpression << std::endl;
+        std::cout << "callReceived: " << Utils::tmToString(callReceived) << std::endl;
+        std::cout << "secondsWaitCallAnswered: " << secondsWaitCallAnswered << std::endl;
+        std::cout << "secondsWaitAmbulanceNotified: " << secondsWaitAmbulanceNotified << std::endl;
+        std::cout << "secondsWaitAmbulanceDispatch: " << secondsWaitAmbulanceDispatch << std::endl;
+        std::cout << "secondsWaitDepartureScene: " << secondsWaitDepartureScene << std::endl;
+        std::cout << "secondsWaitAvailable: " << secondsWaitAvailable << std::endl;
+        std::cout << "gridId: " << gridId << std::endl;
     }
 };

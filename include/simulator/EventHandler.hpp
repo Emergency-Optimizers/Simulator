@@ -14,7 +14,7 @@
 #include <vector>
 /* internal libraries */
 #include "simulator/Incidents.hpp"
-#include "simulator/Event.hpp"
+#include "simulator/EventOld.hpp"
 
 class EventHandler {
  private:
@@ -22,7 +22,7 @@ class EventHandler {
 
  public:
     ~EventHandler() = default;
-    std::vector<Event> events;
+    std::vector<EventOld> events;
     void populate(Incidents& incidents, const std::string& start, const std::string& end);
     int getNextEventIndex();
     void sortEvent(size_t eventIndex);

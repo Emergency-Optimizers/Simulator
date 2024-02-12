@@ -16,7 +16,7 @@ void DispatchEngineStrategy::run(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     if (event.assignedAmbulanceIndex == -1) {
         if (assignAmbulance(rng, incidents, stations, odMatrix, ambulances, event) == 0) return;
@@ -50,7 +50,7 @@ int DispatchEngineStrategy::assignAmbulance(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
     return 0;
@@ -62,7 +62,7 @@ void DispatchEngineStrategy::callProcessed(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
 }
@@ -73,7 +73,7 @@ void DispatchEngineStrategy::dispatchToScene(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
 }
@@ -84,7 +84,7 @@ void DispatchEngineStrategy::arrivedAtScene(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
 }
@@ -95,7 +95,7 @@ void DispatchEngineStrategy::dispatchToHospital(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
 }
@@ -106,7 +106,7 @@ void DispatchEngineStrategy::arrivedAtHospital(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
 }
@@ -117,7 +117,7 @@ void DispatchEngineStrategy::dispatchToDepot(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     /// TODO: code here
 }

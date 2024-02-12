@@ -14,6 +14,8 @@
 #include <optional>
 #include <vector>
 #include <algorithm>
+#include <numeric>
+#include <iterator>
 /* internal libraries */
 #include "Utils.hpp"
 #include "simulator/CSVReader.hpp"
@@ -193,4 +195,25 @@ int Utils::calculateDayDifference(const std::tm& baseDate, const int targetMonth
     if (dayDiff > newDayDiff) dayDiff = newDayDiff;
 
     return dayDiff;
+}
+
+int Utils::weightedLottery(std::mt19937& rnd, const std::vector<double>& weights) {
+    // create a partial sum of the weights
+    std::vector<double> cumulativeWeights(weights.size());
+    std::partial_sum(weights.begin(), weights.end(), cumulativeWeights.begin());
+
+    // generate a random number in the range [0, total weight]
+    std::uniform_real_distribution<> dist(0.0, cumulativeWeights.back());
+
+    // find the index where the random number would fall
+    auto it = std::lower_bound(cumulativeWeights.begin(), cumulativeWeights.end(), dist(rnd));
+
+    // calculate and return the index
+    return std::distance(cumulativeWeights.begin(), it);
+}
+
+int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
+    std::uniform_int_distribution<> dist(min, max);
+
+    return dist(rnd);
 }

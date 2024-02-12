@@ -15,7 +15,7 @@
 /* internal libraries */
 #include "simulator/DispatchEngineStrategyType.hpp"
 #include "simulator/Ambulance.hpp"
-#include "simulator/Event.hpp"
+#include "simulator/EventOld.hpp"
 #include "simulator/Incidents.hpp"
 #include "simulator/Stations.hpp"
 #include "simulator/ODMatrix.hpp"
@@ -28,7 +28,7 @@ class DispatchEngine {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        EventOld& event
     );
 
  public:
@@ -39,6 +39,6 @@ class DispatchEngine {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        EventOld& event
     );
 };

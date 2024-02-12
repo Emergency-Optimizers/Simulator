@@ -13,10 +13,11 @@
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
     Incidents& incidents,
+    const int year,
     const int month,
     const int day,
     const unsigned windowSize
-) : rnd(rnd), incidents(incidents), windowSize(windowSize), month(month), day(day) {
+) : rnd(rnd), incidents(incidents), windowSize(windowSize), year(year), month(month), day(day) {
     filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
 
     weights = generateWeights(windowSize);
@@ -195,6 +196,8 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
             }
         }
     }
+
+    locationProbabilityDistribution = newLocationProbabilityDistribution;
 }
 
 void MonteCarloSimulator::generateWaitTimeHistograms() {
@@ -305,4 +308,61 @@ float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<st
 
     std::uniform_real_distribution<> valueDis(start, end);
     return valueDis(rnd);
+}
+
+std::vector<Event> MonteCarloSimulator::generateEvents() {
+    std::vector<Event> events;
+
+    int totalEvents = 10;
+    std::vector<std::string> triageImpressions = { "A", "H", "V1" };
+
+    for (int i = 0; i < totalEvents; i++) {
+        Event event;
+
+        // get call received
+        int callReceivedHour = Utils::weightedLottery(rnd, hourlyIncidentProbabilityDistribution);
+        int callReceivedMin = Utils::weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);
+        int callReceivedSec = Utils::getRandomInt(rnd, 0, 59);
+        int indexShift = callReceivedHour >= DAY_SHIFT_START || callReceivedHour <= DAY_SHIFT_END ? 0 : 1;
+
+        event.callReceived = {0};
+        event.callReceived.tm_year = year - 1900;
+        event.callReceived.tm_mon = month;
+        event.callReceived.tm_mday = day;
+        event.callReceived.tm_hour = callReceivedHour;
+        event.callReceived.tm_min = callReceivedMin;
+        event.callReceived.tm_sec = callReceivedSec;
+        mktime(&event.callReceived);
+
+        // get triage impression
+        int indexTriage = Utils::weightedLottery(rnd, triageProbabilityDistribution[callReceivedHour]);
+        event.triageImpression = triageImpressions[indexTriage];
+
+        // location
+        event.gridId = indexToGridIdMapping[Utils::weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];
+
+        // wait times
+        event.secondsWaitCallAnswered = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_call_received", "time_call_answered")][event.triageImpression]
+        );
+        event.secondsWaitAmbulanceNotified = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_call_answered", "time_ambulance_notified")][event.triageImpression]
+        );
+        event.secondsWaitAmbulanceDispatch = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_ambulance_notified", "time_dispatch")][event.triageImpression]
+        );
+        event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_arrival_scene", "time_departure_scene")][event.triageImpression]
+        );
+        event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
+        );
+
+        events.push_back(event);
+
+        event.print();
+        std::cout << std::endl;
+    }
+
+    return events;
 }

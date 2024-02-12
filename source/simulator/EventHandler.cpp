@@ -25,7 +25,7 @@ void EventHandler::populate(Incidents& incidents, const std::string& start, cons
     currentIndex = 0;
 
     for (std::size_t i = startIndex; i < endIndex + 1; i++) {
-        Event event;
+        EventOld event;
         event.type = EventType::CALL_PROCESSED;
         std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
         event.timer = std::mktime(&timeCallReceived);
@@ -46,11 +46,11 @@ int EventHandler::getNextEventIndex() {
 }
 
 void EventHandler::sortEvent(size_t eventIndex) {
-    std::vector<Event>::iterator newPosition = std::lower_bound(
+    std::vector<EventOld>::iterator newPosition = std::lower_bound(
         events.begin() + eventIndex,
         events.end(),
         events[eventIndex],
-        [](const Event& a, const Event& b) { return a.timer < b.timer; }
+        [](const EventOld& a, const EventOld& b) { return a.timer < b.timer; }
     );
 
     if (newPosition != events.begin() + eventIndex) {

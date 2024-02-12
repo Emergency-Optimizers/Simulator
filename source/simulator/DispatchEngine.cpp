@@ -17,7 +17,7 @@ void DispatchEngine::dispatch(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     switch (strategy) {
         default:
@@ -31,7 +31,7 @@ void DispatchEngine::randomStrategy(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    EventOld& event
 ) {
     if (event.assignedAmbulanceIndex == -1) {
         std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
