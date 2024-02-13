@@ -6,5 +6,5 @@
 
 #pragma once
 
-const int DAY_SHIFT_START = 6;
-const int DAY_SHIFT_END = 18;
+const int DAY_SHIFT_START = 7;
+const int DAY_SHIFT_END = 22;

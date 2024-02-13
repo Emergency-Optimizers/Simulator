@@ -34,7 +34,10 @@ Incidents::Incidents() {
         {"longitude", Utils::toFloat},
         {"latitude", Utils::toFloat},
         {"region", Utils::toString},
-        {"urban_settlement", Utils::toBool}
+        {"urban_settlement", Utils::toBool},
+        {"total_morning", Utils::toInt},
+        {"total_day", Utils::toInt},
+        {"total_night", Utils::toInt}
     };
 }
 
