@@ -48,7 +48,11 @@ class Utils {
     static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
     static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances);
     static int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay);
-    static int weightedLottery(std::mt19937& rnd, const std::vector<double>& weights);
+    static int weightedLottery(
+        std::mt19937& rnd,
+        const std::vector<double>& weights,
+        const std::vector<std::pair<int, int>>& ranges = {}
+    );
     static int getRandomInt(std::mt19937& rnd, const int min, const int max);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {

@@ -16,8 +16,9 @@ MonteCarloSimulator::MonteCarloSimulator(
     const int year,
     const int month,
     const int day,
+    const bool dayShift,
     const unsigned windowSize
-) : rnd(rnd), incidents(incidents), windowSize(windowSize), year(year), month(month), day(day) {
+) : rnd(rnd), incidents(incidents), windowSize(windowSize), year(year), month(month), day(day), dayShift(dayShift) {
     filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
 
     weights = generateWeights(windowSize);
@@ -310,24 +311,53 @@ float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<st
     return valueDis(rnd);
 }
 
+int MonteCarloSimulator::getTotalIncidentsToGenerate() {
+    std::tm date = {0};
+    date.tm_year = 119;
+    date.tm_mon = month - 1;
+    date.tm_mday = day;
+    mktime(&date);
+
+    int totalMorning = -1;
+    int totalDay = -1;
+    int totalNight = -1;
+
+    for (int i = 0; i < incidents.size(); i++) {
+        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        mktime(&timeCallReceived);
+
+        if (timeCallReceived.tm_yday == date.tm_yday - 1 && totalNight == -1) totalNight = incidents.get<int>("total_night", i);
+        if (timeCallReceived.tm_yday == date.tm_yday) {
+            totalMorning = incidents.get<int>("total_morning", i);
+            totalDay = incidents.get<int>("total_day", i);
+            break;
+        }
+    }
+
+    return dayShift ? totalDay : totalMorning + totalNight;
+}
+
 std::vector<Event> MonteCarloSimulator::generateEvents() {
     std::vector<Event> events;
 
-    int totalEvents = 10;
+    int totalEvents = getTotalIncidentsToGenerate();
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
+    int indexShift = dayShift ? 0 : 1;
+    std::vector<std::pair<int, int>> indexRangesHour = dayShift ?
+        std::vector<std::pair<int, int>>{{7, 21}} :
+        std::vector<std::pair<int, int>>{{0, 6}, {22, 23}};
 
     for (int i = 0; i < totalEvents; i++) {
         Event event;
 
         // get call received
-        int callReceivedHour = Utils::weightedLottery(rnd, hourlyIncidentProbabilityDistribution);
+        int callReceivedHour = Utils::weightedLottery(rnd, hourlyIncidentProbabilityDistribution, indexRangesHour);
         int callReceivedMin = Utils::weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);
         int callReceivedSec = Utils::getRandomInt(rnd, 0, 59);
-        int indexShift = callReceivedHour >= DAY_SHIFT_START || callReceivedHour <= DAY_SHIFT_END ? 0 : 1;
 
         event.callReceived = {0};
         event.callReceived.tm_year = year - 1900;
-        event.callReceived.tm_mon = month;
+        event.callReceived.tm_mon = month - 1;
         event.callReceived.tm_mday = day;
         event.callReceived.tm_hour = callReceivedHour;
         event.callReceived.tm_min = callReceivedMin;
@@ -363,6 +393,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.print();
         std::cout << std::endl;
     }
+
+    std::cout << totalEvents << std::endl;
 
     return events;
 }

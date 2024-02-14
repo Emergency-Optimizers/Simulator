@@ -197,19 +197,55 @@ int Utils::calculateDayDifference(const std::tm& baseDate, const int targetMonth
     return dayDiff;
 }
 
-int Utils::weightedLottery(std::mt19937& rnd, const std::vector<double>& weights) {
-    // create a partial sum of the weights
-    std::vector<double> cumulativeWeights(weights.size());
-    std::partial_sum(weights.begin(), weights.end(), cumulativeWeights.begin());
+int Utils::weightedLottery(
+    std::mt19937& rnd,
+    const std::vector<double>& weights,
+    const std::vector<std::pair<int, int>>& ranges
+) {
+    std::vector<double> adjustedWeights;
 
-    // generate a random number in the range [0, total weight]
+    if (ranges.empty()) {
+        // If ranges is empty, use the entire weights vector
+        adjustedWeights = weights;
+    } else {
+        // Otherwise, process each specified range
+        for (const auto& range : ranges) {
+            int beginIndex = std::max(0, range.first);
+            int endIndex = std::min(static_cast<int>(weights.size()) - 1, range.second);
+
+            if (beginIndex <= endIndex) {
+                adjustedWeights.insert(adjustedWeights.end(), weights.begin() + beginIndex, weights.begin() + endIndex + 1);
+            }
+        }
+    }
+
+    // Create a partial sum of the adjusted weights
+    std::vector<double> cumulativeWeights(adjustedWeights.size());
+    std::partial_sum(adjustedWeights.begin(), adjustedWeights.end(), cumulativeWeights.begin());
+
+    // Generate a random number in the adjusted range
     std::uniform_real_distribution<> dist(0.0, cumulativeWeights.back());
-
-    // find the index where the random number would fall
     auto it = std::lower_bound(cumulativeWeights.begin(), cumulativeWeights.end(), dist(rnd));
+    int indexInAdjustedWeights = std::distance(cumulativeWeights.begin(), it);
 
-    // calculate and return the index
-    return std::distance(cumulativeWeights.begin(), it);
+    // For the default case (full range), the adjusted index is the final result
+    if (ranges.empty()) {
+        return indexInAdjustedWeights;
+    }
+
+    // Adjust the index to map back to the original weights vector for specified ranges
+    int originalIndex = 0;
+    for (const auto& range : ranges) {
+        int rangeSize = range.second - range.first + 1;
+        if (indexInAdjustedWeights < rangeSize) {
+            originalIndex += range.first + indexInAdjustedWeights;
+            break;
+        } else {
+            indexInAdjustedWeights -= rangeSize;
+        }
+    }
+
+    return originalIndex;
 }
 
 int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
