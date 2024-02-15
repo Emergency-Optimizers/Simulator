@@ -21,14 +21,37 @@
  * Main program.
  */
 int main() {
-    std::mt19937 rnd(100);
+    std::mt19937 rnd(0);
 
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
 
-    MonteCarloSimulator sim(rnd, incidents, 2019, 2, 7, true, 4);
+    Stations stations;
+    stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
 
-    std::vector<Event> events = sim.generateEvents();
+    ODMatrix odMatrix;
+    odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
+
+    AmbulanceAllocator ambulanceAllocator(stations);
+    ambulanceAllocator.allocate(std::vector<int>{2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+
+    MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
+
+    std::vector<Event> events = monteCarloSim.generateEvents();
+
+    Simulator simulator(
+        rnd,
+        incidents,
+        stations,
+        odMatrix,
+        ambulanceAllocator,
+        DispatchEngineStrategyType::RANDOM,
+        events
+    );
+
+    simulator.run();
+
+    simulator.printAverageEventPerformanceMetrics();
 
     return 0;
 }

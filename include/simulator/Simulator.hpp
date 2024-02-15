@@ -23,7 +23,7 @@
 
 class Simulator {
  private:
-    std::mt19937 rng;
+    std::mt19937& rng;
     Incidents& incidents;
     Stations& stations;
     ODMatrix& odMatrix;
@@ -33,14 +33,13 @@ class Simulator {
 
  public:
     Simulator(
-        const unsigned seed,
+        std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
         ODMatrix& odMatrix,
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
-        const std::string& start,
-        const std::string& end
+        std::vector<Event> events
     );
     void run();
     void printAverageEventPerformanceMetrics();

@@ -12,8 +12,14 @@
 #include <iostream>
 /* internal libraries */
 #include "Utils.hpp"
+#include "simulator/EventType.hpp"
+#include "simulator/EventPerformanceMetrics.hpp"
 
 struct Event {
+    EventType type = EventType::CALL_PROCESSED;
+    std::time_t timer;
+    int assignedAmbulanceIndex = -1;
+    EventPerformanceMetrics metrics;
     std::string triageImpression;
     std::tm callReceived;
     float secondsWaitCallAnswered = -1;

@@ -191,9 +191,9 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
     for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
         for (int indexShift = 0; indexShift < 2; indexShift++) {
             for (int indexGridId = 0; indexGridId < gridIdSize; indexGridId++) {
-                double locationIncidentProbability = totalIncidentsPerLocation[indexTriage][indexShift][indexGridId] / totalIncidents[indexTriage][indexShift];
+                double totalIncidentsLocation = totalIncidentsPerLocation[indexTriage][indexShift][indexGridId];
+                double locationIncidentProbability = totalIncidentsLocation / totalIncidents[indexTriage][indexShift];
                 newLocationProbabilityDistribution[indexTriage][indexShift][indexGridId] = locationIncidentProbability;
-                // if (indexTriage == 0 && indexShift == 0) std::cout << locationIncidentProbability << ", ";
             }
         }
     }
@@ -388,13 +388,15 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
             waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
         );
 
-        events.push_back(event);
+        // setup timer
+        event.timer = std::mktime(&event.callReceived);
 
-        event.print();
-        std::cout << std::endl;
+        events.push_back(event);
     }
 
-    std::cout << totalEvents << std::endl;
+    std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
+        return a.timer < b.timer;
+    });
 
     return events;
 }

@@ -17,7 +17,7 @@ void DispatchEngine::dispatch(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    EventOld& event
+    Event& event
 ) {
     switch (strategy) {
         default:
@@ -31,7 +31,7 @@ void DispatchEngine::randomStrategy(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    EventOld& event
+    Event& event
 ) {
     if (event.assignedAmbulanceIndex == -1) {
         std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
@@ -50,11 +50,7 @@ void DispatchEngine::randomStrategy(
 
     switch (event.type) {
         case EventType::CALL_PROCESSED:
-            incrementSeconds = incidents.timeDifferenceBetweenHeaders(
-                "time_call_received",
-                "time_call_answered",
-                event.incidentIndex
-            );
+            incrementSeconds = event.secondsWaitCallAnswered;
             event.timer += incrementSeconds;
             event.metrics.callProcessedTime += incrementSeconds;
 
@@ -64,42 +60,34 @@ void DispatchEngine::randomStrategy(
         case EventType::DISPATCH_TO_SCENE:
             incrementSeconds = odMatrix.getTravelTime(
                 ambulances[event.assignedAmbulanceIndex].currentGridId,
-                event.targetGridId
+                event.gridId
             );
             event.timer += incrementSeconds;
             event.metrics.dispatchToSceneTime += incrementSeconds;
 
-            ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
+            ambulances[event.assignedAmbulanceIndex].currentGridId = event.gridId;
 
             event.type = EventType::ARRIVED_AT_SCENE;
 
             break;
         case EventType::ARRIVED_AT_SCENE:
-            if (incidents.get<std::optional<std::tm>>("time_departure_scene", event.incidentIndex).has_value()) {
-                incrementSeconds = incidents.timeDifferenceBetweenHeaders(
-                    "time_arrival_scene",
-                    "time_departure_scene",
-                    event.incidentIndex
-                );
+            if (event.secondsWaitDepartureScene != -1) {
+                incrementSeconds = event.secondsWaitDepartureScene;
                 event.timer += incrementSeconds;
                 event.metrics.arrivalAtSceneTime += incrementSeconds;
 
-                event.targetGridId = stations.get<int64_t>(
+                event.gridId = stations.get<int64_t>(
                     "grid_id",
                     Utils::getRandomElement(rng, stations.getHospitalIndices())
                 );
 
                 event.type = EventType::DISPATCH_TO_HOSPITAL;
             } else {
-                incrementSeconds = incidents.timeDifferenceBetweenHeaders(
-                    "time_arrival_scene",
-                    "time_available",
-                    event.incidentIndex
-                );
+                incrementSeconds = event.secondsWaitAvailable;
                 event.timer += incrementSeconds;
                 event.metrics.arrivalAtSceneTime += incrementSeconds;
 
-                event.targetGridId = stations.get<int64_t>(
+                event.gridId = stations.get<int64_t>(
                     "grid_id",
                     ambulances[event.assignedAmbulanceIndex].allocatedDepotIndex
                 );
@@ -111,26 +99,22 @@ void DispatchEngine::randomStrategy(
         case EventType::DISPATCH_TO_HOSPITAL:
             incrementSeconds = odMatrix.getTravelTime(
                 ambulances[event.assignedAmbulanceIndex].currentGridId,
-                event.targetGridId
+                event.gridId
             );
             event.timer += incrementSeconds;
             event.metrics.dispatchToHospitalTime += incrementSeconds;
 
-            ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
+            ambulances[event.assignedAmbulanceIndex].currentGridId = event.gridId;
 
             event.type = EventType::ARRIVED_AT_HOSPITAL;
 
             break;
         case EventType::ARRIVED_AT_HOSPITAL:
-            incrementSeconds = incidents.timeDifferenceBetweenHeaders(
-                "time_arrival_hospital",
-                "time_available",
-                event.incidentIndex
-            );
+            incrementSeconds = event.secondsWaitAvailable;
             event.timer += incrementSeconds;
             event.metrics.arrivalAtHospitalTime += incrementSeconds;
 
-            event.targetGridId = stations.get<int64_t>(
+            event.gridId = stations.get<int64_t>(
                 "grid_id",
                 ambulances[event.assignedAmbulanceIndex].allocatedDepotIndex
             );
@@ -141,12 +125,12 @@ void DispatchEngine::randomStrategy(
         case EventType::DISPATCH_TO_DEPOT:
             incrementSeconds = odMatrix.getTravelTime(
                 ambulances[event.assignedAmbulanceIndex].currentGridId,
-                event.targetGridId
+                event.gridId
             );
             event.timer += incrementSeconds;
             event.metrics.dispatchToDepotTime += incrementSeconds;
 
-            ambulances[event.assignedAmbulanceIndex].currentGridId = event.targetGridId;
+            ambulances[event.assignedAmbulanceIndex].currentGridId = event.gridId;
             ambulances[event.assignedAmbulanceIndex].assignedEventIndex = -1;
             event.assignedAmbulanceIndex = -1;
 

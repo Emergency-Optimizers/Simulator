@@ -15,18 +15,15 @@
 #include "simulator/DispatchEngine.hpp"
 
 Simulator::Simulator(
-    const unsigned seed,
+    std::mt19937& rng,
     Incidents& incidents,
     Stations& stations,
     ODMatrix& odMatrix,
     AmbulanceAllocator& ambulanceAllocator,
     DispatchEngineStrategyType dispatchStrategy,
-    const std::string& start,
-    const std::string& end
-) : incidents(incidents), stations(stations), odMatrix(odMatrix), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
-    std::mt19937 rng(seed);
-
-    eventHandler.populate(incidents, start, end);
+    std::vector<Event> events
+) : rng(rng), incidents(incidents), stations(stations), odMatrix(odMatrix), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
+    eventHandler.populate(events);
 }
 
 void Simulator::run() {
@@ -36,7 +33,7 @@ void Simulator::run() {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
-        EventOld& event = eventHandler.events[eventIndex];
+        Event& event = eventHandler.events[eventIndex];
         DispatchEngine::dispatch(
             dispatchStrategy,
             rng,
@@ -74,18 +71,35 @@ void Simulator::printAverageEventPerformanceMetrics() {
     }
 
     std::cout << std::fixed << std::setprecision(2);
+    double averageTimeSpentProcessingCall = static_cast<double>(totalMetrics.callProcessedTime) / totalEvents;
     std::cout << "\nAverage time spent on processing call: "
-        << static_cast<double>(totalMetrics.callProcessedTime) / totalEvents << " seconds\n";
+        << averageTimeSpentProcessingCall << " seconds (" << averageTimeSpentProcessingCall / 60 << " min)\n";
+
+    double averageTimeSpentDispatchToScene = static_cast<double>(totalMetrics.dispatchToSceneTime) / totalEvents;
     std::cout << "Average time spent on dispatching to scene: "
-        << static_cast<double>(totalMetrics.dispatchToSceneTime) / totalEvents << " seconds\n";
+        << averageTimeSpentDispatchToScene << " seconds (" << averageTimeSpentDispatchToScene / 60 << " min)\n";
+
+    double averageTimeSpentArrivalAtScene = static_cast<double>(totalMetrics.arrivalAtSceneTime) / totalEvents;
     std::cout << "Average time spent on arrival at scene: "
-        << static_cast<double>(totalMetrics.arrivalAtSceneTime) / totalEvents << " seconds\n";
+        << averageTimeSpentArrivalAtScene << " seconds (" << averageTimeSpentArrivalAtScene / 60 << " min)\n";
+
+    double averageTimeSpentDispatchToHospital = static_cast<double>(totalMetrics.dispatchToHospitalTime) / totalEvents;
     std::cout << "Average time spent on dispatching to hospital: "
-        << static_cast<double>(totalMetrics.dispatchToHospitalTime) / totalEvents << " seconds\n";
+        << averageTimeSpentDispatchToHospital << " seconds (" << averageTimeSpentDispatchToHospital / 60 << " min)\n";
+
+    double averageTimeSpentArrivalAtHospital = static_cast<double>(totalMetrics.arrivalAtHospitalTime) / totalEvents;
     std::cout << "Average time spent on arrival at hospital: "
-        << static_cast<double>(totalMetrics.arrivalAtHospitalTime) / totalEvents << " seconds\n";
+        << averageTimeSpentArrivalAtHospital << " seconds (" << averageTimeSpentArrivalAtHospital / 60 << " min)\n";
+
+    double averageTimeSpentDispatchToDepot = static_cast<double>(totalMetrics.dispatchToDepotTime) / totalEvents;
     std::cout << "Average time spent on dispatching to depot: "
-        << static_cast<double>(totalMetrics.dispatchToDepotTime) / totalEvents << " seconds\n";
+        << averageTimeSpentDispatchToDepot << " seconds (" << averageTimeSpentDispatchToDepot / 60 << " min)\n";
+
+    double averageTimeSpentWaitingForAmbulance = static_cast<double>(totalMetrics.waitingForAmbulanceTime) / totalEvents;
     std::cout << "Average time spent on waiting for ambulance: "
-        << static_cast<double>(totalMetrics.waitingForAmbulanceTime) / totalEvents << " seconds\n";
+        << averageTimeSpentWaitingForAmbulance << " seconds (" << averageTimeSpentWaitingForAmbulance / 60 << " min)\n";
+
+    double averageResponseTime = static_cast<double>(totalMetrics.callProcessedTime + totalMetrics.dispatchToSceneTime) / totalEvents;
+    std::cout << "Average response time: "
+        << averageResponseTime << " seconds (" << averageResponseTime / 60 << " min)\n";
 }
