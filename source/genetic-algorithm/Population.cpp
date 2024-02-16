@@ -7,17 +7,32 @@
 /* internal libraries */
 #include "genetic-algorithm/Population.hpp"
 #include "Utils.hpp"
+#include "simulator/MonteCarloSimulator.hpp"
 
-Population::Population(std::mt19937& rnd, int populationSize, int numDepots, int numAmbulances, double mutationProbability)
-: rnd(rnd), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
+Population::Population(
+    std::mt19937& rnd,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    int populationSize,
+    int numDepots,
+    int numAmbulances,
+    double mutationProbability
+) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
+    MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
+    events = monteCarloSim.generateEvents();
+
     for (int i = 0; i < populationSize; i++) {
-        individuals.push_back(Individual(rnd, numDepots, numAmbulances, mutationProbability, false));
+        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);
+        individuals.push_back(individual);
     }
+
+    evaluateFitness();
 }
 
 void Population::evaluateFitness() {
     for (Individual& individual : individuals) {
-        individual.evaluateFitness();
+        individual.evaluateFitness(events);
     }
 }
 
@@ -35,7 +50,7 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
             tournament.begin(),
             tournament.end(),
             [](const Individual &a, const Individual &b) {
-                return a.getFitness() < b.getFitness();
+                return a.getFitness() > b.getFitness();
             }
         );
 
@@ -46,21 +61,29 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
 }
 
 std::vector<Individual> Population::survivorSelection(int numSurvivors) {
+    // sort the current population based on fitness in descending order
     std::sort(
         individuals.begin(),
         individuals.end(),
-        [](const Individual &a, const Individual &b) { return a.getFitness() > b.getFitness(); }
+        [](const Individual &a, const Individual &b) { return a.getFitness() < b.getFitness(); }
     );
 
-    if (numSurvivors < individuals.size()) {
-        // keep only the top individuals
-        individuals.resize(numSurvivors);
+    std::vector<Individual> survivors;
+
+    // calculate the actual number of survivors to keep, which is the minimum
+    // of numSurvivors and the current population size to avoid out-of-bounds access
+    int actualNumSurvivors = std::min(numSurvivors, static_cast<int>(individuals.size()));
+
+    // copy the top 'actualNumSurvivors' individuals to the survivors vector
+    for (int i = 0; i < actualNumSurvivors; i++) {
+        survivors.push_back(individuals[i]);
     }
-    return individuals;
+
+    return survivors;
 }
 
 void Population::addChildren(const std::vector<Individual>& children) {
-    individuals.insert(individuals.end(), children.begin(), children.end());
+    for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
 }
 
 Individual Population::crossover(const Individual& parent1, const Individual& parent2) {
@@ -75,9 +98,10 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, numDepots, numAmbulances, mutationProbability);
+    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
+    offspring.evaluateFitness(events);
 
     return offspring;
 }
@@ -96,7 +120,7 @@ void Population::evolve(int generations) {
         for (int i = 0; i < populationSize; i += 2) {
             Individual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
             offspring.mutate();
-            offspring.evaluateFitness();
+            offspring.evaluateFitness(events);
             children.push_back(offspring);
         }
 
@@ -115,7 +139,7 @@ const Individual Population::findFittest() {
         individuals.begin(),
         individuals.end(),
         [](const Individual &a, const Individual &b) {
-            return a.getFitness() < b.getFitness();
+            return a.getFitness() > b.getFitness();
         }
     );
 
@@ -127,7 +151,7 @@ const Individual Population::findLeastFit() {
         individuals.begin(),
         individuals.end(),
         [](const Individual &a, const Individual &b) {
-            return a.getFitness() < b.getFitness();
+            return a.getFitness() > b.getFitness();
         }
     );
 

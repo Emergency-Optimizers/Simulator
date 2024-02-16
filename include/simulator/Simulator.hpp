@@ -42,5 +42,6 @@ class Simulator {
         std::vector<Event> events
     );
     void run();
+    double getResponseTime();
     void printAverageEventPerformanceMetrics();
 };

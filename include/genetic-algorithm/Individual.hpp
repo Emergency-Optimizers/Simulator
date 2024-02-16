@@ -11,24 +11,40 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+/* internal libraries */
+#include "simulator/Incidents.hpp"
+#include "simulator/Stations.hpp"
+#include "simulator/ODMatrix.hpp"
+#include "simulator/Event.hpp"
 
 class Individual {
  private:
-    std::mt19937 rnd;
+    std::mt19937& rnd;
+    Incidents& incidents;
+    Stations& stations;
+    ODMatrix& odMatrix;
     std::vector<int> genotype;
     int numDepots;
     int numAmbulances;
-    mutable double fitness;
+    mutable double fitness = 0;
     double mutationProbability;
     bool child;
 
  public:
-    Individual() = default;
-    Individual(std::mt19937 rnd, int numDepots, int numAmbulances, double mutationProbability, bool child = true);
-
+    Individual(
+        std::mt19937& rnd,
+        Incidents& incidents,
+        Stations& stations,
+        ODMatrix& odMatrix,
+        std::vector<Event> events,
+        int numDepots,
+        int numAmbulances,
+        double mutationProbability,
+        bool child = true
+    );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateFitness() const;
+    void evaluateFitness(std::vector<Event> events) const;
     void mutate();
     void repair();
     void addAmbulances(int ambulancesToAdd = 1);
@@ -44,4 +60,15 @@ class Individual {
     void setNumAmbulances(int newNumAmbulances);
     int getNumDepots() const;
     void setNumDepots(int newNumDepots);
+    Individual& Individual::operator=(const Individual& other) {
+        if (this != &other) {
+            genotype = other.genotype;
+            numDepots = other.numDepots;
+            numAmbulances = other.numAmbulances;
+            fitness = other.fitness;
+            mutationProbability = other.mutationProbability;
+            child = other.child;
+        }
+        return *this;
+    }
 };

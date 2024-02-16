@@ -6,9 +6,9 @@
 
 #include <iostream>
 /* internal libraries */
-#include "simulator/ODMatrix.hpp"
 #include "simulator/Incidents.hpp"
 #include "simulator/Stations.hpp"
+#include "simulator/ODMatrix.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
@@ -27,37 +27,14 @@ int main() {
     ODMatrix odMatrix;
     odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
-    AmbulanceAllocator ambulanceAllocator(stations);
-    ambulanceAllocator.allocate(std::vector<int>{2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
-
-    MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
-
-    std::vector<Event> events = monteCarloSim.generateEvents();
-
-    Simulator simulator(
-        rnd,
-        incidents,
-        stations,
-        odMatrix,
-        ambulanceAllocator,
-        DispatchEngineStrategyType::RANDOM,
-        events
-    );
-
-    simulator.run();
-
-    simulator.printAverageEventPerformanceMetrics();
-
-
-
     int populationSize = 50;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 100;
+    int generations = 15;
 
-    Population population(rnd, populationSize, numDepots, numAmbulances, mutationProbability);
     std::cout << "Before evolve" << std::endl;
+    Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability);
     // Run the genetic algorithm for the specified number of generations
     population.evolve(generations);
     // Find and print the fittest individual after the final generation

@@ -17,11 +17,12 @@ void DispatchEngine::dispatch(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    Event& event,
+    int eventIndex
 ) {
     switch (strategy) {
         default:
-            randomStrategy(rng, incidents, stations, odMatrix, ambulances, event);
+            randomStrategy(rng, incidents, stations, odMatrix, ambulances, event, eventIndex);
     }
 }
 
@@ -31,7 +32,8 @@ void DispatchEngine::randomStrategy(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
-    Event& event
+    Event& event,
+    int eventIndex
 ) {
     if (event.assignedAmbulanceIndex == -1) {
         std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
@@ -44,6 +46,7 @@ void DispatchEngine::randomStrategy(
         }
 
         event.assignedAmbulanceIndex = Utils::getRandomElement(rng, availableAmbulanceIndicies);
+        ambulances[event.assignedAmbulanceIndex].assignedEventIndex = eventIndex;
     }
 
     int incrementSeconds = 0;

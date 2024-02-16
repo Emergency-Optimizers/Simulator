@@ -28,7 +28,8 @@ class DispatchEngine {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        Event& event,
+        int eventIndex
     );
 
  public:
@@ -39,6 +40,7 @@ class DispatchEngine {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        Event& event,
+        int eventIndex
     );
 };

@@ -7,18 +7,23 @@
 /* internal libraries */
 #include "genetic-algorithm/Individual.hpp"
 #include "Utils.hpp"
+#include "simulator/AmbulanceAllocator.hpp"
+#include "simulator/Simulator.hpp"
 
 Individual::Individual(
-    std::mt19937 rnd,
+    std::mt19937& rnd,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Event> events,
     int numDepots,
     int numAmbulances,
     double mutationProbability,
     bool child
-) : rnd(rnd), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
+) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
     if (!child) {
         randomizeAmbulances();
     }
-    evaluateFitness();
 }
 
 void Individual::randomizeAmbulances() {
@@ -26,7 +31,7 @@ void Individual::randomizeAmbulances() {
     std::fill(genotype.begin(), genotype.end(), 0);
 
     for (int i = 0; i < numAmbulances; i++) {
-        int depotIndex = Utils::randomInt(0, genotype.size() - 1);
+        int depotIndex = Utils::getRandomInt(rnd, 0, genotype.size() - 1);
         genotype[depotIndex]++;
     }
 }
@@ -37,17 +42,24 @@ bool Individual::isValid() const {
     return totalAmbulances == numAmbulances;
 }
 
-void Individual::evaluateFitness() const {
+void Individual::evaluateFitness(std::vector<Event> events) const {
     fitness = 0.0;
 
-    for (size_t i = 0; i < genotype.size(); i++) {
-        if (i == 0) {  // Check if it's depot 1
-            fitness += genotype[i];  // Add points for ambulances in depot 1
-        }
-        // No action for other depots as they contribute 0 points
-    }
+    AmbulanceAllocator ambulanceAllocator(stations);
+    ambulanceAllocator.allocate(genotype);
 
-    fitness = std::max(0.0, fitness);  // Ensure fitness is non-negative
+    Simulator simulator(
+        rnd,
+        incidents,
+        stations,
+        odMatrix,
+        ambulanceAllocator,
+        DispatchEngineStrategyType::RANDOM,
+        events
+    );
+    simulator.run();
+
+    fitness = simulator.getResponseTime();
 }
 
 void Individual::mutate() {

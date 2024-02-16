@@ -67,5 +67,4 @@ class Utils {
         std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
         return vec[rndBetween(rng)];
     }
-    static int randomInt(int min, int max);
 };

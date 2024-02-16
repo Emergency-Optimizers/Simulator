@@ -250,9 +250,3 @@ int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
 
     return dist(rnd);
 }
-int Utils::randomInt(int min, int max) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(min, max);
-    return dis(gen);
-}

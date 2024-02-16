@@ -27,7 +27,7 @@ Simulator::Simulator(
 }
 
 void Simulator::run() {
-    std::cout << "\nSimulator started. Total events to simulate: " << eventHandler.events.size() << std::endl;
+    // std::cout << "\nSimulator started. Total events to simulate: " << eventHandler.events.size() << std::endl;
     auto start = std::chrono::steady_clock::now();
 
     int eventIndex = eventHandler.getNextEventIndex();
@@ -41,7 +41,8 @@ void Simulator::run() {
             stations,
             odMatrix,
             ambulanceAllocator.ambulances,
-            event
+            event,
+            eventIndex
         );
 
         eventHandler.sortEvent(eventIndex);
@@ -51,7 +52,28 @@ void Simulator::run() {
 
     auto stop = std::chrono::steady_clock::now();
     std::chrono::duration<double> duration = stop - start;
-    std::cout << "\nSimulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
+    // std::cout << "\nSimulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
+}
+
+double Simulator::getResponseTime() {
+    EventPerformanceMetrics totalMetrics;
+    int totalEvents = eventHandler.events.size();
+
+    if (totalEvents == 0) return 0;
+
+    for (int i = 0; i < totalEvents; i++) {
+        totalMetrics.callProcessedTime += eventHandler.events[i].metrics.callProcessedTime;
+        totalMetrics.dispatchToSceneTime += eventHandler.events[i].metrics.dispatchToSceneTime;
+        totalMetrics.arrivalAtSceneTime += eventHandler.events[i].metrics.arrivalAtSceneTime;
+        totalMetrics.dispatchToHospitalTime += eventHandler.events[i].metrics.dispatchToHospitalTime;
+        totalMetrics.arrivalAtHospitalTime += eventHandler.events[i].metrics.arrivalAtHospitalTime;
+        totalMetrics.dispatchToDepotTime += eventHandler.events[i].metrics.dispatchToDepotTime;
+        totalMetrics.waitingForAmbulanceTime += eventHandler.events[i].metrics.waitingForAmbulanceTime;
+    }
+
+    double averageResponseTime = static_cast<double>(totalMetrics.callProcessedTime + totalMetrics.dispatchToSceneTime + totalMetrics.waitingForAmbulanceTime) / totalEvents;
+
+    return averageResponseTime;
 }
 
 void Simulator::printAverageEventPerformanceMetrics() {
