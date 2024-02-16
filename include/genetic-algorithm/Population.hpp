@@ -16,6 +16,7 @@
 
 class Population {
  private:
+    std::mt19937& rnd;
     std::vector<Individual> individuals;
     int populationSize;
     int numDepots;
@@ -23,15 +24,14 @@ class Population {
     double mutationProbability;
 
  public:
-    Population::Population(int populationSize, int numDepots, int numAmbulances, double mutationProbability);
+    Population::Population(std::mt19937& rnd, int populationSize, int numDepots, int numAmbulances, double mutationProbability);
     void evaluateFitness();
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
     std::vector<Individual> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<Individual>& children);
     Individual crossover(const Individual& parent1, const Individual& parent2);
     void evolve(int generations);
-    Individual findFittest() const;
-    Individual findLeastFit() const;
-    double averageFitness() const;
-    std::vector<Individual> getIndividuals() const;
+    const Individual findFittest();
+    const Individual findLeastFit();
+    const double averageFitness();
 };
