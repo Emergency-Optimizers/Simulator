@@ -11,7 +11,7 @@
 Population::Population(std::mt19937& rnd, int populationSize, int numDepots, int numAmbulances, double mutationProbability)
 : rnd(rnd), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
     for (int i = 0; i < populationSize; i++) {
-        individuals.push_back(Individual(numDepots, numAmbulances, mutationProbability, false));
+        individuals.push_back(Individual(rnd, numDepots, numAmbulances, mutationProbability, false));
     }
 }
 
@@ -75,7 +75,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(numDepots, numAmbulances, mutationProbability);
+    Individual offspring = Individual(rnd, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
 

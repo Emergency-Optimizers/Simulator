@@ -14,6 +14,7 @@
 
 class Individual {
  private:
+    std::mt19937 rnd;
     std::vector<int> genotype;
     int numDepots;
     int numAmbulances;
@@ -22,8 +23,8 @@ class Individual {
     bool child;
 
  public:
-    Individual();
-    Individual(int numDepots, int numAmbulances, double mutationProbability, bool child = true);
+    Individual() = default;
+    Individual(std::mt19937 rnd, int numDepots, int numAmbulances, double mutationProbability, bool child = true);
 
     void randomizeAmbulances();
     bool isValid() const;

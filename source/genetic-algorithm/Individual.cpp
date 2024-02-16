@@ -1,5 +1,5 @@
 /**
- * @file Individual.hpp
+ * @file Individual.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -8,20 +8,24 @@
 #include "genetic-algorithm/Individual.hpp"
 #include "Utils.hpp"
 
-Individual::Individual() { }
-
-Individual::Individual(int numDepots, int numAmbulances, double mutationProbability, bool child)
-: genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
+Individual::Individual(
+    std::mt19937 rnd,
+    int numDepots,
+    int numAmbulances,
+    double mutationProbability,
+    bool child
+) : rnd(rnd), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
     if (!child) {
-        randomizeAmbulances();  // Randomize ambulances as part of the construction process.
+        randomizeAmbulances();
     }
     evaluateFitness();
 }
 
 void Individual::randomizeAmbulances() {
-    std::fill(genotype.begin(), genotype.end(), 0);  // Reset all depots to 0 ambulances
+    // reset all depots to 0 ambulances
+    std::fill(genotype.begin(), genotype.end(), 0);
 
-    for (int i = 0; i < numAmbulances; ++i) {
+    for (int i = 0; i < numAmbulances; i++) {
         int depotIndex = Utils::randomInt(0, genotype.size() - 1);
         genotype[depotIndex]++;
     }
@@ -29,13 +33,14 @@ void Individual::randomizeAmbulances() {
 
 bool Individual::isValid() const {
     int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
+
     return totalAmbulances == numAmbulances;
-    }
+}
 
 void Individual::evaluateFitness() const {
     fitness = 0.0;
 
-    for (size_t i = 0; i < genotype.size(); ++i) {
+    for (size_t i = 0; i < genotype.size(); i++) {
         if (i == 0) {  // Check if it's depot 1
             fitness += genotype[i];  // Add points for ambulances in depot 1
         }
@@ -46,25 +51,24 @@ void Individual::evaluateFitness() const {
 }
 
 void Individual::mutate() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
     std::uniform_real_distribution<> probDist(0.0, 1.0);
     std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
 
     for (int depot = 0; depot < genotype.size(); ++depot) {
-        if (probDist(gen) < mutationProbability && genotype[depot] > 0) {  // Only mutate if depot has at least one ambulance
-            int otherDepot = depotDist(gen);
+        // only mutate if depot has at least one ambulance
+        if (probDist(rnd) < mutationProbability && genotype[depot] > 0) {
+            int otherDepot = depotDist(rnd);
             while (otherDepot == depot) {
-                otherDepot = depotDist(gen);  // Find a different depot
+                otherDepot = depotDist(rnd);
             }
 
-            // Transfer an ambulance from current depot to another depot
+            // transfer an ambulance from current depot to another depot
             genotype[depot]--;
             genotype[otherDepot]++;
         }
     }
 
-    // Ensure total number of ambulances remains constant
+    // ensure total number of ambulances remains constant
     if (!isValid()) {
         throw std::runtime_error("Total number of ambulances changed during mutation.");
     }
@@ -80,48 +84,44 @@ void Individual::repair() {
             removeAmbulances(totalAmbulances - numAmbulances);
         }
 
-        totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);  // Update the total after modifications
+        totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
     }
 
-    // Ensure total number of ambulances remains constant
+    // ensure total number of ambulances remains constant
     if (!isValid()) {
         throw std::runtime_error("Total number of ambulances changed during mutation.");
     }
 }
 
 void Individual::addAmbulances(int ambulancesToAdd) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, genotype.size() - 1);
 
-    for (int i = 0; i < ambulancesToAdd; ++i) {
-        std::uniform_int_distribution<> dis(0, genotype.size() - 1);
-        int depotIndex = dis(gen);
+    for (int i = 0; i < ambulancesToAdd; i++) {
+        int depotIndex = dist(rnd);
 
         genotype[depotIndex]++;
     }
 }
 
 void Individual::removeAmbulances(int ambulancesToRemove) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, genotype.size() - 1);
 
-    for (int i = 0; i < ambulancesToRemove; ++i) {
+    for (int i = 0; i < ambulancesToRemove; i++) {
         bool ambulanceRemoved = false;
-        while (!ambulanceRemoved) {
-            std::uniform_int_distribution<> dis(0, genotype.size() - 1);
-            int depotIndex = dis(gen);
 
-            // Check if the selected depot has an ambulance
+        while (!ambulanceRemoved) {
+            int depotIndex = dist(rnd);
+
             if (genotype[depotIndex] > 0) {
                 genotype[depotIndex]--;
-                ambulanceRemoved = true;  // Ambulance removed, exit the while loop
+                ambulanceRemoved = true;
             }
         }
     }
 }
 
 void Individual::printChromosome() const {
-    for (int i = 0; i < genotype.size(); ++i) {
+    for (int i = 0; i < genotype.size(); i++) {
         std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
     }
 }
