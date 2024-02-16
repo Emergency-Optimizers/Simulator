@@ -1,10 +1,7 @@
 /**
  * @file Utils.cpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-08
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* external libraries */
@@ -252,4 +249,10 @@ int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
     std::uniform_int_distribution<> dist(min, max);
 
     return dist(rnd);
+}
+int Utils::randomInt(int min, int max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(min, max);
+    return dis(gen);
 }

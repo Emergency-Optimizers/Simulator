@@ -1,10 +1,7 @@
 /**
  * @file Utils.hpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-09
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 #pragma once
@@ -16,6 +13,7 @@
 #include <variant>
 #include <vector>
 #include <random>
+#include <utility>
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
 
@@ -69,4 +67,5 @@ class Utils {
         std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
         return vec[rndBetween(rng)];
     }
+    static int randomInt(int min, int max);
 };

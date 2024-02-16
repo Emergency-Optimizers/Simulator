@@ -1,13 +1,9 @@
 /**
  * @file main.cpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-07
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
-/* external libraries */
 #include <iostream>
 /* internal libraries */
 #include "simulator/ODMatrix.hpp"
@@ -16,12 +12,11 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
+#include "genetic-algorithm/Individual.hpp"
+#include "genetic-algorithm/Population.hpp"
 
-/**
- * Main program.
- */
 int main() {
-    std::mt19937 rnd(0);
+    /*std::mt19937 rnd(0);
 
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
@@ -51,7 +46,28 @@ int main() {
 
     simulator.run();
 
-    simulator.printAverageEventPerformanceMetrics();
+    simulator.printAverageEventPerformanceMetrics();*/
+
+
+
+    // Define the parameters for the population
+    int populationSize = 50;  // Total number of individuals in the population
+    int numDepots = 19;        // Number of depots
+    int numAmbulances = 45;    // Total number of ambulances
+    double mutationProbability = 0.05;  // Probability of mutation
+    int generations = 100;      // Number of generations to evolve
+
+    // Create a population with the specified parameters
+    unsigned int seed = 12345;  // Example seed
+    Population population(populationSize, numDepots, numAmbulances, mutationProbability);
+    std::cout << "Before evolve" << std::endl;
+    // Run the genetic algorithm for the specified number of generations
+    population.evolve(generations);
+    // Find and print the fittest individual after the final generation
+    Individual fittest = population.findFittest();
+    std::cout << "Fittest Individual After Evolution: " << std::endl;
+    std::cout << "Valid: " << fittest.isValid() << std::endl;
+    fittest.printChromosome();
 
     return 0;
 }
