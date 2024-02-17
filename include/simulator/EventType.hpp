@@ -1,10 +1,7 @@
 /**
  * @file EventType.hpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-09
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 #pragma once

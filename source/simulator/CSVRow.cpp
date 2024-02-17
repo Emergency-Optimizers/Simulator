@@ -1,10 +1,7 @@
 /**
  * @file CSVRow.cpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2023-11-08
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */

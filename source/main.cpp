@@ -1,5 +1,5 @@
 /**
- * @file main.cpp
+ * @file Main.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */

@@ -1,10 +1,7 @@
 /**
  * @file AmbulanceAllocator.cpp
- * @author Sindre Eiklid
- * @version 1.0
- * @date 2024-01-05
  *
- * @copyright Copyright (c) 2023 Sindre Eiklid
+ * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */
