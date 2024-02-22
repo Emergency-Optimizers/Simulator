@@ -25,8 +25,8 @@ class Simulator {
     Stations& stations;
     ODMatrix& odMatrix;
     AmbulanceAllocator& ambulanceAllocator;
-    DispatchEngineStrategyType dispatchStrategy;
     EventHandler eventHandler;
+    DispatchEngineStrategyType dispatchStrategy;
 
  public:
     Simulator(

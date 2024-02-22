@@ -18,8 +18,9 @@ class EventHandler {
     int currentIndex = 0;
 
  public:
-    std::vector<Event> events;
+    std::vector<Event>& events = std::vector<Event>(0);
 
+    EventHandler();
     ~EventHandler() = default;
     void populate(std::vector<Event> newEvents);
     int getNextEventIndex();
