@@ -6,9 +6,11 @@
 
 /* external libraries */
 #include <algorithm>
+#include <fstream>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
 #include "Constants.hpp"
+#include <iomanip>
 
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
@@ -337,7 +339,7 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
     return dayShift ? totalDay : totalMorning + totalNight;
 }
 
-std::vector<Event> MonteCarloSimulator::generateEvents() {
+std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
     std::vector<Event> events;
 
     int totalEvents = getTotalIncidentsToGenerate();
@@ -397,6 +399,11 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
     std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
         return a.timer < b.timer;
     });
+
+
+    if (saveEventsToCSV) {
+        Utils::saveEventsToFile(events);
+    }
 
     return events;
 }

@@ -27,10 +27,10 @@ class MonteCarloSimulator {
     const int day;
     const bool dayShift;
     std::vector<double> weights;
-    void generateHourlyIncidentProbabilityDistribution();
-    void generateMinuteIncidentProbabilityDistribution();
-    void generateTriageProbabilityDistribution();
-    void generateLocationProbabilityDistribution();
+    void generateHourlyIncidentProbabilityDistribution(); // distributions to txt
+    void generateMinuteIncidentProbabilityDistribution(); // distributions to txt
+    void generateTriageProbabilityDistribution(); // distributions to txt
+    void generateLocationProbabilityDistribution(); // distributions to txt
     void generateWaitTimeHistograms();
     void generateWaitTimeHistogram(
         const std::string fromEventColumn,
@@ -59,5 +59,5 @@ class MonteCarloSimulator {
         const unsigned windowSize
     );
     std::vector<double> generateWeights(int windowSize, double sigma = 1.0);
-    std::vector<Event> generateEvents();
+    std::vector<Event> generateEvents(bool saveEventsToCSV);
 };
