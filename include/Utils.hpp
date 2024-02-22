@@ -16,6 +16,7 @@
 #include <utility>
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
+#include "simulator/Event.hpp"
 
 using CellType = std::variant<
     int,
@@ -25,7 +26,6 @@ using CellType = std::variant<
     bool,
     std::optional<std::tm>
 >;
-
 
 class Utils {
  private:
@@ -67,4 +67,5 @@ class Utils {
         std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
         return vec[rndBetween(rng)];
     }
+    static void saveEventsToFile(const std::vector<Event>& events);
 };

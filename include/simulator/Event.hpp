@@ -7,13 +7,15 @@
 #pragma once
 
 /* external libraries */
-#include <string>
 #include <ctime>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 /* internal libraries */
-#include "Utils.hpp"
-#include "simulator/EventType.hpp"
 #include "simulator/EventPerformanceMetrics.hpp"
+#include "simulator/EventType.hpp"
 
 struct Event {
     EventType type = EventType::CALL_PROCESSED;
@@ -31,12 +33,18 @@ struct Event {
 
     void print() {
         std::cout << "triageImpression: " << triageImpression << std::endl;
-        std::cout << "callReceived: " << Utils::tmToString(callReceived) << std::endl;
+        std::cout << "callReceived: " << tmToString(callReceived) << std::endl;
         std::cout << "secondsWaitCallAnswered: " << secondsWaitCallAnswered << std::endl;
         std::cout << "secondsWaitAmbulanceNotified: " << secondsWaitAmbulanceNotified << std::endl;
         std::cout << "secondsWaitAmbulanceDispatch: " << secondsWaitAmbulanceDispatch << std::endl;
         std::cout << "secondsWaitDepartureScene: " << secondsWaitDepartureScene << std::endl;
         std::cout << "secondsWaitAvailable: " << secondsWaitAvailable << std::endl;
         std::cout << "gridId: " << gridId << std::endl;
+    }
+
+    std::string tmToString(const std::tm& time) {
+        std::stringstream ss;
+        ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
+        return ss.str();
     }
 };

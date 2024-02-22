@@ -13,6 +13,9 @@
 #include <algorithm>
 #include <numeric>
 #include <iterator>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 /* internal libraries */
 #include "Utils.hpp"
 #include "simulator/CSVReader.hpp"
@@ -249,4 +252,45 @@ int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
     std::uniform_int_distribution<> dist(min, max);
 
     return dist(rnd);
+}
+
+void Utils::saveEventsToFile(const std::vector<Event>& events) {
+    // get current time
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+    // format current time as a string (YYYY-MM-DD_HH-MM-SS)
+    std::tm bt = *std::localtime(&now_time);
+    std::ostringstream oss;
+    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
+    std::string timestamp = oss.str();
+
+    // construct filename with the current date and time
+    std::string filename = "../data/events/events_" + timestamp + ".csv";
+    std::ofstream outFile(filename);
+
+    // check if the file stream is open before proceeding
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // write CSV headers
+    outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_call_answered,wait_time_ambulance_notified,wait_time_dispatch,wait_time_departure_scene,wait_time_available\n";
+    
+    // write each event to the CSV
+    for (const auto& event : events) {
+        std::ostringstream callReceivedOss;
+        callReceivedOss << std::put_time(&event.callReceived, "%Y-%m-%d %H:%M:%S");
+        std::string callReceivedStr = callReceivedOss.str();
+
+        outFile << callReceivedStr << ","
+                << event.triageImpression << ","
+                << event.gridId << ","
+                << event.secondsWaitCallAnswered << ","
+                << event.secondsWaitAmbulanceNotified << ","
+                << event.secondsWaitAmbulanceDispatch << ","
+                << event.secondsWaitDepartureScene << ","
+                << event.secondsWaitAvailable << "\n";
+    }
 }
