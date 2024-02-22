@@ -17,10 +17,11 @@ Population::Population(
     int populationSize,
     int numDepots,
     int numAmbulances,
-    double mutationProbability
+    double mutationProbability,
+    bool saveEventsToCSV
 ) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
     MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
-    events = monteCarloSim.generateEvents();
+    events = monteCarloSim.generateEvents(saveEventsToCSV); // write to csv
 
     for (int i = 0; i < populationSize; i++) {
         Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);

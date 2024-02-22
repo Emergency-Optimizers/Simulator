@@ -40,7 +40,8 @@ class Population {
         int populationSize,
         int numDepots,
         int numAmbulances,
-        double mutationProbability
+        double mutationProbability,
+        bool saveEventsToCSV
     );
     void evaluateFitness();
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
