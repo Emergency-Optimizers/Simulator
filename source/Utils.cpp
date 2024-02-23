@@ -250,3 +250,8 @@ int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
 
     return dist(rnd);
 }
+
+double Utils::getRandomProbability(std::mt19937& rnd) {
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+    return dist(rnd);
+}

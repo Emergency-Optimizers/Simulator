@@ -188,8 +188,6 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
                 double canceledIncidentProbability = totalIncidentsCanceled / totalIncidents[indexTriage][indexShift];
                 newCanceledProbability[indexTriage][indexShift] = canceledIncidentProbability;
             }
-
-            std::cout << "(" << indexTriage << ", " << indexShift << "): " << newCanceledProbability[indexTriage][indexShift] << ", ";
         }
     }
 
@@ -416,6 +414,9 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         int indexTriage = Utils::weightedLottery(rnd, triageProbabilityDistribution[callReceivedHour]);
         event.triageImpression = triageImpressions[indexTriage];
 
+        // check if it should be canceled
+        bool canceled = canceledProbability[indexTriage][indexShift] > Utils::getRandomProbability(rnd);
+
         // location
         event.gridId = indexToGridIdMapping[Utils::weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];
 
@@ -429,12 +430,15 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.secondsWaitAmbulanceDispatch = generateRandomWaitTimeFromHistogram(
             waitTimesHistograms[std::pair("time_ambulance_notified", "time_dispatch")][event.triageImpression]
         );
-        event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_arrival_scene", "time_departure_scene")][event.triageImpression]
-        );
-        event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
-        );
+
+        if (!canceled) {
+            event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
+                waitTimesHistograms[std::pair("time_arrival_scene", "time_departure_scene")][event.triageImpression]
+            );
+            event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
+                waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
+            );
+        }
 
         // setup timer
         event.timer = std::mktime(&event.callReceived);
