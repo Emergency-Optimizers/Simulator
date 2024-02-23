@@ -161,7 +161,6 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
         std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
         int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
         double weight = weightsYear[dayDiff];
-        weight = 1;
 
         std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
 
@@ -176,7 +175,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START || timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START && timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
 
         if (canceled) totalIncidentsPer[indexTriage][indexShift] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
@@ -231,7 +230,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START || timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START && timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
 
         totalIncidentsPerLocation[indexTriage][indexShift][gridIdToIndexMapping[gridId]] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
