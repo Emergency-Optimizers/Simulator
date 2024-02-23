@@ -54,7 +54,7 @@ void Individual::evaluateFitness(std::vector<Event> events) const {
         stations,
         odMatrix,
         ambulanceAllocator,
-        DispatchEngineStrategyType::RANDOM,
+        DispatchEngineStrategyType::CLOSEST,
         events
     );
     simulator.run();

@@ -10,7 +10,7 @@
 #include <vector>
 #include <random>
 /* internal libraries */
-#include "simulator/DispatchEngineStrategyType.hpp"
+#include "simulator/strategies/DispatchEngineStrategyType.hpp"
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
 #include "simulator/Incidents.hpp"

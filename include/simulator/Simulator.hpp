@@ -15,7 +15,7 @@
 #include "simulator/Stations.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/EventHandler.hpp"
-#include "simulator/DispatchEngineStrategyType.hpp"
+#include "simulator/strategies/DispatchEngineStrategyType.hpp"
 #include "simulator/ODMatrix.hpp"
 
 class Simulator {

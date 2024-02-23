@@ -7,6 +7,7 @@
 /* internal libraries */
 #include "simulator/DispatchEngine.hpp"
 #include "simulator/strategies/RandomDispatchEngineStrategy.hpp"
+#include "simulator/strategies/ClosestDispatchEngineStrategy.hpp"
 
 void DispatchEngine::dispatch(
     const DispatchEngineStrategyType strategy,
@@ -19,6 +20,17 @@ void DispatchEngine::dispatch(
     const int eventIndex
 ) {
     switch (strategy) {
+        case DispatchEngineStrategyType::CLOSEST:
+            ClosestDispatchEngineStrategy::run(
+                rng,
+                incidents,
+                stations,
+                odMatrix,
+                ambulances,
+                events,
+                eventIndex
+            );
+            break;
         default:
             RandomDispatchEngineStrategy::run(
                 rng,
@@ -29,5 +41,6 @@ void DispatchEngine::dispatch(
                 events,
                 eventIndex
             );
+            break;
     }
 }
