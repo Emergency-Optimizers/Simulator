@@ -33,8 +33,10 @@ int main() {
     double mutationProbability = 0.05;
     int generations = 15;
 
-    std::cout << "Before evolve" << std::endl;
-    Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability);
+    bool saveEventsToCSV = true;
+
+    std::cout << "Starting GA..." << std::endl;
+    Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
     // Run the genetic algorithm for the specified number of generations
     population.evolve(generations);
     // Find and print the fittest individual after the final generation

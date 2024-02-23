@@ -42,7 +42,7 @@ bool Individual::isValid() const {
     return totalAmbulances == numAmbulances;
 }
 
-void Individual::evaluateFitness(std::vector<Event> events) const {
+void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
     fitness = 0.0;
 
     AmbulanceAllocator ambulanceAllocator(stations);
@@ -57,7 +57,7 @@ void Individual::evaluateFitness(std::vector<Event> events) const {
         DispatchEngineStrategyType::RANDOM,
         events
     );
-    simulator.run();
+    simulator.run(saveMetricsToFile);
 
     fitness = simulator.getResponseTime();
 }

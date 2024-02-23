@@ -42,7 +42,7 @@ struct Event {
         std::cout << "gridId: " << gridId << std::endl;
     }
 
-    std::string tmToString(const std::tm& time) {
+    std::string tmToString(const std::tm& time) const {
         std::stringstream ss;
         ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
         return ss.str();

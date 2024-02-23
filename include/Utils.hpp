@@ -68,4 +68,5 @@ class Utils {
         return vec[rndBetween(rng)];
     }
     static void saveEventsToFile(const std::vector<Event>& events);
+    static void saveMetricsToFile(const std::vector<Event>& events);
 };

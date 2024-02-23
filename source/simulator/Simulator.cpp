@@ -23,7 +23,7 @@ Simulator::Simulator(
     eventHandler.populate(events);
 }
 
-void Simulator::run() {
+void Simulator::run(bool saveMetricsToFile) {
     // std::cout << "\nSimulator started. Total events to simulate: " << eventHandler.events.size() << std::endl;
     auto start = std::chrono::steady_clock::now();
 
@@ -50,7 +50,12 @@ void Simulator::run() {
     auto stop = std::chrono::steady_clock::now();
     std::chrono::duration<double> duration = stop - start;
     // std::cout << "\nSimulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
+
+    if (saveMetricsToFile) {
+        Utils::saveMetricsToFile(eventHandler.events);
+    }
 }
+
 
 double Simulator::getResponseTime() {
     EventPerformanceMetrics totalMetrics;

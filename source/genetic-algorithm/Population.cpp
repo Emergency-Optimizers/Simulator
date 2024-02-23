@@ -133,6 +133,11 @@ void Population::evolve(int generations) {
         Individual fittest = findFittest();
         std::cout << "Generation " << gen  << ": " << fittest.getFitness() << std::endl;
       }
+      
+    // run one last time to print metrics
+    Individual finalIndividual = findFittest();
+    bool saveMetricsToFile = true;
+    finalIndividual.evaluateFitness(events, saveMetricsToFile);
 }
 
 const Individual Population::findFittest() {

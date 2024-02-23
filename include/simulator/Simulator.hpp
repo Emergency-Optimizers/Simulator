@@ -37,8 +37,9 @@ class Simulator {
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event> events
+
     );
-    void run();
+    void run(bool saveMetricsToFile = false);
     double getResponseTime();
     void printAverageEventPerformanceMetrics();
 };

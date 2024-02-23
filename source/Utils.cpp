@@ -275,7 +275,7 @@ void Utils::saveEventsToFile(const std::vector<Event>& events) {
         return;
     }
 
-    // write CSV headers
+    // write CSV header
     outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_call_answered,wait_time_ambulance_notified,wait_time_dispatch,wait_time_departure_scene,wait_time_available\n";
     
     // write each event to the CSV
@@ -292,5 +292,46 @@ void Utils::saveEventsToFile(const std::vector<Event>& events) {
                 << event.secondsWaitAmbulanceDispatch << ","
                 << event.secondsWaitDepartureScene << ","
                 << event.secondsWaitAvailable << "\n";
+    }
+}
+
+void Utils::saveMetricsToFile(const std::vector<Event>& events) {
+    // get current time
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+    // format current time as a string (YYYY-MM-DD_HH-MM-SS)
+    std::tm bt = *std::localtime(&now_time);
+    std::ostringstream oss;
+    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
+    std::string timestamp = oss.str();
+
+    // construct filename with the current date and time
+    std::string filename = "../data/metrics/metrics_" + timestamp + ".csv";
+    std::ofstream outFile(filename);
+
+    // check if the file stream is open before proceeding
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // write CSV header
+    outFile << "time_call_received,triage_impression_during_call,grid_id,call_processed_time,dispatch_to_scene_time,arrival_at_scene_time,dispatch_to_hospital_time,arrival_at_hospital_time,dispatch_to_depot_time,waiting_for_ambulance_time\n";
+
+    for (const auto& event : events) {
+        std::string callReceivedStr = event.tmToString(event.callReceived);
+
+        // write each metric to the CSV
+        outFile << callReceivedStr << ","
+                << event.triageImpression << ","
+                << event.gridId << ","
+                << event.metrics.callProcessedTime << ","
+                << event.metrics.dispatchToSceneTime << ","
+                << event.metrics.arrivalAtSceneTime << ","
+                << event.metrics.dispatchToHospitalTime << ","
+                << event.metrics.arrivalAtHospitalTime << ","
+                << event.metrics.dispatchToDepotTime << ","
+                << event.metrics.waitingForAmbulanceTime << "\n";
     }
 }

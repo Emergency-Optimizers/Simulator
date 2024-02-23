@@ -44,7 +44,7 @@ class Individual {
     );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateFitness(std::vector<Event> events) const;
+    void evaluateFitness(std::vector<Event> events, bool saveMetricsToFile = false) const;
     void mutate();
     void repair();
     void addAmbulances(int ambulancesToAdd = 1);
