@@ -37,6 +37,7 @@ MonteCarloSimulator::MonteCarloSimulator(
     generateHourlyIncidentProbabilityDistribution();
     generateMinuteIncidentProbabilityDistribution();
     generateTriageProbabilityDistribution();
+    generateCanceledProbabilityDistribution();
     generateLocationProbabilityDistribution();
     generateWaitTimeHistograms();
 }
@@ -146,6 +147,54 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     }
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
+}
+
+void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
+    std::vector<std::vector<double>> newCanceledProbability(3, std::vector<double>(2, 0));
+
+    std::vector<std::vector<double>> totalIncidentsPer(3, std::vector<double>(2, 0));
+    std::vector<std::vector<double>> totalIncidents(3, std::vector<double>(2, 0));
+
+    std::vector<double> weightsYear = generateWeights(365);
+
+    for (int i = 0; i < incidents.size(); i++) {
+        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        double weight = weightsYear[dayDiff];
+        weight = 1;
+
+        std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
+
+        bool canceled = !incidents.get<std::optional<std::tm>>("time_departure_scene", i).has_value();
+
+        int indexTriage;
+        if (triageImpression == "A") {
+            indexTriage = 0;
+        } else if (triageImpression == "H") {
+            indexTriage = 1;
+        } else if (triageImpression == "V1") {
+            indexTriage = 2;
+        }
+
+        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START || timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+
+        if (canceled) totalIncidentsPer[indexTriage][indexShift] += weight;
+        totalIncidents[indexTriage][indexShift] += weight;
+    }
+
+    for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
+        for (int indexShift = 0; indexShift < 2; indexShift++) {
+            double totalIncidentsCanceled = totalIncidentsPer[indexTriage][indexShift];
+            if (totalIncidentsCanceled != 0) {
+                double canceledIncidentProbability = totalIncidentsCanceled / totalIncidents[indexTriage][indexShift];
+                newCanceledProbability[indexTriage][indexShift] = canceledIncidentProbability;
+            }
+
+            std::cout << "(" << indexTriage << ", " << indexShift << "): " << newCanceledProbability[indexTriage][indexShift] << ", ";
+        }
+    }
+
+    canceledProbability = newCanceledProbability;
 }
 
 void MonteCarloSimulator::generateLocationProbabilityDistribution() {
