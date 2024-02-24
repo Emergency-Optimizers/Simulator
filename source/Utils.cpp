@@ -335,3 +335,52 @@ void Utils::saveMetricsToFile(const std::vector<Event>& events) {
                 << event.metrics.waitingForAmbulanceTime << "\n";
     }
 }
+
+void Utils::save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename) {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+    // format current time as a string (YYYY-MM-DD_HH-MM-SS)
+    std::tm bt = *std::localtime(&now_time);
+    std::ostringstream oss;
+    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
+
+    // construct filename with the current date and time
+    std::string filename = "../data/distributions/" + baseFilename + "_" + oss.str() + ".csv";
+
+    // write vector to file
+    std::ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+    for (const auto& value : distribution) {
+        outFile << value << ",";
+    }
+}
+
+void Utils::save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+    // format current time as string (YYYY-MM-DD_HH-MM-SS)
+    std::tm bt = *std::localtime(&now_time);
+    std::ostringstream oss;
+    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
+
+    // construct filename with the current date and time
+    std::string filename =  "../data/distributions/" + baseFilename + "_" + oss.str() + ".csv";
+    
+    // write vector to file
+    std::ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+    for (const auto& row : distribution) {
+        for (const auto& value : row) {
+            outFile << value << ",";
+        }
+        outFile << "\n";
+    }
+}
