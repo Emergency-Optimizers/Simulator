@@ -30,7 +30,6 @@ void Simulator::run(bool saveMetricsToFile) {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
-        Event& event = eventHandler.events[eventIndex];
         DispatchEngine::dispatch(
             dispatchStrategy,
             rng,
@@ -38,7 +37,7 @@ void Simulator::run(bool saveMetricsToFile) {
             stations,
             odMatrix,
             ambulanceAllocator.ambulances,
-            event,
+            eventHandler.events,
             eventIndex
         );
 

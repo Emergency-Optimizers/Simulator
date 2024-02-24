@@ -8,4 +8,5 @@
 
 enum class DispatchEngineStrategyType {
     RANDOM,
+    CLOSEST
 };

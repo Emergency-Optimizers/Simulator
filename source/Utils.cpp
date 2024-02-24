@@ -15,7 +15,6 @@
 #include <iterator>
 #include <chrono>
 #include <ctime>
-#include <iomanip>
 /* internal libraries */
 #include "Utils.hpp"
 #include "simulator/CSVReader.hpp"
@@ -277,7 +276,7 @@ void Utils::saveEventsToFile(const std::vector<Event>& events) {
 
     // write CSV header
     outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_call_answered,wait_time_ambulance_notified,wait_time_dispatch,wait_time_departure_scene,wait_time_available\n";
-    
+
     // write each event to the CSV
     for (const auto& event : events) {
         std::ostringstream callReceivedOss;
@@ -370,7 +369,7 @@ void Utils::save2dDistributionToFile(const std::vector<std::vector<double>>& dis
 
     // construct filename with the current date and time
     std::string filename =  "../data/distributions/" + baseFilename + "_" + oss.str() + ".csv";
-    
+
     // write vector to file
     std::ofstream outFile(filename);
     if (!outFile.is_open()) {
@@ -383,4 +382,9 @@ void Utils::save2dDistributionToFile(const std::vector<std::vector<double>>& dis
         }
         outFile << "\n";
     }
+}
+
+double Utils::getRandomProbability(std::mt19937& rnd) {
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+    return dist(rnd);
 }

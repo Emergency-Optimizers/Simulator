@@ -39,6 +39,7 @@ MonteCarloSimulator::MonteCarloSimulator(
     generateHourlyIncidentProbabilityDistribution();
     generateMinuteIncidentProbabilityDistribution();
     generateTriageProbabilityDistribution();
+    generateCanceledProbabilityDistribution();
     generateLocationProbabilityDistribution();
     generateWaitTimeHistograms();
 }
@@ -155,6 +156,51 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
 
 }
 
+void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
+    std::vector<std::vector<double>> newCanceledProbability(3, std::vector<double>(2, 0));
+
+    std::vector<std::vector<double>> totalIncidentsPer(3, std::vector<double>(2, 0));
+    std::vector<std::vector<double>> totalIncidents(3, std::vector<double>(2, 0));
+
+    std::vector<double> weightsYear = generateWeights(365);
+
+    for (int i = 0; i < incidents.size(); i++) {
+        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        double weight = weightsYear[dayDiff];
+
+        std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
+
+        bool canceled = !incidents.get<std::optional<std::tm>>("time_departure_scene", i).has_value();
+
+        int indexTriage;
+        if (triageImpression == "A") {
+            indexTriage = 0;
+        } else if (triageImpression == "H") {
+            indexTriage = 1;
+        } else if (triageImpression == "V1") {
+            indexTriage = 2;
+        }
+
+        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START && timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+
+        if (canceled) totalIncidentsPer[indexTriage][indexShift] += weight;
+        totalIncidents[indexTriage][indexShift] += weight;
+    }
+
+    for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
+        for (int indexShift = 0; indexShift < 2; indexShift++) {
+            double totalIncidentsCanceled = totalIncidentsPer[indexTriage][indexShift];
+            if (totalIncidentsCanceled != 0) {
+                double canceledIncidentProbability = totalIncidentsCanceled / totalIncidents[indexTriage][indexShift];
+                newCanceledProbability[indexTriage][indexShift] = canceledIncidentProbability;
+            }
+        }
+    }
+
+    canceledProbability = newCanceledProbability;
+}
+
 void MonteCarloSimulator::generateLocationProbabilityDistribution() {
     int gridIdSize = indexToGridIdMapping.size();
 
@@ -189,7 +235,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START || timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START && timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
 
         totalIncidentsPerLocation[indexTriage][indexShift][gridIdToIndexMapping[gridId]] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
@@ -376,6 +422,9 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         int indexTriage = Utils::weightedLottery(rnd, triageProbabilityDistribution[callReceivedHour]);
         event.triageImpression = triageImpressions[indexTriage];
 
+        // check if it should be canceled
+        bool canceled = canceledProbability[indexTriage][indexShift] > Utils::getRandomProbability(rnd);
+
         // location
         event.gridId = indexToGridIdMapping[Utils::weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];
 
@@ -389,12 +438,15 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         event.secondsWaitAmbulanceDispatch = generateRandomWaitTimeFromHistogram(
             waitTimesHistograms[std::pair("time_ambulance_notified", "time_dispatch")][event.triageImpression]
         );
-        event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_arrival_scene", "time_departure_scene")][event.triageImpression]
-        );
-        event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
-        );
+
+        if (!canceled) {
+            event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
+                waitTimesHistograms[std::pair("time_arrival_scene", "time_departure_scene")][event.triageImpression]
+            );
+            event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
+                waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
+            );
+        }
 
         // setup timer
         event.timer = std::mktime(&event.callReceived);

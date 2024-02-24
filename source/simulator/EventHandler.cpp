@@ -10,6 +10,8 @@
 #include "simulator/EventHandler.hpp"
 #include "Utils.hpp"
 
+EventHandler::EventHandler() { }
+
 void EventHandler::populate(std::vector<Event> newEvents) {
     events = newEvents;
 }

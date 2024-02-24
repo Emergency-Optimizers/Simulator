@@ -52,6 +52,7 @@ class Utils {
         const std::vector<std::pair<int, int>>& ranges = {}
     );
     static int getRandomInt(std::mt19937& rnd, const int min, const int max);
+    static double getRandomProbability(std::mt19937& rnd);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);

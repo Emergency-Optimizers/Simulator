@@ -27,10 +27,11 @@ class MonteCarloSimulator {
     const int day;
     const bool dayShift;
     std::vector<double> weights;
-    void generateHourlyIncidentProbabilityDistribution(); // distributions to txt
-    void generateMinuteIncidentProbabilityDistribution(); // distributions to txt
-    void generateTriageProbabilityDistribution(); // distributions to txt
-    void generateLocationProbabilityDistribution(); // distributions to txt
+    void generateHourlyIncidentProbabilityDistribution();
+    void generateMinuteIncidentProbabilityDistribution();
+    void generateTriageProbabilityDistribution();
+    void generateCanceledProbabilityDistribution();
+    void generateLocationProbabilityDistribution();
     void generateWaitTimeHistograms();
     void generateWaitTimeHistogram(
         const std::string fromEventColumn,
@@ -46,6 +47,7 @@ class MonteCarloSimulator {
     std::vector<std::vector<double>> minuteIncidentProbabilityDistribution;
     std::map<std::pair<std::string, std::string>, std::map<std::string, std::map<std::pair<float, float>, double>>> waitTimesHistograms;
     std::vector<std::vector<double>> triageProbabilityDistribution;
+    std::vector<std::vector<double>> canceledProbability;
     std::map<int, int64_t> indexToGridIdMapping;
     std::map<int64_t, int> gridIdToIndexMapping;
     std::vector<std::vector<std::vector<double>>> locationProbabilityDistribution;

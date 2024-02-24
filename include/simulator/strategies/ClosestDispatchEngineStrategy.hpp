@@ -1,5 +1,5 @@
 /**
- * @file DispatchEngineStrategy.hpp
+ * @file ClosestDispatchEngineStrategy.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -10,21 +10,18 @@
 #include <vector>
 #include <random>
 /* internal libraries */
-#include "simulator/Ambulance.hpp"
-#include "simulator/Event.hpp"
-#include "simulator/Incidents.hpp"
-#include "simulator/Stations.hpp"
-#include "simulator/ODMatrix.hpp"
+#include "simulator/strategies/DispatchEngineStrategy.hpp"
 
-class DispatchEngineStrategy {
+class ClosestDispatchEngineStrategy : public DispatchEngineStrategy {
  protected:
-    static int assignAmbulance(
+    static bool assignAmbulance(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
     static void callProcessed(
         std::mt19937& rng,
@@ -32,7 +29,8 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
     static void dispatchToScene(
         std::mt19937& rng,
@@ -40,7 +38,8 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
     static void arrivedAtScene(
         std::mt19937& rng,
@@ -48,7 +47,8 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
     static void dispatchToHospital(
         std::mt19937& rng,
@@ -56,7 +56,8 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
     static void arrivedAtHospital(
         std::mt19937& rng,
@@ -64,7 +65,8 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
     static void dispatchToDepot(
         std::mt19937& rng,
@@ -72,7 +74,8 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
 
  public:
@@ -82,6 +85,7 @@ class DispatchEngineStrategy {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
-        Event& event
+        std::vector<Event>& events,
+        const int eventIndex
     );
 };
