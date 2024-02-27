@@ -233,3 +233,81 @@ void ClosestDispatchEngineStrategy::dispatchToDepot(
 
     events[eventIndex].type = EventType::NONE;
 }
+
+bool DispatchEngineStrategy::assigningAmbulance(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+    return false;
+}
+
+void DispatchEngineStrategy::dispatchingToScene(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+void DispatchEngineStrategy::dispatchingToHospital(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+void DispatchEngineStrategy::dispatchingToDepot(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+void DispatchEngineStrategy::finishingEvent(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+/*
+
+call received           (incident starts)
+call answered           (wait time from histogram)
+assign ambulance        (wait time until ambulance is available)
+dispatch to scene       (OD matrix)
+time spent on scene     (wait time from histogram)
+dispatch to hospital    (OD matrix)
+time spent at hospital  (wait time histogram)
+dispatch to depot       (OD matrix)
+
+
+
+
+
+*/

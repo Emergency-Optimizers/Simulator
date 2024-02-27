@@ -29,7 +29,7 @@ bool DispatchEngineStrategy::assignAmbulance(
     const int eventIndex
 ) {
     /// TODO: code here
-    return true;
+    return false;
 }
 
 void DispatchEngineStrategy::callProcessed(
@@ -93,6 +93,67 @@ void DispatchEngineStrategy::arrivedAtHospital(
 }
 
 void DispatchEngineStrategy::dispatchToDepot(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+bool DispatchEngineStrategy::assigningAmbulance(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+    return false;
+}
+
+void DispatchEngineStrategy::dispatchingToScene(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+void DispatchEngineStrategy::dispatchingToHospital(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+void DispatchEngineStrategy::dispatchingToDepot(
+    std::mt19937& rng,
+    Incidents& incidents,
+    Stations& stations,
+    ODMatrix& odMatrix,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
+}
+
+void DispatchEngineStrategy::finishingEvent(
     std::mt19937& rng,
     Incidents& incidents,
     Stations& stations,
