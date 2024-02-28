@@ -5,7 +5,7 @@
  */
 
 /* internal libraries */
-#include "genetic-algorithm/Individual.hpp"
+#include "metaheuristics/genetic-algorithm/Individual.hpp"
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"

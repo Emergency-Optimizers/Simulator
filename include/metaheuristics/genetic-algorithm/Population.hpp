@@ -12,7 +12,7 @@
 #include <numeric>
 #include <random>
 /* internal libraries */
-#include "genetic-algorithm/Individual.hpp"
+#include "metaheuristics/genetic-algorithm/Individual.hpp"
 #include "simulator/Incidents.hpp"
 #include "simulator/Stations.hpp"
 #include "simulator/ODMatrix.hpp"

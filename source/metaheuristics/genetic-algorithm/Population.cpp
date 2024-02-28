@@ -5,7 +5,7 @@
  */
 
 /* internal libraries */
-#include "genetic-algorithm/Population.hpp"
+#include "metaheuristics/genetic-algorithm/Population.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
