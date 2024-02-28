@@ -32,7 +32,7 @@ int main() {
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 100;
+    int generations = 10;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
@@ -42,16 +42,16 @@ int main() {
     auto start = std::chrono::high_resolution_clock::now();
     population.evolve(generations);
     auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     // find and print the fittest individual after the final generation
+    std::cout << "\n[--- GA completed in " << duration / 1000 << " seconds ---]" << std::endl;
+    std::cout << "Generations: " << generations << ", population size: " << populationSize << std::endl;
     Individual fittest = population.findFittest();
-    std::cout << "Fittest Individual After Evolution: " << std::endl;
-    std::cout << "Valid: " << fittest.isValid() << std::endl;
+    std::cout << "Fittest Individual: " << fittest.getFitness();
+    std::cout << (fittest.isValid() ? " [valid]\n" : " [invalid]\n")  << std::endl;
 
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "GA completed in " << duration << " milliseconds." << std::endl;
     fittest.printChromosome();
-
 
     return 0;
 }
