@@ -152,7 +152,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     }
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
-    Utils::save2dDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
+    Utils::saveDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
 
 }
 

@@ -27,19 +27,20 @@ int main() {
     ODMatrix odMatrix;
     odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
-    int populationSize = 50;
+    int populationSize = 10;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 15;
-
+    int generations = 5;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
     Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
-    // Run the genetic algorithm for the specified number of generations
+    
+    // run the genetic algorithm for the specified number of generations
     population.evolve(generations);
-    // Find and print the fittest individual after the final generation
+
+    // find and print the fittest individual after the final generation
     Individual fittest = population.findFittest();
     std::cout << "Fittest Individual After Evolution: " << std::endl;
     std::cout << "Valid: " << fittest.isValid() << std::endl;

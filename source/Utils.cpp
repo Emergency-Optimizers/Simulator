@@ -335,6 +335,38 @@ void Utils::saveMetricsToFile(const std::vector<Event>& events) {
     }
 }
 
+
+void Utils::saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+    // Format current time as string (YYYY-MM-DD_HH-MM-SS)
+    std::tm bt = *std::localtime(&now_time);
+    std::ostringstream oss;
+    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
+
+    // Construct filename with the current date and time
+    std::string filename =  "../data/distributions/" + baseFilename + "_" + oss.str() + ".csv";
+
+    std::ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // Write header
+    outFile << "A,H,V1\n";
+
+    // Write vector to file without trailing commas
+    for (const auto& row : distribution) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            outFile << row[i];
+            if (i < row.size() - 1) outFile << ",";
+        }
+        outFile << "\n";
+    }
+}
+
 void Utils::save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename) {
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
