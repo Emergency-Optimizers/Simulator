@@ -70,6 +70,7 @@ class Utils {
     }
     static void saveEventsToFile(const std::vector<Event>& events);
     static void saveMetricsToFile(const std::vector<Event>& events);
+    static void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
     static void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
     static void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 };

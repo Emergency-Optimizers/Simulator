@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <chrono>
 /* internal libraries */
 #include "simulator/Incidents.hpp"
 #include "simulator/Stations.hpp"
@@ -31,19 +32,26 @@ int main() {
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 15;
-
+    int generations = 100;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
     Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
-    // Run the genetic algorithm for the specified number of generations
+
+    // run the genetic algorithm for the specified number of generations
+    auto start = std::chrono::high_resolution_clock::now();
     population.evolve(generations);
-    // Find and print the fittest individual after the final generation
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // find and print the fittest individual after the final generation
     Individual fittest = population.findFittest();
     std::cout << "Fittest Individual After Evolution: " << std::endl;
     std::cout << "Valid: " << fittest.isValid() << std::endl;
+
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    std::cout << "GA completed in " << duration << " milliseconds." << std::endl;
     fittest.printChromosome();
+
 
     return 0;
 }

@@ -128,16 +128,35 @@ void Population::evolve(int generations) {
         // step 3: survivor Selection
         // combining existing population with children
         addChildren(children);
-        survivorSelection(populationSize);
+        individuals = survivorSelection(populationSize);
 
         Individual fittest = findFittest();
-        std::cout << "Generation " << gen  << ": " << fittest.getFitness() << std::endl;
+        std::cout << "Generation " << gen  << ": " << fittest.getFitness() << ", [" << countUnique(individuals) << "] unique individuals" << std::endl;
+        
       }
       
     // run one last time to print metrics
     Individual finalIndividual = findFittest();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateFitness(events, saveMetricsToFile);
+}
+
+int Population::countUnique(const std::vector<Individual>& population) {
+    std::vector<std::vector<int>> genotypes;
+    genotypes.reserve(population.size());
+
+    for (const auto& individual : population) {
+        genotypes.push_back(individual.getGenotype());
+    }
+
+    // sort genotypes to bring identical ones together
+    std::sort(genotypes.begin(), genotypes.end());
+
+    // remove consecutive duplicates
+    auto lastUnique = std::unique(genotypes.begin(), genotypes.end());
+
+    // calculate the distance between the beginning and the point of last unique element
+    return std::distance(genotypes.begin(), lastUnique);
 }
 
 const Individual Population::findFittest() {
