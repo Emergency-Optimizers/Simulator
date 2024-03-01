@@ -18,33 +18,26 @@ void ClosestDispatchEngineStrategy::run(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    if (events[eventIndex].assignedAmbulanceIndex == -1) {
-        if (!assignAmbulance(rng, incidents, stations, odMatrix, ambulances, events, eventIndex)) return;
-    }
-
     switch (events[eventIndex].type) {
-        case EventType::CALL_PROCESSED:
-            callProcessed(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::ASSIGNING_AMBULANCE:
+            assigningAmbulance(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
             break;
-        case EventType::DISPATCH_TO_SCENE:
-            dispatchToScene(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::DISPATCHING_TO_SCENE:
+            dispatchingToScene(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
             break;
-        case EventType::ARRIVED_AT_SCENE:
-            arrivedAtScene(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::DISPATCHING_TO_HOSPITAL:
+            dispatchingToHospital(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
             break;
-        case EventType::DISPATCH_TO_HOSPITAL:
-            dispatchToHospital(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::DISPATCHING_TO_DEPOT:
+            dispatchingToDepot(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
             break;
-        case EventType::ARRIVED_AT_HOSPITAL:
-            arrivedAtHospital(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
-            break;
-        case EventType::DISPATCH_TO_DEPOT:
-            dispatchToDepot(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::FINISHED:
+            finishingEvent(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
             break;
     }
 }
 
-bool ClosestDispatchEngineStrategy::assignAmbulance(
+void ClosestDispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,
     Incidents& incidents,
     Stations& stations,
@@ -60,7 +53,7 @@ bool ClosestDispatchEngineStrategy::assignAmbulance(
         events[eventIndex].timer += 60;
         events[eventIndex].metrics.waitingForAmbulanceTime += 60;
 
-        return false;
+        return;
     }
 
     // find closest ambulance
@@ -77,11 +70,10 @@ bool ClosestDispatchEngineStrategy::assignAmbulance(
 
     events[eventIndex].assignedAmbulanceIndex = availableAmbulanceIndicies[closestAmbulanceIndex];
     ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventIndex = eventIndex;
-
-    return true;
+    events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
 }
 
-void ClosestDispatchEngineStrategy::callProcessed(
+void ClosestDispatchEngineStrategy::dispatchingToHospital(
     std::mt19937& rng,
     Incidents& incidents,
     Stations& stations,
@@ -90,94 +82,28 @@ void ClosestDispatchEngineStrategy::callProcessed(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    int incrementSeconds = events[eventIndex].secondsWaitCallAnswered;
-    events[eventIndex].timer += incrementSeconds;
-    events[eventIndex].metrics.callProcessedTime += incrementSeconds;
-
-    events[eventIndex].type = EventType::DISPATCH_TO_SCENE;
-}
-
-void ClosestDispatchEngineStrategy::dispatchToScene(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    int incrementSeconds = odMatrix.getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
-    );
-    events[eventIndex].timer += incrementSeconds;
-    events[eventIndex].metrics.dispatchToSceneTime += incrementSeconds;
-
-    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
-
-    events[eventIndex].type = EventType::ARRIVED_AT_SCENE;
-}
-
-void ClosestDispatchEngineStrategy::arrivedAtScene(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    if (events[eventIndex].secondsWaitDepartureScene != -1) {
-        int incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
-        events[eventIndex].timer += incrementSeconds;
-        events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
-
-        // find closest hospital
-        int closestHospitalIndex = -1;
-        int closestHospitalTravelTime = std::numeric_limits<int>::max();
-        int64_t eventGridId = events[eventIndex].gridId;
-        std::vector<unsigned int> hospitals = stations.getHospitalIndices();
-        for (int i = 0; i < hospitals.size(); i++) {
-            int64_t hospitalGridId = stations.get<int64_t>(
-                "grid_id",
-                hospitals[i]
-            );
-            int travelTime = odMatrix.getTravelTime(hospitalGridId, eventGridId);
-            if (travelTime < closestHospitalTravelTime) {
-                closestHospitalIndex = i;
-                closestHospitalTravelTime = travelTime;
-            }
+    // find closest hospital
+    int closestHospitalIndex = -1;
+    int closestHospitalTravelTime = std::numeric_limits<int>::max();
+    int64_t eventGridId = events[eventIndex].gridId;
+    std::vector<unsigned int> hospitals = stations.getHospitalIndices();
+    for (int i = 0; i < hospitals.size(); i++) {
+        int64_t hospitalGridId = stations.get<int64_t>(
+            "grid_id",
+            hospitals[i]
+        );
+        int travelTime = odMatrix.getTravelTime(hospitalGridId, eventGridId);
+        if (travelTime < closestHospitalTravelTime) {
+            closestHospitalIndex = i;
+            closestHospitalTravelTime = travelTime;
         }
-
-        events[eventIndex].gridId = stations.get<int64_t>(
-            "grid_id",
-            hospitals[closestHospitalIndex]
-        );
-
-        events[eventIndex].type = EventType::DISPATCH_TO_HOSPITAL;
-    } else {
-        int incrementSeconds = events[eventIndex].secondsWaitAvailable;
-        events[eventIndex].timer += incrementSeconds;
-        events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
-
-        events[eventIndex].gridId = stations.get<int64_t>(
-            "grid_id",
-            ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
-        );
-
-        events[eventIndex].type = EventType::DISPATCH_TO_DEPOT;
     }
-}
 
-void ClosestDispatchEngineStrategy::dispatchToHospital(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
+    events[eventIndex].gridId = stations.get<int64_t>(
+        "grid_id",
+        hospitals[closestHospitalIndex]
+    );
+
     int incrementSeconds = odMatrix.getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
         events[eventIndex].gridId
@@ -187,112 +113,10 @@ void ClosestDispatchEngineStrategy::dispatchToHospital(
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
-    events[eventIndex].type = EventType::ARRIVED_AT_HOSPITAL;
-}
+    events[eventIndex].timer += events[eventIndex].secondsWaitAvailable;
+    events[eventIndex].metrics.arrivalAtHospitalTime += events[eventIndex].secondsWaitAvailable;
 
-void ClosestDispatchEngineStrategy::arrivedAtHospital(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    int incrementSeconds = events[eventIndex].secondsWaitAvailable;
-    events[eventIndex].timer += incrementSeconds;
-    events[eventIndex].metrics.arrivalAtHospitalTime += incrementSeconds;
-
-    events[eventIndex].gridId = stations.get<int64_t>(
-        "grid_id",
-        ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
-    );
-
-    events[eventIndex].type = EventType::DISPATCH_TO_DEPOT;
-}
-
-void ClosestDispatchEngineStrategy::dispatchToDepot(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    int incrementSeconds = odMatrix.getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
-    );
-    events[eventIndex].timer += incrementSeconds;
-    events[eventIndex].metrics.dispatchToDepotTime += incrementSeconds;
-
-    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventIndex = -1;
-    events[eventIndex].assignedAmbulanceIndex = -1;
-
-    events[eventIndex].type = EventType::NONE;
-}
-
-bool DispatchEngineStrategy::assigningAmbulance(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-    return false;
-}
-
-void DispatchEngineStrategy::dispatchingToScene(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::dispatchingToHospital(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::dispatchingToDepot(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::finishingEvent(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
+    events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
 }
 
 /*

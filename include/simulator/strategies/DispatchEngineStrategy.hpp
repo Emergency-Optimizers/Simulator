@@ -82,7 +82,7 @@ class DispatchEngineStrategy {
         const int eventIndex
     );
 
-    static bool assigningAmbulance(
+    static void assigningAmbulance(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,

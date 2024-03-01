@@ -104,7 +104,7 @@ void DispatchEngineStrategy::dispatchToDepot(
     /// TODO: code here
 }
 
-bool DispatchEngineStrategy::assigningAmbulance(
+void DispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,
     Incidents& incidents,
     Stations& stations,
@@ -114,7 +114,6 @@ bool DispatchEngineStrategy::assigningAmbulance(
     const int eventIndex
 ) {
     /// TODO: code here
-    return false;
 }
 
 void DispatchEngineStrategy::dispatchingToScene(
@@ -126,7 +125,28 @@ void DispatchEngineStrategy::dispatchingToScene(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    /// TODO: code here
+    int incrementSeconds = odMatrix.getTravelTime(
+        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].gridId
+    );
+    events[eventIndex].timer += incrementSeconds;
+    events[eventIndex].metrics.dispatchToSceneTime += incrementSeconds;
+
+    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
+
+    if (events[eventIndex].secondsWaitDepartureScene != -1) {
+        incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
+        events[eventIndex].timer += incrementSeconds;
+        events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+
+        events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
+    } else {
+        incrementSeconds = events[eventIndex].secondsWaitAvailable;
+        events[eventIndex].timer += incrementSeconds;
+        events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+
+        events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
+    }
 }
 
 void DispatchEngineStrategy::dispatchingToHospital(
@@ -150,7 +170,18 @@ void DispatchEngineStrategy::dispatchingToDepot(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    /// TODO: code here
+    events[eventIndex].gridId = stations.get<int64_t>(
+        "grid_id",
+        ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
+    );
+
+    int incrementSeconds = odMatrix.getTravelTime(
+        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].gridId
+    );
+    events[eventIndex].timer += incrementSeconds;
+
+    events[eventIndex].type = EventType::FINISHED;
 }
 
 void DispatchEngineStrategy::finishingEvent(
@@ -162,5 +193,15 @@ void DispatchEngineStrategy::finishingEvent(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    /// TODO: code here
+    int incrementSeconds = odMatrix.getTravelTime(
+        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].gridId
+    );
+    events[eventIndex].metrics.dispatchToDepotTime += incrementSeconds;
+
+    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventIndex = -1;
+    events[eventIndex].assignedAmbulanceIndex = -1;
+
+    events[eventIndex].type = EventType::NONE;
 }
