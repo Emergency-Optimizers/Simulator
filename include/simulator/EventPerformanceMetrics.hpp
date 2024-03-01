@@ -7,6 +7,7 @@
 #pragma once
 
 struct EventPerformanceMetrics {
+    int64_t incidentGridId;
     int callProcessedTime = 0;
     int dispatchToSceneTime = 0;
     int arrivalAtSceneTime = 0;

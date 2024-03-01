@@ -20,6 +20,21 @@ Stations::Stations() {
     };
 }
 
+Stations::Stations(const std::string& filename) {
+    schemaMapping = {
+        {"type", Utils::toString},
+        {"grid_id", Utils::toInt64},
+        {"x", Utils::toInt},
+        {"y", Utils::toInt},
+        {"longitude", Utils::toFloat},
+        {"latitude", Utils::toFloat},
+        {"region", Utils::toString},
+        {"urban_settlement", Utils::toBool},
+    };
+
+    loadFromFile(filename);
+}
+
 std::vector<unsigned> Stations::getDepotIndices() {
     std::vector<unsigned> depotIndices;
 

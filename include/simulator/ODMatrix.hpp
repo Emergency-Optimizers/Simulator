@@ -17,7 +17,7 @@ class ODMatrix {
     std::unordered_map<int64_t, int> idToIndexMap;
 
  public:
-    ODMatrix();
+    ODMatrix(const std::string& filename);
     void loadFromFile(const std::string& filename);
     int getTravelTime(const int64_t& id1, const int64_t& id2);
 };
