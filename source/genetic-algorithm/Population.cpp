@@ -109,9 +109,9 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
 
 void Population::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {
-        // step 1: parent Selection
+        // step 1: parent selection
         int numParents = 2;
-        int tournamentSize = 5;
+        int tournamentSize = 3;
         std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
 
         // step 2: crossover to create offspring
@@ -125,7 +125,7 @@ void Population::evolve(int generations) {
             children.push_back(offspring);
         }
 
-        // step 3: survivor Selection
+        // step 3: survivor selection
         // combining existing population with children
         addChildren(children);
         individuals = survivorSelection(populationSize);
