@@ -82,6 +82,7 @@ void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveM
     // mock objectives for purpose of testing:
     objectives[0] = simulator.getResponseTime();
     objectives[1] = calculateUniformityObjective();
+    objectives[2] = calculateMinimizeMaxDepotObjective();
 }
 
 double Individual::calculateUniformityObjective() {
@@ -100,11 +101,16 @@ double Individual::calculateMinimizeMaxDepotObjective() {
 }
 
 bool Individual::dominates(const Individual& other) const {
-    // Implementation of dominance logic, considering all objectives.
-}
-
-void Individual::calculateCrowdingDistance(const std::vector<Individual>& population) {
-    // Implementation to calculate crowding distance.
+    // an individual dominates another if it is better in at least one objective, and no worse in all other objectives
+    bool better = false;
+    for (int i = 0; i < objectives.size(); ++i) {
+        if (objectives[i] < other.objectives[i]) {
+            better = true;
+        } else if (objectives[i] > other.objectives[i]) {
+            return false;
+        }
+    }
+    return better;
 }
 
 void Individual::mutate() {
