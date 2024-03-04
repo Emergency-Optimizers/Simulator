@@ -5,7 +5,7 @@
  */
 
 /* internal libraries */
-#include "metaheuristics/genetic-algorithm/Population.hpp"
+#include "metaheuristics/nsga2/Population.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
@@ -19,9 +19,17 @@ Population::Population(
     int numAmbulances,
     double mutationProbability,
     bool saveEventsToCSV
-) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
+) : rnd(rnd),
+    incidents(incidents),
+    stations(stations),
+    odMatrix(odMatrix),
+    populationSize(populationSize),
+    numDepots(numDepots),
+    numAmbulances(numAmbulances),
+    mutationProbability(mutationProbability) {
+
     MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
-    events = monteCarloSim.generateEvents(saveEventsToCSV); // write to csv
+    events = monteCarloSim.generateEvents(saveEventsToCSV);
 
     for (int i = 0; i < populationSize; i++) {
         Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);
@@ -33,7 +41,7 @@ Population::Population(
 
 void Population::evaluateFitness() {
     for (Individual& individual : individuals) {
-        individual.evaluateFitness(events);
+        individual.evaluateObjectives(events);
     }
 }
 
@@ -105,6 +113,33 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
     offspring.evaluateFitness(events);
 
     return offspring;
+}
+
+void Population::calculateCrowdingDistance(std::vector<Individual>& front) {
+    size_t numObjectives = front[0].objectives.size();
+    // Initialize crowding distance for all individuals in the front
+    for (Individual& individual : front) {
+        individual.crowdingDistance = 0.0;
+    }
+
+    for (size_t i = 0; i < numObjectives; ++i) {
+        // Sort individuals in the front based on the objective i
+        std::sort(front.begin(), front.end(), [i](const Individual& a, const Individual& b) {
+            return a.objectives[i] < b.objectives[i];
+        });
+
+        // Assign infinity distance to boundary individuals
+        front.front().crowdingDistance = std::numeric_limits<double>::infinity();
+        front.back().crowdingDistance = std::numeric_limits<double>::infinity();
+
+        // Calculate normalized distance for intermediate individuals
+        double objectiveRange = front.back().objectives[i] - front.front().objectives[i];
+        if (objectiveRange > 0) { // Avoid division by zero
+            for (size_t j = 1; j < front.size() - 1; ++j) {
+                front[j].crowdingDistance += (front[j + 1].objectives[i] - front[j - 1].objectives[i]) / objectiveRange;
+            }
+        }
+    }
 }
 
 void Population::evolve(int generations) {

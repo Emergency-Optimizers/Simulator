@@ -51,7 +51,6 @@ class Individual {
     double calculateMinimizeMaxDepotObjective();
     double calculateUniformityObjective();
     bool dominates(const Individual& other) const;
-    void calculateCrowdingDistance(const std::vector<Individual>& population);
     void mutate();
     void repair();
     void addAmbulances(int ambulancesToAdd = 1);
