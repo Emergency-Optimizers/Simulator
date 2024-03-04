@@ -16,15 +16,26 @@ Individual::Individual(
     Stations& stations,
     ODMatrix& odMatrix,
     std::vector<Event> events,
+    int numObjectives,
     int numDepots,
     int numAmbulances,
     double mutationProbability,
     bool child
-) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
-    if (!child) {
-        randomizeAmbulances();
+) : rnd(rnd),
+    incidents(incidents),  
+    stations(stations),
+    odMatrix(odMatrix),
+    genotype(numDepots, 0),
+    numObjectives(numObjectives),
+    numDepots(numDepots),
+    numAmbulances(numAmbulances),
+    objectives(numObjectives, 0),
+    mutationProbability(mutationProbability),
+    child(child) {
+        if (!child) {
+            randomizeAmbulances();
+        }
     }
-}
 
 void Individual::randomizeAmbulances() {
     // reset all depots to 0 ambulances
@@ -42,8 +53,8 @@ bool Individual::isValid() const {
     return totalAmbulances == numAmbulances;
 }
 
-void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
-    fitness = 0.0;
+void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false) {
+    std::vector<double> newObjectives(numObjectives, 0);
 
     AmbulanceAllocator ambulanceAllocator(stations);
     ambulanceAllocator.allocate(genotype);
@@ -59,7 +70,41 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
     );
     simulator.run(saveMetricsToFile);
 
-    fitness = simulator.getResponseTime();
+    // TODO:
+    // objectives[0] = simulator.getAverageResponseTime("A", "Urban");
+    // objectives[1] = simulator.getAverageResponseTime("H", "Urban");
+    // objectives[2] = simulator.getAverageResponseTime("A", "NonUrban");
+    // objectives[3] = simulator.getAverageResponseTime("H", "NonUrban");
+    // objectives[4] = simulator.getCountOverThreshold("Urban", 12)
+    // objectives[5] =  simulator.getCountOverThreshold("NonUrban", 25);
+    // objectives[6] = simulator.calculateUHU();
+
+    // mock objectives for purpose of testing:
+    objectives[0] = simulator.getResponseTime();
+    objectives[1] = calculateUniformityObjective();
+}
+
+double Individual::calculateUniformityObjective() {
+    // mock objective, can be removed
+    double mean = std::accumulate(genotype.begin(), genotype.end(), 0.0) / genotype.size();
+    double variance = std::accumulate(genotype.begin(), genotype.end(), 0.0, [mean](double acc, int val) {
+        return acc + (val - mean) * (val - mean);
+    }) / genotype.size();
+
+    return variance;
+}
+
+double Individual::calculateMinimizeMaxDepotObjective() {
+    // mock objective, can be removed
+    return *std::max_element(genotype.begin(), genotype.end());
+}
+
+bool Individual::dominates(const Individual& other) const {
+    // Implementation of dominance logic, considering all objectives.
+}
+
+void Individual::calculateCrowdingDistance(const std::vector<Individual>& population) {
+    // Implementation to calculate crowding distance.
 }
 
 void Individual::mutate() {
@@ -146,14 +191,6 @@ void Individual::setGenotype(const std::vector<int>& newGenotype) {
     genotype = newGenotype;
 }
 
-double Individual::getFitness() const {
-    return fitness;
-}
-
-void Individual::setFitness(double newFitness) {
-    fitness = newFitness;
-}
-
 void Individual::setAmbulancesAtDepot(int depotIndex, int count) {
     if (depotIndex >= 0 && depotIndex < genotype.size()) {
         genotype[depotIndex] = count;
@@ -178,4 +215,16 @@ int Individual::getNumDepots() const {
 
 void Individual::setNumDepots(int newNumDepots) {
     numDepots = newNumDepots;
+}
+
+double Individual::getCrowdingDistance() const {
+    return crowdingDistance;
+}
+
+const std::vector<double>& Individual::getObjectives() const {
+    return objectives;
+}
+
+void Individual::setObjectives(const std::vector<double>& newObjectives) {
+    objectives = newObjectives;
 }

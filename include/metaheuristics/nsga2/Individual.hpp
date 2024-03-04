@@ -24,6 +24,7 @@ class Individual {
     Stations& stations;
     ODMatrix& odMatrix;
     std::vector<int> genotype;
+    int numObjectives;
     int numDepots;
     int numAmbulances;
     std::vector<double> objectives;
@@ -38,6 +39,7 @@ class Individual {
         Stations& stations,
         ODMatrix& odMatrix,
         std::vector<Event> events,
+        int numObjectives,
         int numDepots,
         int numAmbulances,
         double mutationProbability,
@@ -45,7 +47,9 @@ class Individual {
     );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false) const;
+    void evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false);
+    double calculateMinimizeMaxDepotObjective();
+    double calculateUniformityObjective();
     bool dominates(const Individual& other) const;
     void calculateCrowdingDistance(const std::vector<Individual>& population);
     void mutate();
