@@ -34,13 +34,13 @@ Population::Population(
     events = monteCarloSim.generateEvents(saveEventsToCSV);
 
     for (int i = 0; i < populationSize; i++) {
-        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, 0, mutationProbability, false);
+        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability, false);
         individuals.push_back(individual);
     }
-    evaluateFitness();
+    evaluateObjectives();
 }
 
-void Population::evaluateFitness() {
+void Population::evaluateObjectives() {
     for (Individual& individual : individuals) {
         individual.evaluateObjectives(events);
     }
@@ -73,25 +73,34 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
 
 
 std::vector<Individual> Population::survivorSelection(int numSurvivors) {
-    // sort the current population based on fitness in descending order
-    std::sort(
-        individuals.begin(),
-        individuals.end(),
-        [](const Individual &a, const Individual &b) { return a.getFitness() < b.getFitness(); }
-    );
+    // assumes that individuals are already sorted into fronts
+    std::vector<Individual> nextGeneration;
+    int currentFront = 0;
 
-    std::vector<Individual> survivors;
+    // continue filling the next generation with individuals from each front
+    // until it exceeds the desired number of survivors (population size)
+    while (nextGeneration.size() + fronts[currentFront].size() <= numSurvivors) {
+        // calculate crowding distance for all individuals in the current front
+        calculateCrowdingDistance(fronts[currentFront]);
 
-    // calculate the actual number of survivors to keep, which is the minimum
-    // of numSurvivors and the current population size to avoid out-of-bounds access
-    int actualNumSurvivors = std::min(numSurvivors, static_cast<int>(individuals.size()));
-
-    // copy the top 'actualNumSurvivors' individuals to the survivors vector
-    for (int i = 0; i < actualNumSurvivors; i++) {
-        survivors.push_back(individuals[i]);
+        // add the entire front to the next generation
+        nextGeneration.insert(nextGeneration.end(), fronts[currentFront].begin(), fronts[currentFront].end());
+        currentFront++;
     }
 
-    return survivors;
+    // if last added front exceeds the population limit, sort it by crowding distance
+    // and select only as many individuals as needed to fill the next generation
+    if (nextGeneration.size() < populationSize) {
+        std::sort(fronts[currentFront].begin(), fronts[currentFront].end(),
+            [](const Individual& a, const Individual& b) {
+                return a.getCrowdingDistance() > b.getCrowdingDistance(); // Higher crowding distance is preferred
+            });
+
+        int remainingSlots = populationSize - nextGeneration.size();
+        nextGeneration.insert(nextGeneration.end(), fronts[currentFront].begin(), fronts[currentFront].begin() + remainingSlots);
+    }
+
+    return nextGeneration;
 }
 
 void Population::addChildren(const std::vector<Individual>& children) {
@@ -110,7 +119,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, 0, -1, mutationProbability);
+    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateObjectives(events);
@@ -196,36 +205,37 @@ void Population::fastNonDominatedSort() {
     }
 }
 
-
-
 void Population::evolve(int generations) {
-    for (int gen = 0; gen < generations; gen++) {
-        // step 1: parent Selection
-        int numParents = 2;
-        int tournamentSize = 5;
-        std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
+    for (int gen = 0; gen < generations; ++gen) {
+        // step 1: sort the population into Pareto fronts
+        fastNonDominatedSort();
 
-        // step 2: crossover to create offspring
-        std::vector<Individual> children;
-        children.reserve(populationSize);
-
-        for (int i = 0; i < populationSize; i += 2) {
-            Individual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
-            offspring.mutate();
-            offspring.evaluateObjectives(events);
-            children.push_back(offspring);
+        // step 2: calculate crowding distance within each front
+        for (auto& front : fronts) {
+            calculateCrowdingDistance(front);
         }
 
-        // step 3: survivor Selection
-        // combining existing population with children
-        addChildren(children);
-        individuals = survivorSelection(populationSize);
+        // step 3: selection, crossover and mutation to create a new offspring pool
+        std::vector<Individual> offspring;
+        int numParents = populationSize/2;
+        int tournamentSize = 3;
+        while (offspring.size() < populationSize) {
+            std::vector<Individual> parents = parentSelection(numParents, tournamentSize); // Example parameters
+            Individual child = crossover(parents[0], parents[1]);
+            child.mutate();
+            offspring.push_back(child);
+        }
 
-        Individual fittest = findFittest();
-        std::cout << "Generation " << gen  << ": " << fittest.getFitness() << ", [" << countUnique(individuals) << "] unique individuals" << std::endl;
-        
-      }
-      
+        // step 4: evaluate objectives for offspring
+        for (Individual& child : offspring) {
+            child.evaluateObjectives(events);
+        }
+
+        // step 5: combine, sort, and select the next generation from parents and offspring
+        individuals.insert(individuals.end(), offspring.begin(), offspring.end());
+        fastNonDominatedSort(); // Re-sort combined population
+        individuals = survivorSelection(populationSize); // Select the top individuals
+    }      
     // run one last time to print metrics
     Individual finalIndividual = findFittest();
     bool saveMetricsToFile = true;

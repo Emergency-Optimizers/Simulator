@@ -43,8 +43,6 @@ class Individual {
         int numObjectives,
         int numDepots,
         int numAmbulances,
-        double crowdingDistance,
-        int rank,
         double mutationProbability,
         bool child = true
     );

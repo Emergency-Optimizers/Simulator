@@ -30,6 +30,7 @@ class Population {
     int numDepots;
     int numAmbulances;
     int numObjectives;
+    std::vector<std::vector<Individual>> fronts;
     double mutationProbability;
 
  public:
@@ -45,7 +46,7 @@ class Population {
         double mutationProbability,
         bool saveEventsToCSV
     );
-    void evaluateFitness();
+    void evaluateObjectives();
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
     std::vector<Individual> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<Individual>& children);
