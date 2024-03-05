@@ -17,6 +17,7 @@ Population::Population(
     int populationSize,
     int numDepots,
     int numAmbulances,
+    int numObjectives,
     double mutationProbability,
     bool saveEventsToCSV
 ) : rnd(rnd),
@@ -26,16 +27,16 @@ Population::Population(
     populationSize(populationSize),
     numDepots(numDepots),
     numAmbulances(numAmbulances),
+    numObjectives(numObjectives),
     mutationProbability(mutationProbability) {
 
     MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
     events = monteCarloSim.generateEvents(saveEventsToCSV);
 
     for (int i = 0; i < populationSize; i++) {
-        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);
+        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, 0, mutationProbability, false);
         individuals.push_back(individual);
     }
-
     evaluateFitness();
 }
 
@@ -107,36 +108,36 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability);
+    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, crowdingDistance, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
-    offspring.evaluateFitness(events);
+    offspring.evaluateObjectives(events);
 
     return offspring;
 }
 
 void Population::calculateCrowdingDistance(std::vector<Individual>& front) {
-    size_t numObjectives = front[0].objectives.size();
+    size_t numObjectives = front[0].getObjectives().size();
     // Initialize crowding distance for all individuals in the front
     for (Individual& individual : front) {
-        individual.crowdingDistance = 0.0;
+        individual.setCrowdingDistance(0.0);
     }
 
     for (size_t i = 0; i < numObjectives; ++i) {
         // Sort individuals in the front based on the objective i
         std::sort(front.begin(), front.end(), [i](const Individual& a, const Individual& b) {
-            return a.objectives[i] < b.objectives[i];
+            return a.getObjectives()[i] < b.getObjectives()[i];
         });
 
         // Assign infinity distance to boundary individuals
-        front.front().crowdingDistance = std::numeric_limits<double>::infinity();
-        front.back().crowdingDistance = std::numeric_limits<double>::infinity();
+        front.front().setCrowdingDistance(std::numeric_limits<double>::infinity());
+        front.back().setCrowdingDistance(std::numeric_limits<double>::infinity());
 
         // Calculate normalized distance for intermediate individuals
-        double objectiveRange = front.back().objectives[i] - front.front().objectives[i];
+        double objectiveRange = front.back().getObjectives()[i] - front.front().getObjectives()[i];
         if (objectiveRange > 0) { // Avoid division by zero
             for (size_t j = 1; j < front.size() - 1; ++j) {
-                front[j].crowdingDistance += (front[j + 1].objectives[i] - front[j - 1].objectives[i]) / objectiveRange;
+                front[j].setCrowdingDistance(front[j].getCrowdingDistance() + (front[j + 1].getObjectives()[i] - front[j - 1].getObjectives()[i]) / objectiveRange);
             }
         }
     }
@@ -156,7 +157,7 @@ void Population::evolve(int generations) {
         for (int i = 0; i < populationSize; i += 2) {
             Individual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
             offspring.mutate();
-            offspring.evaluateFitness(events);
+            offspring.evaluateObjectives(events);
             children.push_back(offspring);
         }
 
@@ -173,7 +174,7 @@ void Population::evolve(int generations) {
     // run one last time to print metrics
     Individual finalIndividual = findFittest();
     bool saveMetricsToFile = true;
-    finalIndividual.evaluateFitness(events, saveMetricsToFile);
+    finalIndividual.evaluateObjectives(events, saveMetricsToFile);
 }
 
 int Population::countUnique(const std::vector<Individual>& population) {
