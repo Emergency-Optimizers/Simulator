@@ -41,6 +41,6 @@ class Simulator {
     );
     void run(bool saveMetricsToFile = false);
     double getResponseTime();
-    double getResponseTimeMistakes();
+    double getResponseTimeViolations();
     void printAverageEventPerformanceMetrics();
 };

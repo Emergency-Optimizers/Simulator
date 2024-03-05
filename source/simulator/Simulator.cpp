@@ -78,7 +78,7 @@ double Simulator::getResponseTime() {
 }
 
 
-double Simulator::getResponseTimeMistakes() {
+double Simulator::getResponseTimeViolations() {
     int totalEvents = eventHandler.events.size();
     double totalWrongs = 0;
 
