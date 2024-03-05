@@ -53,7 +53,7 @@ bool Individual::isValid() const {
     return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
 }
 
-void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false) {
+void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
     std::vector<double> newObjectives(numObjectives, 0);
 
     AmbulanceAllocator ambulanceAllocator(stations);
@@ -229,10 +229,6 @@ double Individual::getCrowdingDistance() const {
 
 void Individual::setCrowdingDistance(double newCrowdingDistance) {
     crowdingDistance = newCrowdingDistance;
-}
-
-int Individual::getNumAmbulances() const {
-    return numAmbulances;
 }
 
 void Individual::setRank(int newRank) {
