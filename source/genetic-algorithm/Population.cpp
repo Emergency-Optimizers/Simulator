@@ -110,7 +110,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
 void Population::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {
         // step 1: parent selection
-        int numParents = 2;
+        int numParents = populationSize/2;
         int tournamentSize = 3;
         std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
 
