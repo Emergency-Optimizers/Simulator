@@ -42,6 +42,7 @@ class Individual {
         int numObjectives,
         int numDepots,
         int numAmbulances,
+        double crowdingDistance,
         double mutationProbability,
         bool child = true
     );
@@ -68,6 +69,7 @@ class Individual {
     int getNumDepots() const;
     void setNumDepots(int newNumDepots);
     double getCrowdingDistance() const;
+    void setCrowdingDistance(double newCrowdingDistance);
     const std::vector<double>& getObjectives() const;
     void setObjectives(const std::vector<double>& newObjectives);
     Individual& Individual::operator=(const Individual& other) {

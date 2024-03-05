@@ -19,6 +19,7 @@ Individual::Individual(
     int numObjectives,
     int numDepots,
     int numAmbulances,
+    double crowdingDistance,
     double mutationProbability,
     bool child
 ) : rnd(rnd),
@@ -30,6 +31,7 @@ Individual::Individual(
     numDepots(numDepots),
     numAmbulances(numAmbulances),
     objectives(numObjectives, 0),
+    crowdingDistance(0),
     mutationProbability(mutationProbability),
     child(child) {
         if (!child) {
@@ -225,6 +227,10 @@ void Individual::setNumDepots(int newNumDepots) {
 
 double Individual::getCrowdingDistance() const {
     return crowdingDistance;
+}
+
+void Individual::setCrowdingDistance(double newCrowdingDistance) {
+    crowdingDistance = newCrowdingDistance;
 }
 
 const std::vector<double>& Individual::getObjectives() const {
