@@ -55,20 +55,22 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
             tournament.push_back(Utils::getRandomElement(rnd, individuals));
         }
 
-        // select the individual with the highest fitness in the tournament
-        auto best = std::max_element(
-            tournament.begin(),
-            tournament.end(),
-            [](const Individual &a, const Individual &b) {
-                return a.getFitness() > b.getFitness();
-            }
-        );
+        // tournament selection based on rank and crowding distance
+        auto best = std::min_element(tournament.begin(), tournament.end(),
+                                     [](const Individual &a, const Individual &b) {
+                                         // first, compare by rank (lower rank is better)
+                                         if (a.getRank() != b.getRank()) {
+                                             return a.getRank() < b.getRank();
+                                         }
+                                         // if ranks are equal, compare by crowding distance (higher is better)
+                                         return a.getCrowdingDistance() > b.getCrowdingDistance();
+                                     });
 
         selectedParents.push_back(*best);
     }
-
     return selectedParents;
 }
+
 
 std::vector<Individual> Population::survivorSelection(int numSurvivors) {
     // sort the current population based on fitness in descending order
