@@ -51,6 +51,7 @@ class Population {
     void addChildren(const std::vector<Individual>& children);
     Individual crossover(const Individual& parent1, const Individual& parent2);
     void calculateCrowdingDistance(std::vector<Individual>& front);
+    void fastNonDominatedSort();
     void evolve(int generations);
     int countUnique(const std::vector<Individual>& population);
     const Individual findFittest();

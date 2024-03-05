@@ -29,6 +29,7 @@ class Individual {
     int numAmbulances;
     std::vector<double> objectives;
     double crowdingDistance;
+    int rank;
     double mutationProbability;
     bool child;
 
@@ -43,6 +44,7 @@ class Individual {
         int numDepots,
         int numAmbulances,
         double crowdingDistance,
+        int rank,
         double mutationProbability,
         bool child = true
     );
@@ -70,6 +72,8 @@ class Individual {
     void setNumDepots(int newNumDepots);
     double getCrowdingDistance() const;
     void setCrowdingDistance(double newCrowdingDistance);
+    int getRank() const;
+    void setRank(int newRank);
     const std::vector<double>& getObjectives() const;
     void setObjectives(const std::vector<double>& newObjectives);
     Individual& Individual::operator=(const Individual& other) {

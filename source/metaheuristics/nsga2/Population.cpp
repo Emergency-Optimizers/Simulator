@@ -108,7 +108,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, crowdingDistance, mutationProbability);
+    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, 0, -1, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateObjectives(events);
@@ -142,6 +142,59 @@ void Population::calculateCrowdingDistance(std::vector<Individual>& front) {
         }
     }
 }
+
+void Population::fastNonDominatedSort() {
+    std::vector<std::vector<Individual*>> fronts;
+    std::vector<int> dominationCounts(individuals.size(), 0);
+    std::vector<std::vector<Individual*>> dominatedIndividuals(individuals.size());
+    std::vector<int> ranks(individuals.size(), 0);
+
+    // step 1: determine domination relationships and counts
+    for (size_t i = 0; i < individuals.size(); ++i) {
+        for (size_t j = 0; j < individuals.size(); ++j) {
+            if (i != j) {
+                if (individuals[i].dominates(individuals[j])) {
+                    dominatedIndividuals[i].push_back(&individuals[j]);
+                } else if (individuals[j].dominates(individuals[i])) {
+                    dominationCounts[i]++;
+                }
+            }
+        }
+        if (dominationCounts[i] == 0) {
+            ranks[i] = 0;
+            if (fronts.empty()) {
+                fronts.push_back({});
+            }
+            fronts[0].push_back(&individuals[i]);
+        }
+    }
+
+    // step 2: create subsequent fronts
+    int currentFront = 0;
+    while (currentFront < fronts.size()) {
+        std::vector<Individual*> nextFront;
+        for (Individual* individual : fronts[currentFront]) {
+            for (Individual* dominated : dominatedIndividuals[individual - &individuals[0]]) { // Convert pointer arithmetic to index
+                dominationCounts[dominated - &individuals[0]]--; // Decrease domination count
+                if (dominationCounts[dominated - &individuals[0]] == 0) {
+                    ranks[dominated - &individuals[0]] = currentFront + 1;
+                    nextFront.push_back(dominated);
+                }
+            }
+        }
+        if (!nextFront.empty()) {
+            fronts.push_back(nextFront);
+        }
+        currentFront++;
+    }
+
+    // Optionally update individuals with their ranks for further processing
+    for (size_t i = 0; i < individuals.size(); ++i) {
+        individuals[i].setRank(ranks[i]);
+    }
+}
+
+
 
 void Population::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {

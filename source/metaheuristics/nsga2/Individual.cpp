@@ -20,6 +20,7 @@ Individual::Individual(
     int numDepots,
     int numAmbulances,
     double crowdingDistance,
+    int rank,
     double mutationProbability,
     bool child
 ) : rnd(rnd),
@@ -32,6 +33,7 @@ Individual::Individual(
     numAmbulances(numAmbulances),
     objectives(numObjectives, 0),
     crowdingDistance(0),
+    rank(-1),
     mutationProbability(mutationProbability),
     child(child) {
         if (!child) {
@@ -50,9 +52,7 @@ void Individual::randomizeAmbulances() {
 }
 
 bool Individual::isValid() const {
-    int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
-
-    return totalAmbulances == numAmbulances;
+    return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
 }
 
 void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false) {
@@ -233,8 +233,16 @@ void Individual::setCrowdingDistance(double newCrowdingDistance) {
     crowdingDistance = newCrowdingDistance;
 }
 
-const std::vector<double>& Individual::getObjectives() const {
-    return objectives;
+int Individual::getNumAmbulances() const {
+    return numAmbulances;
+}
+
+void Individual::setRank(int newRank) {
+    rank = newRank;
+}
+
+int Individual::getRank() const {
+    return rank;
 }
 
 void Individual::setObjectives(const std::vector<double>& newObjectives) {
