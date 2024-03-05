@@ -12,8 +12,8 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
-#include "metaheuristics/genetic-algorithm/Individual.hpp"
-#include "metaheuristics/genetic-algorithm/Population.hpp"
+#include "metaheuristics/nsga2/Individual.hpp"
+#include "metaheuristics/nsga2/Population.hpp"
 
 int main() {
     std::mt19937 rnd(0);
@@ -27,15 +27,16 @@ int main() {
     ODMatrix odMatrix;
     odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
+    int numObjectives = 3;
     int populationSize = 30;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 20;
+    int generations = 10;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
-    Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
+    Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, numObjectives, mutationProbability, saveEventsToCSV);
     
     // run the genetic algorithm for the specified number of generations
     population.evolve(generations);
