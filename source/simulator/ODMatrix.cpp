@@ -11,7 +11,9 @@
 /* internal libraries */
 #include "simulator/ODMatrix.hpp"
 
-ODMatrix::ODMatrix() { }
+ODMatrix::ODMatrix(const std::string& filename) {
+    loadFromFile(filename);
+}
 
 void ODMatrix::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);

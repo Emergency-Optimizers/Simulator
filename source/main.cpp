@@ -19,14 +19,9 @@
 int main() {
     std::mt19937 rnd(0);
 
-    Incidents incidents;
-    incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
-
-    Stations stations;
-    stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
-
-    ODMatrix odMatrix;
-    odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
+    Incidents incidents("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+    Stations stations("../../Data-Processing/data/enhanced/oslo/depots.csv");
+    ODMatrix odMatrix("../../Data-Processing/data/oslo/od_matrix.txt");
 
     int populationSize = 50;
     int numDepots = 19;

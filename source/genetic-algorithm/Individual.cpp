@@ -59,7 +59,7 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
     );
     simulator.run(saveMetricsToFile);
 
-    fitness = simulator.getResponseTime();
+    fitness = simulator.responseTimeViolations();
 }
 
 void Individual::mutate() {
