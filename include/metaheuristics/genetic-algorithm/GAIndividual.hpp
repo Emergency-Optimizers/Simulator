@@ -1,5 +1,5 @@
 /**
- * @file Individual.hpp
+ * @file GAIndividual.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -17,7 +17,7 @@
 #include "simulator/ODMatrix.hpp"
 #include "simulator/Event.hpp"
 
-class Individual {
+class GAIndividual {
  private:
     std::mt19937& rnd;
     Incidents& incidents;
@@ -31,7 +31,7 @@ class Individual {
     bool child;
 
  public:
-    Individual(
+    GAIndividual(
         std::mt19937& rnd,
         Incidents& incidents,
         Stations& stations,
@@ -60,7 +60,7 @@ class Individual {
     void setNumAmbulances(int newNumAmbulances);
     int getNumDepots() const;
     void setNumDepots(int newNumDepots);
-    Individual& Individual::operator=(const Individual& other) {
+    GAIndividual& GAIndividual::operator=(const GAIndividual& other) {
         if (this != &other) {
             genotype = other.genotype;
             numDepots = other.numDepots;
