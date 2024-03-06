@@ -231,12 +231,16 @@ void Individual::setCrowdingDistance(double newCrowdingDistance) {
     crowdingDistance = newCrowdingDistance;
 }
 
+int Individual::getRank() const {
+    return rank;
+}
+
 void Individual::setRank(int newRank) {
     rank = newRank;
 }
 
-int Individual::getRank() const {
-    return rank;
+const std::vector<double>& Individual::getObjectives() const {
+    return objectives;
 }
 
 void Individual::setObjectives(const std::vector<double>& newObjectives) {

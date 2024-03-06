@@ -261,42 +261,31 @@ int Population::countUnique(const std::vector<Individual>& population) {
 }
 
 const Individual Population::findFittest() {
-    auto fittest = std::max_element(
-        individuals.begin(),
-        individuals.end(),
-        [](const Individual &a, const Individual &b) {
-            return a.getFitness() > b.getFitness();
-        }
-    );
+    fastNonDominatedSort();
+    for (auto& front : fronts) {
+        calculateCrowdingDistance(front);
+    }
+    const auto& firstFront = fronts.front();
 
-    return *fittest;
+    auto fittest = std::max_element(firstFront.begin(), firstFront.end(),
+                                    [](const Individual& a, const Individual& b) {
+                                        return a.getCrowdingDistance() > b.getCrowdingDistance();
+                                    });
+    
+    return *fittest; // Corrected to single dereference
 }
 
 const Individual Population::findLeastFit() {
-    auto leastFit = std::min_element(
-        individuals.begin(),
-        individuals.end(),
-        [](const Individual &a, const Individual &b) {
-            return a.getFitness() > b.getFitness();
-        }
-    );
+    fastNonDominatedSort();
+    for (auto& front : fronts) {
+        calculateCrowdingDistance(front);
+    }
+    const auto& lastFront = fronts.back(); // Individuals in the last front are dominated by all others
+
+    auto leastFit = std::min_element(lastFront.begin(), lastFront.end(),
+                                    [](const Individual& a, const Individual& b) {
+                                        return a.getCrowdingDistance() < b.getCrowdingDistance(); // Assuming you want edge cases out first
+                                    });
 
     return *leastFit;
-}
-
-const double Population::averageFitness() {
-    if (individuals.empty()) {
-        return 0.0;
-    }
-
-    double totalFitness = std::accumulate(
-        individuals.begin(),
-        individuals.end(),
-        0.0,
-        [](double sum, const Individual& individual) {
-            return sum + individual.getFitness();
-        }
-    );
-
-    return totalFitness / individuals.size();
 }

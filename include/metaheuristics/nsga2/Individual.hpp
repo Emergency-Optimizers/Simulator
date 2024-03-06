@@ -60,7 +60,6 @@ class Individual {
 
     const std::vector<int>& getGenotype() const;
     void setGenotype(const std::vector<int>& newGenotype);
-    double getFitness() const;
     void setFitness(double fitness);
     void setAmbulancesAtDepot(int depotIndex, int count);
     int getAmbulancesAtDepot(int depotIndex) const;

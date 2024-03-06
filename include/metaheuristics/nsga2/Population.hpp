@@ -57,5 +57,4 @@ class Population {
     int countUnique(const std::vector<Individual>& population);
     const Individual findFittest();
     const Individual findLeastFit();
-    const double averageFitness();
 };
