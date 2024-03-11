@@ -53,6 +53,8 @@ class Utils {
     );
     static int getRandomInt(std::mt19937& rnd, const int min, const int max);
     static double getRandomProbability(std::mt19937& rnd);
+    static double calculateMean(const std::vector<int>& numbers);
+    static double calculateStandardDeviation(const std::vector<int>& numbers);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);
