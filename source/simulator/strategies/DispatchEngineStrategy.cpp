@@ -34,6 +34,7 @@ void DispatchEngineStrategy::dispatchingToScene(
     );
     events[eventIndex].timer += incrementSeconds;
     events[eventIndex].metrics.dispatchToSceneTime += incrementSeconds;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
@@ -41,12 +42,14 @@ void DispatchEngineStrategy::dispatchingToScene(
         incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
         events[eventIndex].timer += incrementSeconds;
         events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+        ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
         incrementSeconds = events[eventIndex].secondsWaitAvailable;
         events[eventIndex].timer += incrementSeconds;
         events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+        ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
     }
