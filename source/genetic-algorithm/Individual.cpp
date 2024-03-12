@@ -76,7 +76,7 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
         std::cout
             << "Total: " << totalHours << " hours, "
             << "Standard deviation: " << Utils::calculateStandardDeviation(times)
-            << std::endl << std::endl;
+            << std::endl;
     }
 }
 
