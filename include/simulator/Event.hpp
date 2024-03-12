@@ -25,6 +25,7 @@ struct Event {
     std::string triageImpression;
     std::tm callReceived;
     float secondsWaitCallAnswered = -1;
+    float secondsWaitAppointingResource = -1;
     float secondsWaitDepartureScene = -1;
     float secondsWaitAvailable = -1;
     int64_t gridId = -1;

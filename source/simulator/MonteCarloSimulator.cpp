@@ -432,6 +432,9 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         event.secondsWaitCallAnswered = generateRandomWaitTimeFromHistogram(
             waitTimesHistograms[std::pair("time_call_received", "time_incident_created")][event.triageImpression]
         );
+        event.secondsWaitAppointingResource = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_incident_created", "time_resource_appointed")][event.triageImpression]
+        );
 
         if (!canceled) {
             event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
@@ -449,8 +452,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         // setup timer
         event.timer = std::mktime(&event.callReceived);
 
-        event.timer += event.secondsWaitCallAnswered;
-        event.metrics.callProcessedTime += event.secondsWaitCallAnswered;
+        event.timer += event.secondsWaitCallAnswered + event.secondsWaitAppointingResource;
+        event.metrics.callProcessedTime += event.secondsWaitCallAnswered + event.secondsWaitAppointingResource;
 
         event.metrics.incidentGridId = event.gridId;
 
