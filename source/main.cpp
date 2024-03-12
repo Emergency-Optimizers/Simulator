@@ -27,7 +27,7 @@ int main() {
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 100;
+    int generations = 50;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
