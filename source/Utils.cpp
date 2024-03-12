@@ -275,7 +275,7 @@ void Utils::saveEventsToFile(const std::vector<Event>& events) {
     }
 
     // write CSV header
-    outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_call_answered,wait_time_departure_scene,wait_time_available\n";
+    outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_incident_created,wait_time_ambulance_dispatch_to_hospital,wait_time_ambulance_available\n";
 
     // write each event to the CSV
     for (const auto& event : events) {
