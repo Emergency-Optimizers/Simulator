@@ -418,3 +418,25 @@ double Utils::getRandomProbability(std::mt19937& rnd) {
     std::uniform_real_distribution<> dist(0.0, 1.0);
     return dist(rnd);
 }
+
+double Utils::calculateMean(const std::vector<int>& numbers) {
+    double sum = 0.0;
+
+    for (int num : numbers) {
+        sum += num;
+    }
+
+    return numbers.empty() ? 0.0 : sum / numbers.size();
+}
+
+double Utils::calculateStandardDeviation(const std::vector<int>& numbers) {
+    double mean = calculateMean(numbers);
+    double varianceSum = 0.0;
+
+    for (int num : numbers) {
+        varianceSum += std::pow(num - mean, 2);
+    }
+    double variance = numbers.empty() ? 0.0 : varianceSum / numbers.size();
+
+    return std::sqrt(variance);
+}

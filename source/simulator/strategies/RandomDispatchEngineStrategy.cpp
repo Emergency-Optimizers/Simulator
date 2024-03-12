@@ -79,11 +79,13 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
     );
     events[eventIndex].timer += incrementSeconds;
     events[eventIndex].metrics.dispatchToHospitalTime += incrementSeconds;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
     events[eventIndex].timer += events[eventIndex].secondsWaitAvailable;
     events[eventIndex].metrics.arrivalAtHospitalTime += events[eventIndex].secondsWaitAvailable;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
     events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
 }

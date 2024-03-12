@@ -23,7 +23,7 @@ int main() {
     Stations stations("../../Data-Processing/data/enhanced/oslo/depots.csv");
     ODMatrix odMatrix("../../Data-Processing/data/oslo/od_matrix.txt");
 
-    int populationSize = 50;
+    int populationSize = 10;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;

@@ -110,28 +110,13 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
     );
     events[eventIndex].timer += incrementSeconds;
     events[eventIndex].metrics.dispatchToHospitalTime += incrementSeconds;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
     events[eventIndex].timer += events[eventIndex].secondsWaitAvailable;
     events[eventIndex].metrics.arrivalAtHospitalTime += events[eventIndex].secondsWaitAvailable;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
     events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
 }
-
-/*
-
-call received           (incident starts)
-call answered           (wait time from histogram)
-assign ambulance        (wait time until ambulance is available)
-dispatch to scene       (OD matrix)
-time spent on scene     (wait time from histogram)
-dispatch to hospital    (OD matrix)
-time spent at hospital  (wait time histogram)
-dispatch to depot       (OD matrix)
-
-
-
-
-
-*/

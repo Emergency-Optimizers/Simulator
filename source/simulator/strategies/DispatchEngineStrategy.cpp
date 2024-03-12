@@ -7,103 +7,6 @@
 /* internal libraries */
 #include "simulator/strategies/DispatchEngineStrategy.hpp"
 
-void DispatchEngineStrategy::run(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-bool DispatchEngineStrategy::assignAmbulance(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-    return false;
-}
-
-void DispatchEngineStrategy::callProcessed(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::dispatchToScene(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::arrivedAtScene(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::dispatchToHospital(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::arrivedAtHospital(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
-void DispatchEngineStrategy::dispatchToDepot(
-    std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
-    std::vector<Ambulance>& ambulances,
-    std::vector<Event>& events,
-    const int eventIndex
-) {
-    /// TODO: code here
-}
-
 void DispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,
     Incidents& incidents,
@@ -131,6 +34,7 @@ void DispatchEngineStrategy::dispatchingToScene(
     );
     events[eventIndex].timer += incrementSeconds;
     events[eventIndex].metrics.dispatchToSceneTime += incrementSeconds;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
@@ -138,12 +42,14 @@ void DispatchEngineStrategy::dispatchingToScene(
         incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
         events[eventIndex].timer += incrementSeconds;
         events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+        ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
         incrementSeconds = events[eventIndex].secondsWaitAvailable;
         events[eventIndex].timer += incrementSeconds;
         events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+        ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
     }
