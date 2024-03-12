@@ -440,3 +440,13 @@ double Utils::calculateStandardDeviation(const std::vector<int>& numbers) {
 
     return std::sqrt(variance);
 }
+
+double Utils::calculateEuclideanDistance(double x1, double y1, double x2, double y2) {
+    return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+}
+
+std::pair<int, int> Utils::idToUtm(int64_t grid_id) {
+    int x = std::floor(grid_id * std::pow(10, -7)) - (2 * static_cast<int>(std::pow(10, 6)));
+    int y = grid_id - (std::floor(grid_id * std::pow(10, -7)) * static_cast<int64_t>(std::pow(10, 7)));
+    return std::make_pair(x, y);
+}

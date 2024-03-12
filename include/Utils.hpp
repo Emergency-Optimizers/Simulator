@@ -55,6 +55,8 @@ class Utils {
     static double getRandomProbability(std::mt19937& rnd);
     static double calculateMean(const std::vector<int>& numbers);
     static double calculateStandardDeviation(const std::vector<int>& numbers);
+    static double calculateEuclideanDistance(double x1, double y1, double x2, double y2);
+    static std::pair<int, int> idToUtm(int64_t grid_id);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);

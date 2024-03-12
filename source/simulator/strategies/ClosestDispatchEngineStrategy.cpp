@@ -60,8 +60,12 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     int closestAmbulanceIndex = -1;
     int closestAmbulanceTravelTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
+    // std::pair<int, int> utm1 = Utils::idToUtm(eventGridId);
     for (int i = 0; i < availableAmbulanceIndicies.size(); i++) {
+        // std::pair<int, int> utm2 = Utils::idToUtm(ambulances[i].currentGridId);
+        // int travelTime = Utils::calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
         int travelTime = odMatrix.getTravelTime(ambulances[i].currentGridId, eventGridId);
+
         if (travelTime < closestAmbulanceTravelTime) {
             closestAmbulanceIndex = i;
             closestAmbulanceTravelTime = travelTime;
