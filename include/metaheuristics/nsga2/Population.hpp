@@ -30,7 +30,7 @@ class Population {
     int numDepots;
     int numAmbulances;
     int numObjectives;
-    std::vector<std::vector<Individual>> fronts;
+    std::vector<std::vector<Individual*>> fronts;
     double mutationProbability;
 
  public:
@@ -51,7 +51,7 @@ class Population {
     std::vector<Individual> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<Individual>& children);
     Individual crossover(const Individual& parent1, const Individual& parent2);
-    void calculateCrowdingDistance(std::vector<Individual>& front);
+    void calculateCrowdingDistance(std::vector<Individual*>& front);
     void fastNonDominatedSort();
     void evolve(int generations);
     int countUnique(const std::vector<Individual>& population);

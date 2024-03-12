@@ -28,11 +28,11 @@ int main() {
     odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
     int numObjectives = 3;
-    int populationSize = 30;
+    int populationSize = 10;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 10;
+    int generations = 3;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;

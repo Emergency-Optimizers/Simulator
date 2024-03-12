@@ -117,6 +117,8 @@ void Individual::mutate() {
     std::uniform_real_distribution<> probDist(0.0, 1.0);
     std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
 
+    std::cout << "In mutate() - Min: " << 0 << ", Max: " << genotype.size() - 1 << std::endl;
+
     for (int depot = 0; depot < genotype.size(); ++depot) {
         // only mutate if depot has at least one ambulance
         if (probDist(rnd) < mutationProbability && genotype[depot] > 0) {
@@ -158,6 +160,8 @@ void Individual::repair() {
 
 void Individual::addAmbulances(int ambulancesToAdd) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
+    std::cout << "In addAmulances() - Min: " << 0 << ", Max: " << genotype.size() - 1 << std::endl;
+
 
     for (int i = 0; i < ambulancesToAdd; i++) {
         int depotIndex = dist(rnd);
@@ -168,6 +172,7 @@ void Individual::addAmbulances(int ambulancesToAdd) {
 
 void Individual::removeAmbulances(int ambulancesToRemove) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
+    std::cout << "In removeAmulances() - Min: " << 0 << ", Max: " << genotype.size() - 1 << std::endl;
 
     for (int i = 0; i < ambulancesToRemove; i++) {
         bool ambulanceRemoved = false;
