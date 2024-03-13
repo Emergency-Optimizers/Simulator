@@ -29,6 +29,8 @@ class Individual {
     int numAmbulances;
     std::vector<double> objectives;
     double crowdingDistance;
+    int dominationCount; // how many individuals dominate this one
+    std::vector<Individual*> dominatedIndividuals; 
     int rank;
     double mutationProbability;
     bool child;
@@ -73,6 +75,13 @@ class Individual {
     void setRank(int newRank);
     const std::vector<double>& getObjectives() const;
     void setObjectives(const std::vector<double>& newObjectives);
+    int getDominationCount(); // how many individuals
+    void incrementDominationCount();
+    void decrementDominationCount();
+    void clearDominationCount();
+    const std::vector<Individual*>& getDominatedIndividuals() const;
+    void nowDominates(Individual* dominatedIndividual);
+    void clearDominatedIndividuals();
     Individual& Individual::operator=(const Individual& other) {
         if (this != &other) {
             genotype = other.genotype;

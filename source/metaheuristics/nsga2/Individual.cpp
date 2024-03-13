@@ -31,6 +31,7 @@ Individual::Individual(
     numAmbulances(numAmbulances),
     objectives(numObjectives, 0),
     crowdingDistance(0),
+    dominationCount(0),
     rank(-1),
     mutationProbability(mutationProbability),
     child(child) {
@@ -54,6 +55,7 @@ bool Individual::isValid() const {
 }
 
 void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
+    std::cout << "Here" << std::endl;
     AmbulanceAllocator ambulanceAllocator(stations);
     ambulanceAllocator.allocate(genotype);
 
@@ -115,8 +117,6 @@ void Individual::mutate() {
     std::uniform_real_distribution<> probDist(0.0, 1.0);
     std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
 
-    std::cout << "In mutate() - Min: " << 0 << ", Max: " << genotype.size() - 1 << std::endl;
-
     for (int depot = 0; depot < genotype.size(); ++depot) {
         // only mutate if depot has at least one ambulance
         if (probDist(rnd) < mutationProbability && genotype[depot] > 0) {
@@ -158,7 +158,6 @@ void Individual::repair() {
 
 void Individual::addAmbulances(int ambulancesToAdd) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
-    std::cout << "In addAmulances() - Min: " << 0 << ", Max: " << genotype.size() - 1 << std::endl;
 
 
     for (int i = 0; i < ambulancesToAdd; i++) {
@@ -248,4 +247,32 @@ const std::vector<double>& Individual::getObjectives() const {
 
 void Individual::setObjectives(const std::vector<double>& newObjectives) {
     objectives = newObjectives;
+}
+
+int Individual::getDominationCount() {
+    return dominationCount;
+}
+
+void Individual::incrementDominationCount() {
+    dominationCount++;
+}
+
+void Individual::decrementDominationCount() {
+    dominationCount--;
+}
+
+void Individual::clearDominationCount() {
+    dominationCount = 0;
+}
+
+const std::vector<Individual*>& Individual::getDominatedIndividuals() const {
+    return dominatedIndividuals;
+}
+
+void Individual::nowDominates(Individual* dominatedIndividual) {
+    dominatedIndividuals.push_back(dominatedIndividual);
+} 
+
+void Individual::clearDominatedIndividuals() {
+    dominatedIndividuals.clear();
 }

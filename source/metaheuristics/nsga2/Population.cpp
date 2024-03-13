@@ -8,6 +8,7 @@
 #include "metaheuristics/nsga2/Population.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
+#include <unordered_set>
 
 Population::Population(
     std::mt19937& rnd,
@@ -47,8 +48,6 @@ void Population::evaluateObjectives() {
 }
 
 std::vector<Individual> Population::parentSelection(int tournamentSize) {
-    std::cout << "Inside Parent Selection" << std::endl;
-
     std::vector<Individual> selectedParents;
 
     for (int i = 0; i < 2; i++) {
@@ -98,10 +97,8 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
             int slotsLeft = numSurvivors - nextGeneration.size();
             int i = 0;
             while (slotsLeft > 0 && i < currentFront.size()) {
-                if (!currentFront[i]->getGenotype().empty()) {
-                    nextGeneration.push_back(*currentFront[i]); // Add individuals until slots are filled
-                    slotsLeft--;
-                }
+                nextGeneration.push_back(*currentFront[i]); // Add individuals until slots are filled
+                slotsLeft--;
                 i++;
             }
         }
@@ -109,7 +106,6 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
         currentFrontIndex++;
     }
 
-    std::cout << "Completed survivor selection. Final generation size: " << nextGeneration.size() << std::endl;
     return nextGeneration;
 }
 
@@ -175,59 +171,81 @@ void Population::calculateCrowdingDistance(std::vector<Individual*>& front) {
 
 
 void Population::fastNonDominatedSort() {
+    std::cout << "Starting fast non-dominated sort..." << std::endl;
+    std::cout << "Total individuals in population: " << individuals.size() << "\n";
 
+
+    // clear domination values
+    for (Individual& ind : individuals) {
+        ind.clearDominatedIndividuals();
+        ind.setRank(-1);
+        ind.clearDominationCount();
+    }
+
+    // clear them fronts and initialize first front
     std::vector<std::vector<Individual*>> newFronts;
-    std::vector<std::vector<Individual*>> dominatedIndividuals(individuals.size());
-    std::vector<int> dominationCounter(individuals.size(), 0);
-
-    // Initialize the first front
+    std::unordered_set<Individual*> addedIndividuals;
+    fronts.clear();
     newFronts.emplace_back();
-    // Determine domination relationships
+
+    // find undominated individuals of rank 0
     for (size_t i = 0; i < individuals.size(); i++) {
         for (size_t j = 0; j < individuals.size(); j++) {
             if (i == j) continue;
             if (individuals[i].dominates(individuals[j])) {
-                dominatedIndividuals[i].push_back(&individuals[j]);
+                individuals[i].nowDominates(&individuals[j]);
             } else if (individuals[j].dominates(individuals[i])) {
-                dominationCounter[i]++;
+                individuals[i].incrementDominationCount();
             }
         }
-        if (dominationCounter[i] == 0) {
+        // if not dominated by anyone, set rank 0
+        if (individuals[i].getDominationCount() == 0) {
             individuals[i].setRank(0);
             newFronts[0].push_back(&individuals[i]);
+            addedIndividuals.insert(&individuals[i]);
         }
     }
 
-    // Construct subsequent fronts
-    int currentFront = -1;
-    while (currentFront < static_cast<int>(newFronts.size() - 1)) {
-        currentFront++;
-        std::vector<Individual*> nextFront;
-        if (currentFront < static_cast<int>(newFronts.size())) {
-            for (auto* p : newFronts[currentFront]) {
-                auto pIndex = std::distance(individuals.data(), p); // Find index of p in individuals
-                for (auto* q : dominatedIndividuals[pIndex]) {
-                    auto qIndex = std::distance(individuals.data(), q); // Find index of q in individuals
-                    dominationCounter[qIndex]--;
-                    if (dominationCounter[qIndex] == 0) {
-                        q->setRank(currentFront + 1);
-                        nextFront.push_back(q);
-                    }
+    // construct subsequent fronts
+    int currentFrontIndex = 0;
+    while (currentFrontIndex < newFronts.size() && !newFronts[currentFrontIndex].empty()) {
+        std::vector<Individual*> nextFrontCandidates;
+        // iterate over each individual in the current front
+        for (auto* dominatingIndividual : newFronts[currentFrontIndex]) {
+            // process each individual that the current dominatingIndividual dominates
+            for (auto* dominatedIndividual : dominatingIndividual->getDominatedIndividuals()) {
+                // decrement the domination count of the dominated individual
+                dominatedIndividual->decrementDominationCount();
+                // check if this individual should move to the next front
+                if (dominatedIndividual->getDominationCount() == 0 && addedIndividuals.find(dominatedIndividual) == addedIndividuals.end()) {
+                    dominatedIndividual->setRank(currentFrontIndex + 1);
+                    nextFrontCandidates.push_back(dominatedIndividual);
+                    addedIndividuals.insert(dominatedIndividual);
                 }
             }
         }
-        if (!nextFront.empty()) {
-            newFronts.push_back(nextFront);
+        // move to the next front index for the next iteration
+        currentFrontIndex++;
+        // if there are candidates for the next front, add them to newFronts
+        if (!nextFrontCandidates.empty()) {
+            newFronts.push_back(nextFrontCandidates);
         }
     }
 
-    // Update the population's fronts with newFronts
-    fronts.insert(fronts.end(), newFronts.begin(), newFronts.end());
+    // remove any remaining empty fronts from newFronts
+    newFronts.erase(std::remove_if(newFronts.begin(), newFronts.end(),
+                                   [](const std::vector<Individual*>& front) { return front.empty(); }),
+                    newFronts.end());
 
-    // Update individuals' rank based on front position
-    for (size_t frontIndex = 0; frontIndex < fronts.size(); ++frontIndex) {
-        for (auto* indPtr : fronts[frontIndex]) {
-            indPtr->setRank(frontIndex);
+    // update the population's fronts with newFronts
+    fronts = std::move(newFronts);
+
+    // update individuals' rank based on front position
+    for (size_t currentFrontIndex = 0; currentFrontIndex < fronts.size(); ++currentFrontIndex) {
+        std::cout << "Front " << currentFrontIndex << " has " << fronts[currentFrontIndex].size() << " individuals.\n";
+
+        for (auto* individual : fronts[currentFrontIndex]) {
+            individual->setRank(currentFrontIndex);
         }
     }
 
@@ -239,25 +257,28 @@ void Population::evolve(int generations) {
     for (int gen = 0; gen < generations; ++gen) {
         std::cout << "Generation: " << gen << std::endl;
 
+        printPopulationInfo();
+
         // step 1: sort the population into Pareto fronts
         std::cout << "Sorting into Pareto fronts...\n";
         fastNonDominatedSort();
 
-       checkEmptyGenotypes();
-       
+        printPopulationInfo();
+        checkEmptyGenotypes();
+
         // step 2: calculate crowding distance within each front
         std::cout << "Calculating crowding distances...\n";
         for (auto& front : fronts) {
             calculateCrowdingDistance(front);
         }
 
+        printPopulationInfo();
         checkEmptyGenotypes();
 
         // step 3: selection, crossover and mutation to create a new offspring pool
         std::cout << "Performing parent selection:\n";
         std::vector<Individual> offspring;
         int tournamentSize = 3;
-
 
         while (offspring.size() < populationSize) {
             std::vector<Individual> parents = parentSelection(tournamentSize);
@@ -279,11 +300,14 @@ void Population::evolve(int generations) {
         individuals = survivorSelection(populationSize); // Select the top individuals
 
         std::cout << "Generation " << gen << " completed.\n\n";
+        printPopulationInfo();
     }
 
     // Final metrics calculation
     std::cout << "Calculating final metrics...\n";
     Individual finalIndividual = findFittest();
+    finalIndividual.printChromosome();
+    std::cout << finalIndividual.;
     bool saveMetricsToFile = true;
     finalIndividual.evaluateObjectives(events, saveMetricsToFile);
     std::cout << "Evolution process completed.\n";
@@ -308,20 +332,23 @@ int Population::countUnique(const std::vector<Individual>& population) {
     return std::distance(genotypes.begin(), lastUnique);
 }
 
-const Individual Population::findFittest() {
-    // Ensure the population is already sorted into Pareto fronts and crowding distances are calculated
+const Individual& Population::findFittest() const {
+    std::cout << "Got here!" << std::endl;
+
+    if (fronts.empty() || fronts.front().empty()) {
+        throw std::runtime_error("No individuals in the population or the first front is empty.");
+    }
+
     const auto& firstFront = fronts.front();
 
     auto fittest = std::max_element(firstFront.begin(), firstFront.end(),
                                     [](const Individual* a, const Individual* b) {
-                                        // Compare by crowding distance, assuming you want the individual with the highest crowding distance
                                         return a->getCrowdingDistance() > b->getCrowdingDistance();
                                     });
 
-    // Dereference the iterator to get the pointer, then return the object it points to
+    std::cout << "Got here too!" << std::endl;
     return **fittest;
 }
-
 
 const Individual Population::findLeastFit() {
     const auto& lastFront = fronts.back(); // Assuming the last front contains the least fit individuals
@@ -343,5 +370,15 @@ void Population::checkEmptyGenotypes() {
             std::cout << "Empty genotype found!" << std::endl;
             throw std::runtime_error("Empty genotype encountered. Terminating program.");
         }
+    }
+}
+
+void Population::printPopulationInfo() {
+    std::cout << "Population information:" << std::endl;
+    std::cout << "Number of individuals: " << individuals.size() << std::endl;
+    std::cout << "Number of fronts: " << fronts.size() << std::endl;
+
+    for (size_t i = 0; i < fronts.size(); ++i) {
+        std::cout << "Front " << i << " has " << fronts[i].size() << " members." << std::endl;
     }
 }

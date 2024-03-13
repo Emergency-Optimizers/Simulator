@@ -55,7 +55,8 @@ class Population {
     void fastNonDominatedSort();
     void evolve(int generations);
     int countUnique(const std::vector<Individual>& population);
-    const Individual findFittest();
+    const Individual& findFittest() const;
     const Individual findLeastFit();
     void checkEmptyGenotypes();
+    void printPopulationInfo();
 };
