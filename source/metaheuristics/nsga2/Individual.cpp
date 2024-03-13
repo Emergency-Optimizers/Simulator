@@ -54,8 +54,6 @@ bool Individual::isValid() const {
 }
 
 void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
-    std::vector<double> newObjectives(numObjectives, 0);
-
     AmbulanceAllocator ambulanceAllocator(stations);
     ambulanceAllocator.allocate(genotype);
 

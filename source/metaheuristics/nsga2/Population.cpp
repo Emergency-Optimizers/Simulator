@@ -46,12 +46,12 @@ void Population::evaluateObjectives() {
     }
 }
 
-std::vector<Individual> Population::parentSelection(int numParents, int tournamentSize) {
+std::vector<Individual> Population::parentSelection(int tournamentSize) {
     std::cout << "Inside Parent Selection" << std::endl;
 
     std::vector<Individual> selectedParents;
 
-    for (int i = 0; i < numParents; i++) {
+    for (int i = 0; i < 2; i++) {
         std::vector<Individual> tournament;
         for (int j = 0; j < tournamentSize; j++) {
             tournament.push_back(Utils::getRandomElement(rnd, individuals));
@@ -70,7 +70,6 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
 
         selectedParents.push_back(*best);
     }
-    std::cout << "Returning parents" << std::endl;
 
     return selectedParents;
 }
@@ -80,11 +79,8 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
     std::vector<Individual> nextGeneration;
     int currentFrontIndex = 0;
 
-    std::cout << "Starting survivor selection... Total fronts: " << fronts.size() << ", Num survivors: " << numSurvivors << std::endl;
-
     while (nextGeneration.size() < numSurvivors && currentFrontIndex < fronts.size()) {
         auto& currentFront = fronts[currentFrontIndex];
-        std::cout << "Processing front " << currentFrontIndex << " with size " << currentFront.size() << std::endl;
 
         // Calculate crowding distance for all individuals in the current front
         calculateCrowdingDistance(currentFront);
@@ -100,12 +96,16 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
                 return a->getCrowdingDistance() > b->getCrowdingDistance(); // Prefer higher crowding distance
             });
             int slotsLeft = numSurvivors - nextGeneration.size();
-            for (int i = 0; i < slotsLeft; ++i) {
-                nextGeneration.push_back(*currentFront[i]); // Add individuals until slots are filled
+            int i = 0;
+            while (slotsLeft > 0 && i < currentFront.size()) {
+                if (!currentFront[i]->getGenotype().empty()) {
+                    nextGeneration.push_back(*currentFront[i]); // Add individuals until slots are filled
+                    slotsLeft--;
+                }
+                i++;
             }
         }
 
-        std::cout << "Filled next generation. Current size: " << nextGeneration.size() << std::endl;
         currentFrontIndex++;
     }
 
@@ -122,10 +122,9 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
     offspringGenotype.reserve(parent1.getGenotype().size());
 
     std::uniform_real_distribution<> dist(0, 1);
-    std::cout << "In crossover" << std::endl;
 
     if (parent1.getGenotype().size() == 0 || parent2.getGenotype().size() == 0) {
-        std::cerr << "Error: One of the parents has an empty genotype." << std::endl;
+        std::cerr << "Crossover error: One of the parents has an empty genotype." << std::endl;
 
         return parent1;
     }
@@ -133,10 +132,8 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
     for (size_t i = 0; i < parent1.getGenotype().size(); i++) {
         double alpha = dist(rnd);
         int gene = static_cast<int>(alpha * parent1.getGenotype()[i] + (1 - alpha) * parent2.getGenotype()[i]);
-        std::cout << "In crossover 2" << std::endl;
         offspringGenotype.push_back(gene);
     }
-    std::cout << "In crossover 3" << std::endl;
 
     Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
@@ -174,15 +171,10 @@ void Population::calculateCrowdingDistance(std::vector<Individual*>& front) {
             }
         }
     }
-
-    std::cout << "Calculated crowding distances for front with size " << front.size() << std::endl;
 }
 
 
 void Population::fastNonDominatedSort() {
-    std::cout << "Starting fast non-dominated sort..." << std::endl;
-
-    // No need to clear existing fronts
 
     std::vector<std::vector<Individual*>> newFronts;
     std::vector<std::vector<Individual*>> dominatedIndividuals(individuals.size());
@@ -206,14 +198,11 @@ void Population::fastNonDominatedSort() {
         }
     }
 
-    std::cout << "1\n";
-
     // Construct subsequent fronts
     int currentFront = -1;
     while (currentFront < static_cast<int>(newFronts.size() - 1)) {
         currentFront++;
         std::vector<Individual*> nextFront;
-        std::cout << "2\n";
         if (currentFront < static_cast<int>(newFronts.size())) {
             for (auto* p : newFronts[currentFront]) {
                 auto pIndex = std::distance(individuals.data(), p); // Find index of p in individuals
@@ -231,8 +220,6 @@ void Population::fastNonDominatedSort() {
             newFronts.push_back(nextFront);
         }
     }
-
-    std::cout << "3\n";
 
     // Update the population's fronts with newFronts
     fronts.insert(fronts.end(), newFronts.begin(), newFronts.end());
@@ -256,19 +243,24 @@ void Population::evolve(int generations) {
         std::cout << "Sorting into Pareto fronts...\n";
         fastNonDominatedSort();
 
+       checkEmptyGenotypes();
+       
         // step 2: calculate crowding distance within each front
         std::cout << "Calculating crowding distances...\n";
         for (auto& front : fronts) {
             calculateCrowdingDistance(front);
         }
 
+        checkEmptyGenotypes();
+
         // step 3: selection, crossover and mutation to create a new offspring pool
-        std::cout << "Performing selection, crossover, and mutation...\n";
+        std::cout << "Performing parent selection:\n";
         std::vector<Individual> offspring;
-        int numParents = populationSize / 2;
         int tournamentSize = 3;
+
+
         while (offspring.size() < populationSize) {
-            std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
+            std::vector<Individual> parents = parentSelection(tournamentSize);
             Individual child = crossover(parents[0], parents[1]);
             child.mutate();
             offspring.push_back(child);
@@ -342,4 +334,14 @@ const Individual Population::findLeastFit() {
 
     // Dereference the iterator to get the pointer, then return the object it points to
     return **leastFit;
+}
+
+void Population::checkEmptyGenotypes() {
+    std::cout << "Checking for empty genotypes..." << std::endl;
+    for (const Individual& individual : individuals) {
+        if (individual.getGenotype().empty()) {
+            std::cout << "Empty genotype found!" << std::endl;
+            throw std::runtime_error("Empty genotype encountered. Terminating program.");
+        }
+    }
 }
