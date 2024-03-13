@@ -60,3 +60,7 @@ int ODMatrix::getTravelTime(const int64_t& id1, const int64_t& id2) {
     }
     return matrix[idToIndexMap[id1]][idToIndexMap[id2]];
 }
+
+bool ODMatrix::gridIdExists(const int64_t& id) {
+    return idToIndexMap.find(id) != idToIndexMap.end();
+}
