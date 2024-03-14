@@ -57,6 +57,7 @@ class Utils {
     static double calculateStandardDeviation(const std::vector<int>& numbers);
     static double calculateEuclideanDistance(double x1, double y1, double x2, double y2);
     static std::pair<int, int> idToUtm(int64_t grid_id);
+    static int64_t utmToId(const std::pair<int, int>& utm, const int cellSize = 1000, const int offset = 2000000);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);

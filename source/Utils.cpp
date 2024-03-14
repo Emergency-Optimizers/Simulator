@@ -450,3 +450,10 @@ std::pair<int, int> Utils::idToUtm(int64_t grid_id) {
     int y = grid_id - (std::floor(grid_id * std::pow(10, -7)) * static_cast<int64_t>(std::pow(10, 7)));
     return std::make_pair(x, y);
 }
+
+int64_t Utils::utmToId(const std::pair<int, int>& utm, int cellSize, int offset) {
+   int64_t xCorner = std::floor((utm.first + offset) / cellSize) * cellSize - offset;
+   int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
+
+   return 20000000000000 + (xCorner * 10000000) + yCorner;
+}
