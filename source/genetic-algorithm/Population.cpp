@@ -109,26 +109,30 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
 
 void Population::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {
-        // step 1: parent selection
-        int numParents = populationSize/2;
-        int tournamentSize = 3;
-        std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
+        int numParents = populationSize / 2;
 
-        // step 2: crossover to create offspring
-        std::vector<Individual> children;
-        children.reserve(populationSize);
+        // don't branch if population size is set to 1
+        // this is for debugging when we only want to simulate once
+        if (numParents > 1) {
+            // step 1: parent selection
+            int tournamentSize = 3;
+            std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
 
-        for (int i = 0; i < populationSize; i += 2) {
-            Individual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
-            offspring.mutate();
-            offspring.evaluateFitness(events);
-            children.push_back(offspring);
+            // step 2: crossover to create offspring
+            std::vector<Individual> children;
+            children.reserve(populationSize);
+
+            for (int i = 0; i < populationSize; i += 2) {
+                Individual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
+                offspring.mutate();
+                offspring.evaluateFitness(events);
+                children.push_back(offspring);
+            }
+            // step 3: survivor selection
+            // combining existing population with children
+            addChildren(children);
+            individuals = survivorSelection(populationSize);
         }
-
-        // step 3: survivor selection
-        // combining existing population with children
-        addChildren(children);
-        individuals = survivorSelection(populationSize);
 
         Individual fittest = findFittest();
         std::cout << "Generation " << gen  << ": " << fittest.getFitness() << ", [" << countUnique(individuals) << "] unique individuals" << std::endl;
