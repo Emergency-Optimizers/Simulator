@@ -73,7 +73,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     }
 
     events[eventIndex].assignedAmbulanceIndex = closestAmbulanceIndex;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventIndex = eventIndex;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = events[eventIndex].id;
     events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
 }
 

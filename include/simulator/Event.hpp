@@ -18,6 +18,7 @@
 #include "simulator/EventType.hpp"
 
 struct Event {
+    int id = -1;
     EventType type = EventType::ASSIGNING_AMBULANCE;
     std::time_t timer;
     int assignedAmbulanceIndex = -1;

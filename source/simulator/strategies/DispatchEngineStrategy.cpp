@@ -106,7 +106,7 @@ void DispatchEngineStrategy::finishingEvent(
     events[eventIndex].metrics.dispatchToDepotTime += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventIndex = -1;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = -1;
     events[eventIndex].assignedAmbulanceIndex = -1;
 
     events[eventIndex].type = EventType::NONE;

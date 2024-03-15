@@ -404,6 +404,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
     for (int i = 0; i < totalEvents; i++) {
         Event event;
 
+        event.id = i;
+
         // get call received
         int callReceivedHour = Utils::weightedLottery(rnd, hourlyIncidentProbabilityDistribution, indexRangesHour);
         int callReceivedMin = Utils::weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);

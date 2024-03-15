@@ -142,7 +142,7 @@ std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Amb
     std::vector<unsigned> availableAmbulanceIndicies;
 
     for (int i = 0; i < ambulances.size(); i++) {
-        if (ambulances[i].assignedEventIndex == -1) availableAmbulanceIndicies.push_back(i);
+        if (ambulances[i].assignedEventId == -1) availableAmbulanceIndicies.push_back(i);
     }
 
     return availableAmbulanceIndicies;

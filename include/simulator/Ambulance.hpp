@@ -13,6 +13,6 @@ struct Ambulance {
     int id = -1;
     int allocatedDepotIndex = -1;
     int64_t currentGridId = -1;
-    int assignedEventIndex = -1;
+    int assignedEventId = -1;
     int timeUnavailable = 0;
 };
