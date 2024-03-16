@@ -46,7 +46,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances);
+    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances, events);
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
@@ -58,22 +58,64 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
 
     // find closest ambulance
     int closestAmbulanceIndex = -1;
+    int64_t closestAmbulanceGridId = -1;
     int closestAmbulanceTravelTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
     // std::pair<int, int> utm1 = Utils::idToUtm(eventGridId);
     for (int i = 0; i < availableAmbulanceIndicies.size(); i++) {
-        // std::pair<int, int> utm2 = Utils::idToUtm(ambulances[i].currentGridId);
+        int64_t ambulanceGridId;
+
+        if (ambulances[availableAmbulanceIndicies[i]].assignedEventId != -1) {
+            int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
+
+            int totalTravelTime = odMatrix.getTravelTime(
+                ambulances[availableAmbulanceIndicies[i]].currentGridId,
+                events[currentAmbulanceEventIndex].gridId
+            );
+
+            ambulanceGridId = Utils::approximateLocation(
+                ambulances[availableAmbulanceIndicies[i]].currentGridId,
+                events[currentAmbulanceEventIndex].gridId,
+                events[currentAmbulanceEventIndex].timer - totalTravelTime,
+                events[eventIndex].timer,
+                odMatrix
+            );
+
+            if (!odMatrix.gridIdExists(ambulanceGridId)) {
+                continue;
+            }
+        } else {
+            ambulanceGridId = ambulances[availableAmbulanceIndicies[i]].currentGridId;
+        }
+
+        // std::pair<int, int> utm2 = Utils::idToUtm(ambulanceGridId);
         // int travelTime = Utils::calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
-        int travelTime = odMatrix.getTravelTime(ambulances[availableAmbulanceIndicies[i]].currentGridId, eventGridId);
+        int travelTime = odMatrix.getTravelTime(ambulanceGridId, eventGridId);
 
         if (travelTime < closestAmbulanceTravelTime) {
             closestAmbulanceIndex = availableAmbulanceIndicies[i];
+            closestAmbulanceGridId = ambulanceGridId;
             closestAmbulanceTravelTime = travelTime;
         }
     }
 
+    if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
+        int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
+
+        events[currentAmbulanceEventIndex].metrics.dispatchToDepotTime += odMatrix.getTravelTime(
+            ambulances[closestAmbulanceIndex].currentGridId,
+            closestAmbulanceGridId
+        );
+
+        events[currentAmbulanceEventIndex].gridId = closestAmbulanceGridId;
+        events[currentAmbulanceEventIndex].assignedAmbulanceIndex = -1;
+        events[currentAmbulanceEventIndex].type = EventType::NONE;
+
+        ambulances[closestAmbulanceIndex].currentGridId = closestAmbulanceGridId;
+    }
+
     events[eventIndex].assignedAmbulanceIndex = closestAmbulanceIndex;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = events[eventIndex].id;
+    ambulances[closestAmbulanceIndex].assignedEventId = events[eventIndex].id;
     events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
 }
 
