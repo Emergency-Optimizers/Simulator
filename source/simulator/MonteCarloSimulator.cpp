@@ -256,11 +256,11 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
 }
 
 void MonteCarloSimulator::generateWaitTimeHistograms() {
-    generateWaitTimeHistogram("time_call_received", "time_incident_created", 10);
-    generateWaitTimeHistogram("time_incident_created", "time_resource_appointed", 10);
-    generateWaitTimeHistogram("time_resource_appointed", "time_ambulance_dispatch_to_scene", 10);
-    generateWaitTimeHistogram("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital", 10);
-    generateWaitTimeHistogram("time_ambulance_arrived_at_hospital", "time_ambulance_available", 10);
+    generateWaitTimeHistogram("time_call_received", "time_incident_created", 100);
+    generateWaitTimeHistogram("time_incident_created", "time_resource_appointed", 100);
+    generateWaitTimeHistogram("time_resource_appointed", "time_ambulance_dispatch_to_scene", 100);
+    generateWaitTimeHistogram("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital", 100);
+    generateWaitTimeHistogram("time_ambulance_arrived_at_hospital", "time_ambulance_available", 100);
 
     // custom histogram for cancelled incidents
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
@@ -455,8 +455,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         event.timer = std::mktime(&event.callReceived);
 
         // remove event.secondsWaitAppointingResource
-        event.timer += event.secondsWaitCallAnswered;
-        event.metrics.callProcessedTime += event.secondsWaitCallAnswered;
+        event.timer += event.secondsWaitCallAnswered + 30;
+        event.metrics.callProcessedTime += event.secondsWaitCallAnswered + 30;
 
         event.metrics.incidentGridId = event.gridId;
 
