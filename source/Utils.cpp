@@ -138,11 +138,19 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     return lhs.tm_sec < rhs.tm_sec;
 }
 
-std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances) {
+std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances, const std::vector<Event>& events) {
     std::vector<unsigned> availableAmbulanceIndicies;
 
     for (int i = 0; i < ambulances.size(); i++) {
-        if (ambulances[i].assignedEventId == -1) availableAmbulanceIndicies.push_back(i);
+        if (ambulances[i].assignedEventId == -1) {
+            availableAmbulanceIndicies.push_back(i);
+        } else {
+            for (int j = 0; j < events.size(); j++) {
+                if (events[j].id == ambulances[i].assignedEventId && events[j].type == EventType::FINISHED) {
+                    availableAmbulanceIndicies.push_back(i);
+                }
+            }
+        }
     }
 
     return availableAmbulanceIndicies;
@@ -456,4 +464,44 @@ int64_t Utils::utmToId(const std::pair<int, int>& utm, int cellSize, int offset)
    int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
 
    return 20000000000000 + (xCorner * 10000000) + yCorner;
+}
+
+int64_t Utils::approximateLocation(
+    const int64_t& startId,
+    const int64_t& goalId,
+    const time_t& timeAtStart,
+    const time_t& timeNow,
+    ODMatrix& odMatrix
+) {
+    int timeToReachGoal = odMatrix.getTravelTime(startId, goalId);
+
+    time_t timeTravelled = timeNow - timeAtStart;
+
+    double proportion = static_cast<double>(timeTravelled) / static_cast<double>(timeToReachGoal);
+
+    std::pair<int, int> utmStart = idToUtm(startId);
+    std::pair<int, int> utmGoal = idToUtm(goalId);
+
+    std::pair<int, int> utmInterpolated = {
+        static_cast<int>(static_cast<double>(utmStart.first) + static_cast<double>(utmGoal.first - utmStart.first) * proportion),
+        static_cast<int>(static_cast<double>(utmStart.second) + static_cast<double>(utmGoal.second - utmStart.second) * proportion)
+    };
+
+    int64_t approximatedGridId = utmToId(utmInterpolated);
+
+    /*std::cout
+        << startId << " -> " << goalId << " = " << approximatedGridId << " ("
+        << proportion * 100 << "% ("
+        << timeTravelled << "->" << timeToReachGoal
+        << "))" << std::endl;*/
+
+    return approximatedGridId;
+}
+
+int Utils::findEventIndexFromId(const std::vector<Event>& events, const int id) {
+    for (int i = 0; i < events.size(); i++) {
+        if (events[i].id == id) return i;
+    }
+
+    return -1;
 }

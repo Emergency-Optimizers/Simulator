@@ -17,6 +17,7 @@
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
+#include "simulator/ODMatrix.hpp"
 
 using CellType = std::variant<
     int,
@@ -44,7 +45,7 @@ class Utils {
     static int compareTime(const std::tm& time_1, const std::tm& time_2);
     static float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
     static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
-    static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances);
+    static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances, const std::vector<Event>& events);
     static int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay);
     static int weightedLottery(
         std::mt19937& rnd,
@@ -58,6 +59,14 @@ class Utils {
     static double calculateEuclideanDistance(double x1, double y1, double x2, double y2);
     static std::pair<int, int> idToUtm(int64_t grid_id);
     static int64_t utmToId(const std::pair<int, int>& utm, const int cellSize = 1000, const int offset = 2000000);
+    static int64_t approximateLocation(
+        const int64_t& startId,
+        const int64_t& goalId,
+        const time_t& timeAtStart,
+        const time_t& timeNow,
+        ODMatrix& odMatrix
+    );
+    static int findEventIndexFromId(const std::vector<Event>& events, const int id);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);
