@@ -31,6 +31,10 @@ CellType Utils::toFloat(const std::string& str) {
     return std::stof(str);
 }
 
+CellType Utils::toDouble(const std::string& str) {
+    return std::stod(str);
+}
+
 CellType Utils::toString(const std::string& str) {
     return str;
 }
@@ -68,6 +72,8 @@ std::string Utils::cellTypeToString(const CellType& cell) {
         } else if constexpr (std::is_same_v<T, int64_t>) {
             return std::to_string(arg);
         } else if constexpr (std::is_same_v<T, float>) {
+            return std::to_string(arg);
+        } else if constexpr (std::is_same_v<T, double>) {
             return std::to_string(arg);
         } else if constexpr (std::is_same_v<T, std::string>) {
             return arg;
@@ -460,10 +466,10 @@ std::pair<int, int> Utils::idToUtm(int64_t grid_id) {
 }
 
 int64_t Utils::utmToId(const std::pair<int, int>& utm, int cellSize, int offset) {
-   int64_t xCorner = std::floor((utm.first + offset) / cellSize) * cellSize - offset;
-   int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
+    int64_t xCorner = std::floor((utm.first + offset) / cellSize) * cellSize - offset;
+    int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
 
-   return 20000000000000 + (xCorner * 10000000) + yCorner;
+    return 20000000000000 + (xCorner * 10000000) + yCorner;
 }
 
 int64_t Utils::approximateLocation(

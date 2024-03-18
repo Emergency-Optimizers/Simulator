@@ -23,6 +23,7 @@ using CellType = std::variant<
     int,
     int64_t,
     float,
+    double,
     std::string,
     bool,
     std::optional<std::tm>
@@ -36,6 +37,7 @@ class Utils {
     static CellType toInt(const std::string& str);
     static CellType toInt64(const std::string& str);
     static CellType toFloat(const std::string& str);
+    static CellType toDouble(const std::string& str);
     static CellType toString(const std::string& str);
     static CellType toBool(const std::string& str);
     static CellType toDateTime(const std::string& str);
