@@ -28,6 +28,11 @@ int main() {
     ODMatrix odMatrix;
     odMatrix.loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 
+
+ Incidents incidents("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+    Stations stations("../../Data-Processing/data/enhanced/oslo/depots.csv");
+    ODMatrix odMatrix("../../Data-Processing/data/oslo/od_matrix.txt");
+    
     int numObjectives = 3;
     int populationSize = 10;
     int numDepots = 19;
