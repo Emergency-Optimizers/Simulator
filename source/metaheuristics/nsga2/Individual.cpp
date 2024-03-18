@@ -67,7 +67,7 @@ void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveM
         DispatchEngineStrategyType::CLOSEST,
         events
     );
-    
+
     simulator.run(saveMetricsToFile);
 
     objectives[0] = simulator.averageResponseTime("A", true);
@@ -179,7 +179,6 @@ void Individual::removeAmbulances(int ambulancesToRemove) {
 }
 
 void Individual::printChromosome() const {
-    std::cout << "Attempting to print genotype... " << genotype.size() << std::endl;
     for (int i = 0; i < genotype.size(); i++) {
         std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
     }        

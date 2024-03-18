@@ -252,7 +252,6 @@ void Population::fastNonDominatedSort() {
 }
 
 void Population::evolve(int generations) {
-    std::cout << "Starting evolution process...\n";
     for (int gen = 0; gen < generations; ++gen) {
         std::cout << "GENERATION: " << gen << std::endl;
 
@@ -321,8 +320,6 @@ int Population::countUnique(const std::vector<Individual>& population) {
 }
 
 const Individual& Population::findFittest() const {
-    std::cout << "Trying to find fittest..." << std::endl;
-
     if (fronts.empty() || fronts.front().empty()) {
         throw std::runtime_error("No individuals in the population or the first front is empty.");
     }
@@ -333,11 +330,6 @@ const Individual& Population::findFittest() const {
                                     [](const Individual* a, const Individual* b) {
                                         return a->getCrowdingDistance() > b->getCrowdingDistance();
                                     });
-
-    std::cout << "Finished finding fittest..." << std::endl;
-    if ((*fittest)->getGenotype().size() == 0) {
-        std::cout << "Fittest has genotype of length 0!\n";
-    }
 
     return **fittest;
 }
