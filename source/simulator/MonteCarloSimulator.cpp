@@ -171,7 +171,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 
         std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
 
-        bool canceled = !incidents.get<std::optional<std::tm>>("time_departure_scene", i).has_value();
+        bool canceled = !incidents.get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value();
 
         int indexTriage;
         if (triageImpression == "A") {
@@ -256,11 +256,11 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
 }
 
 void MonteCarloSimulator::generateWaitTimeHistograms() {
-    generateWaitTimeHistogram("time_call_received", "time_call_answered", 10);
-    generateWaitTimeHistogram("time_call_answered", "time_ambulance_notified", 10);
-    generateWaitTimeHistogram("time_ambulance_notified", "time_dispatch", 10);
-    generateWaitTimeHistogram("time_arrival_scene", "time_departure_scene", 10);
-    generateWaitTimeHistogram("time_arrival_hospital", "time_available", 10);
+    generateWaitTimeHistogram("time_call_received", "time_incident_created", 100);
+    generateWaitTimeHistogram("time_incident_created", "time_resource_appointed", 100);
+    generateWaitTimeHistogram("time_resource_appointed", "time_ambulance_dispatch_to_scene", 100);
+    generateWaitTimeHistogram("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital", 100);
+    generateWaitTimeHistogram("time_ambulance_arrived_at_hospital", "time_ambulance_available", 100);
 
     // custom histogram for cancelled incidents
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
@@ -272,12 +272,12 @@ void MonteCarloSimulator::generateWaitTimeHistograms() {
             // filter by triage impression
             if (filteredIncidents.get<std::string>("triage_impression_during_call", i) != triageImpression) continue;
             // filter out rows not cancelled
-            if (!filteredIncidents.get<std::optional<std::tm>>("time_departure_scene", i).has_value()) continue;
+            if (!filteredIncidents.get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value()) continue;
 
-            float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders("time_arrival_scene", "time_available", i);
+            float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders("time_ambulance_arrived_at_scene", "time_ambulance_available", i);
             data.push_back(timeDiff);
         }
-        waitTimesHistograms[std::pair("time_arrival_scene", "time_available")][triageImpression] = createHistogram(data, 10);
+        waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][triageImpression] = createHistogram(data, 10);
     }
 }
 
@@ -404,6 +404,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
     for (int i = 0; i < totalEvents; i++) {
         Event event;
 
+        event.id = i;
+
         // get call received
         int callReceivedHour = Utils::weightedLottery(rnd, hourlyIncidentProbabilityDistribution, indexRangesHour);
         int callReceivedMin = Utils::weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);
@@ -430,26 +432,33 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
 
         // wait times
         event.secondsWaitCallAnswered = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_call_received", "time_call_answered")][event.triageImpression]
+            waitTimesHistograms[std::pair("time_call_received", "time_incident_created")][event.triageImpression]
         );
-        event.secondsWaitAmbulanceNotified = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_call_answered", "time_ambulance_notified")][event.triageImpression]
-        );
-        event.secondsWaitAmbulanceDispatch = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_ambulance_notified", "time_dispatch")][event.triageImpression]
+        event.secondsWaitAppointingResource = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_incident_created", "time_resource_appointed")][event.triageImpression]
         );
 
         if (!canceled) {
             event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
-                waitTimesHistograms[std::pair("time_arrival_scene", "time_departure_scene")][event.triageImpression]
+                waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital")][event.triageImpression]
             );
             event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
-                waitTimesHistograms[std::pair("time_arrival_hospital", "time_available")][event.triageImpression]
+                waitTimesHistograms[std::pair("time_ambulance_arrived_at_hospital", "time_ambulance_available")][event.triageImpression]
+            );
+        } else {
+            event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
+                waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][event.triageImpression]
             );
         }
 
         // setup timer
         event.timer = std::mktime(&event.callReceived);
+
+        // remove event.secondsWaitAppointingResource
+        event.timer += event.secondsWaitCallAnswered + 30;
+        event.metrics.callProcessedTime += event.secondsWaitCallAnswered + 30;
+
+        event.metrics.incidentGridId = event.gridId;
 
         events.push_back(event);
     }

@@ -59,7 +59,25 @@ void GAIndividual::evaluateFitness(std::vector<Event> events, bool saveMetricsTo
     );
     simulator.run(saveMetricsToFile);
 
-    fitness = simulator.getResponseTime();
+    fitness = simulator.responseTimeViolations();
+
+    if (saveMetricsToFile) {
+        int totalHours = 0;
+        std::vector<int> times;
+        std::cout << std::endl;
+        for (int i = 0; i < ambulanceAllocator.ambulances.size(); i++) {
+            totalHours += (ambulanceAllocator.ambulances[i].timeUnavailable / 60) / 60;
+            times.push_back(ambulanceAllocator.ambulances[i].timeUnavailable);
+            std::cout
+                << "Ambulance " << i << ": "
+                << (ambulanceAllocator.ambulances[i].timeUnavailable / 60) / 60 << " hours"
+                << std::endl;
+        }
+        std::cout
+            << "Total: " << totalHours << " hours, "
+            << "Standard deviation: " << Utils::calculateStandardDeviation(times)
+            << std::endl;
+    }
 }
 
 void GAIndividual::mutate() {

@@ -26,7 +26,6 @@ void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulanc
             ambulance.id = ambulanceId++;
             ambulance.allocatedDepotIndex = depotIndex;
             ambulance.currentGridId = depotGridId;
-            ambulance.assignedEventIndex = -1;
 
             ambulances.push_back(ambulance);
         }

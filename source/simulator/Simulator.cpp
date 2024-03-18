@@ -55,14 +55,16 @@ void Simulator::run(bool saveMetricsToFile) {
     }
 }
 
-
-double Simulator::getResponseTime() {
-    EventPerformanceMetrics totalMetrics;
+double Simulator::averageResponseTime(const std::string& triageImpression, bool urban) {
     int totalEvents = eventHandler.events.size();
-
     if (totalEvents == 0) return 0;
 
+    EventPerformanceMetrics totalMetrics;
     for (int i = 0; i < totalEvents; i++) {
+        Event event = eventHandler.events[i];
+
+        if (event.triageImpression != triageImpression || incidents.gridIdUrban[event.metrics.incidentGridId] != urban) continue;
+
         totalMetrics.callProcessedTime += eventHandler.events[i].metrics.callProcessedTime;
         totalMetrics.dispatchToSceneTime += eventHandler.events[i].metrics.dispatchToSceneTime;
         totalMetrics.arrivalAtSceneTime += eventHandler.events[i].metrics.arrivalAtSceneTime;
@@ -72,9 +74,42 @@ double Simulator::getResponseTime() {
         totalMetrics.waitingForAmbulanceTime += eventHandler.events[i].metrics.waitingForAmbulanceTime;
     }
 
-    double averageResponseTime = static_cast<double>(totalMetrics.callProcessedTime + totalMetrics.dispatchToSceneTime + totalMetrics.waitingForAmbulanceTime) / totalEvents;
+    double totalResponseTime = static_cast<double>(
+        totalMetrics.callProcessedTime + totalMetrics.waitingForAmbulanceTime + totalMetrics.dispatchToSceneTime
+    );
+    if (totalResponseTime == 0) return 0;
 
-    return averageResponseTime;
+    return totalResponseTime / totalEvents;
+}
+
+double Simulator::responseTimeViolations() {
+    int totalEvents = eventHandler.events.size();
+    double totalWrongs = 0;
+
+    if (totalEvents == 0) return 0;
+
+    for (int i = 0; i < totalEvents; i++) {
+        int responseTime = eventHandler.events[i].metrics.callProcessedTime + eventHandler.events[i].metrics.dispatchToSceneTime;
+
+        bool urban = incidents.gridIdUrban[eventHandler.events[i].metrics.incidentGridId];
+        std::string triage = eventHandler.events[i].triageImpression;
+
+        if (triage == "A") {
+            if (urban) {
+                if (responseTime > 720) totalWrongs++;
+            } else if (responseTime > 1500) {
+                totalWrongs++;
+            }
+        } else if (triage == "H") {
+            if (urban) {
+                if (responseTime > 1800) totalWrongs++;
+            } else if (responseTime > 2400) {
+                totalWrongs++;
+            }
+        }
+    }
+
+    return totalWrongs;
 }
 
 void Simulator::printAverageEventPerformanceMetrics() {

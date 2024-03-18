@@ -11,7 +11,9 @@
 /* internal libraries */
 #include "simulator/ODMatrix.hpp"
 
-ODMatrix::ODMatrix() { }
+ODMatrix::ODMatrix(const std::string& filename) {
+    loadFromFile(filename);
+}
 
 void ODMatrix::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
@@ -56,5 +58,9 @@ int ODMatrix::getTravelTime(const int64_t& id1, const int64_t& id2) {
         std::cerr << "Invalid IDs\n";
         return 0;
     }
-    return matrix[idToIndexMap[id1]][idToIndexMap[id2]];
+    return matrix[idToIndexMap[id1]][idToIndexMap[id2]] + 20;
+}
+
+bool ODMatrix::gridIdExists(const int64_t& id) {
+    return idToIndexMap.find(id) != idToIndexMap.end();
 }

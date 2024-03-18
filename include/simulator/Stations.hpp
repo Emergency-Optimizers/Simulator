@@ -14,6 +14,7 @@
 class Stations : public CSVReader {
  public:
     Stations();
+    explicit Stations(const std::string& filename);
     std::vector<unsigned> getDepotIndices();
     std::vector<unsigned> getHospitalIndices();
 };

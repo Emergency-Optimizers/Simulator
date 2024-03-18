@@ -138,11 +138,19 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     return lhs.tm_sec < rhs.tm_sec;
 }
 
-std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances) {
+std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances, const std::vector<Event>& events) {
     std::vector<unsigned> availableAmbulanceIndicies;
 
     for (int i = 0; i < ambulances.size(); i++) {
-        if (ambulances[i].assignedEventIndex == -1) availableAmbulanceIndicies.push_back(i);
+        if (ambulances[i].assignedEventId == -1) {
+            availableAmbulanceIndicies.push_back(i);
+        } else {
+            for (int j = 0; j < events.size(); j++) {
+                if (events[j].id == ambulances[i].assignedEventId && events[j].type == EventType::FINISHED) {
+                    availableAmbulanceIndicies.push_back(i);
+                }
+            }
+        }
     }
 
     return availableAmbulanceIndicies;
@@ -275,7 +283,7 @@ void Utils::saveEventsToFile(const std::vector<Event>& events) {
     }
 
     // write CSV header
-    outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_call_answered,wait_time_ambulance_notified,wait_time_dispatch,wait_time_departure_scene,wait_time_available\n";
+    outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_incident_created,wait_time_ambulance_dispatch_to_hospital,wait_time_ambulance_available\n";
 
     // write each event to the CSV
     for (const auto& event : events) {
@@ -287,8 +295,6 @@ void Utils::saveEventsToFile(const std::vector<Event>& events) {
                 << event.triageImpression << ","
                 << event.gridId << ","
                 << event.secondsWaitCallAnswered << ","
-                << event.secondsWaitAmbulanceNotified << ","
-                << event.secondsWaitAmbulanceDispatch << ","
                 << event.secondsWaitDepartureScene << ","
                 << event.secondsWaitAvailable << "\n";
     }
@@ -419,4 +425,83 @@ void Utils::save2dDistributionToFile(const std::vector<std::vector<double>>& dis
 double Utils::getRandomProbability(std::mt19937& rnd) {
     std::uniform_real_distribution<> dist(0.0, 1.0);
     return dist(rnd);
+}
+
+double Utils::calculateMean(const std::vector<int>& numbers) {
+    double sum = 0.0;
+
+    for (int num : numbers) {
+        sum += num;
+    }
+
+    return numbers.empty() ? 0.0 : sum / numbers.size();
+}
+
+double Utils::calculateStandardDeviation(const std::vector<int>& numbers) {
+    double mean = calculateMean(numbers);
+    double varianceSum = 0.0;
+
+    for (int num : numbers) {
+        varianceSum += std::pow(num - mean, 2);
+    }
+    double variance = numbers.empty() ? 0.0 : varianceSum / numbers.size();
+
+    return std::sqrt(variance);
+}
+
+double Utils::calculateEuclideanDistance(double x1, double y1, double x2, double y2) {
+    return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+}
+
+std::pair<int, int> Utils::idToUtm(int64_t grid_id) {
+    int x = std::floor(grid_id * std::pow(10, -7)) - (2 * static_cast<int>(std::pow(10, 6)));
+    int y = grid_id - (std::floor(grid_id * std::pow(10, -7)) * static_cast<int64_t>(std::pow(10, 7)));
+    return std::make_pair(x, y);
+}
+
+int64_t Utils::utmToId(const std::pair<int, int>& utm, int cellSize, int offset) {
+   int64_t xCorner = std::floor((utm.first + offset) / cellSize) * cellSize - offset;
+   int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
+
+   return 20000000000000 + (xCorner * 10000000) + yCorner;
+}
+
+int64_t Utils::approximateLocation(
+    const int64_t& startId,
+    const int64_t& goalId,
+    const time_t& timeAtStart,
+    const time_t& timeNow,
+    ODMatrix& odMatrix
+) {
+    int timeToReachGoal = odMatrix.getTravelTime(startId, goalId);
+
+    time_t timeTravelled = timeNow - timeAtStart;
+
+    double proportion = static_cast<double>(timeTravelled) / static_cast<double>(timeToReachGoal);
+
+    std::pair<int, int> utmStart = idToUtm(startId);
+    std::pair<int, int> utmGoal = idToUtm(goalId);
+
+    std::pair<int, int> utmInterpolated = {
+        static_cast<int>(static_cast<double>(utmStart.first) + static_cast<double>(utmGoal.first - utmStart.first) * proportion),
+        static_cast<int>(static_cast<double>(utmStart.second) + static_cast<double>(utmGoal.second - utmStart.second) * proportion)
+    };
+
+    int64_t approximatedGridId = utmToId(utmInterpolated);
+
+    /*std::cout
+        << startId << " -> " << goalId << " = " << approximatedGridId << " ("
+        << proportion * 100 << "% ("
+        << timeTravelled << "->" << timeToReachGoal
+        << "))" << std::endl;*/
+
+    return approximatedGridId;
+}
+
+int Utils::findEventIndexFromId(const std::vector<Event>& events, const int id) {
+    for (int i = 0; i < events.size(); i++) {
+        if (events[i].id == id) return i;
+    }
+
+    return -1;
 }

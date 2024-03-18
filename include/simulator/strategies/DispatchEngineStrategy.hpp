@@ -18,7 +18,7 @@
 
 class DispatchEngineStrategy {
  protected:
-    static bool assignAmbulance(
+    static void assigningAmbulance(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
@@ -27,7 +27,7 @@ class DispatchEngineStrategy {
         std::vector<Event>& events,
         const int eventIndex
     );
-    static void callProcessed(
+    static void dispatchingToScene(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
@@ -36,7 +36,7 @@ class DispatchEngineStrategy {
         std::vector<Event>& events,
         const int eventIndex
     );
-    static void dispatchToScene(
+    static void dispatchingToHospital(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
@@ -45,7 +45,7 @@ class DispatchEngineStrategy {
         std::vector<Event>& events,
         const int eventIndex
     );
-    static void arrivedAtScene(
+    static void dispatchingToDepot(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,
@@ -54,25 +54,7 @@ class DispatchEngineStrategy {
         std::vector<Event>& events,
         const int eventIndex
     );
-    static void dispatchToHospital(
-        std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
-        std::vector<Ambulance>& ambulances,
-        std::vector<Event>& events,
-        const int eventIndex
-    );
-    static void arrivedAtHospital(
-        std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
-        std::vector<Ambulance>& ambulances,
-        std::vector<Event>& events,
-        const int eventIndex
-    );
-    static void dispatchToDepot(
+    static void finishingEvent(
         std::mt19937& rng,
         Incidents& incidents,
         Stations& stations,

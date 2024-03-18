@@ -40,6 +40,7 @@ class Simulator {
 
     );
     void run(bool saveMetricsToFile = false);
-    double getResponseTime();
+    double averageResponseTime(const std::string& triageImpression, bool urban);
+    double responseTimeViolations();
     void printAverageEventPerformanceMetrics();
 };
