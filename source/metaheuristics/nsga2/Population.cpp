@@ -297,9 +297,7 @@ void Population::evolve(int generations) {
     printBestScoresForEachObjective();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateObjectives(events, saveMetricsToFile);
-    std::cout << "Evolution process completed.\n";
 }
-
 
 int Population::countUnique(const std::vector<Individual>& population) {
     std::vector<std::vector<int>> genotypes;
