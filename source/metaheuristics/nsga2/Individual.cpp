@@ -55,7 +55,6 @@ bool Individual::isValid() const {
 }
 
 void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
-    std::cout << "Here" << std::endl;
     AmbulanceAllocator ambulanceAllocator(stations);
     ambulanceAllocator.allocate(genotype);
 
@@ -68,21 +67,16 @@ void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveM
         DispatchEngineStrategyType::CLOSEST,
         events
     );
+    
     simulator.run(saveMetricsToFile);
 
-    // TODO:
-    // objectives[0] = simulator.getAverageResponseTime("A", "Urban");
-    // objectives[1] = simulator.getAverageResponseTime("H", "Urban");
-    // objectives[2] = simulator.getAverageResponseTime("A", "NonUrban");
-    // objectives[3] = simulator.getAverageResponseTime("H", "NonUrban");
-    // objectives[4] = simulator.getCountOverThreshold("Urban", 12)
-    // objectives[5] =  simulator.getCountOverThreshold("NonUrban", 25);
-    // objectives[6] = simulator.calculateUHU();
-
-    // mock objectives for purpose of testing:
     objectives[0] = simulator.averageResponseTime("A", true);
-    objectives[1] = calculateUniformityObjective();
-    objectives[2] = calculateMinimizeMaxDepotObjective();
+    objectives[1] = simulator.averageResponseTime("A", false);
+    objectives[2] = simulator.averageResponseTime("H", true);
+    objectives[3] = simulator.averageResponseTime("H", false);
+    objectives[4] = simulator.averageResponseTime("V1", true);
+    objectives[5] = simulator.averageResponseTime("V1", false);
+    objectives[6] = simulator.responseTimeViolations();
 }
 
 double Individual::calculateUniformityObjective() {
@@ -169,7 +163,6 @@ void Individual::addAmbulances(int ambulancesToAdd) {
 
 void Individual::removeAmbulances(int ambulancesToRemove) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
-    std::cout << "In removeAmulances() - Min: " << 0 << ", Max: " << genotype.size() - 1 << std::endl;
 
     for (int i = 0; i < ambulancesToRemove; i++) {
         bool ambulanceRemoved = false;
@@ -186,12 +179,10 @@ void Individual::removeAmbulances(int ambulancesToRemove) {
 }
 
 void Individual::printChromosome() const {
-    std::cout << "Okay gonna try: " << genotype.size() << std::endl;
+    std::cout << "Attempting to print genotype... " << genotype.size() << std::endl;
     for (int i = 0; i < genotype.size(); i++) {
         std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
     }        
-    std::cout << "Heelep" << std::endl;
-
 }
 
 const std::vector<int>& Individual::getGenotype() const {

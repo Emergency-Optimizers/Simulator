@@ -20,18 +20,22 @@ int main() {
     std::mt19937 rnd(0);
 
     Incidents incidents("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+    std::cout << "[1/3] Incidents loaded" << std::endl;
     Stations stations("../../Data-Processing/data/enhanced/oslo/depots.csv");
+    std::cout << "[2/3] Stations loaded" << std::endl;
     ODMatrix odMatrix("../../Data-Processing/data/oslo/od_matrix.txt");
+    std::cout << "[3/3] OD matrix loaded" << std::endl;
+
     
-    int numObjectives = 3;
-    int populationSize = 10;
+    int numObjectives = 7;
+    int populationSize = 30;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 3;
+    int generations = 30;
     bool saveEventsToCSV = true;
 
-    std::cout << "Starting NSGA..." << std::endl;
+    std::cout << "\nStarting NSGA..." << std::endl;
     Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, numObjectives, mutationProbability, saveEventsToCSV);
 
     // run the genetic algorithm for the specified number of generations
@@ -39,8 +43,6 @@ int main() {
     population.evolve(generations);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-
-    std::cout << "Got out! " << std::endl;
 
     return 0;
 }

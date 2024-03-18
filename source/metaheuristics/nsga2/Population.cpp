@@ -73,7 +73,6 @@ std::vector<Individual> Population::parentSelection(int tournamentSize) {
     return selectedParents;
 }
 
-
 std::vector<Individual> Population::survivorSelection(int numSurvivors) {
     std::vector<Individual> nextGeneration;
     int currentFrontIndex = 0;
@@ -83,6 +82,14 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
 
         // Calculate crowding distance for all individuals in the current front
         calculateCrowdingDistance(currentFront);
+
+        // Remove individuals with empty genotypes from the current front
+        currentFront.erase(
+            std::remove_if(currentFront.begin(), currentFront.end(),
+                           [](const Individual* individual) {
+                               return individual->getGenotype().empty();
+                           }),
+            currentFront.end());
 
         // If adding the entire front does not exceed numSurvivors, add all; otherwise, add as many as needed
         if (nextGeneration.size() + currentFront.size() <= numSurvivors) {
@@ -171,10 +178,6 @@ void Population::calculateCrowdingDistance(std::vector<Individual*>& front) {
 
 
 void Population::fastNonDominatedSort() {
-    std::cout << "Starting fast non-dominated sort..." << std::endl;
-    std::cout << "Total individuals in population: " << individuals.size() << "\n";
-
-
     // clear domination values
     for (Individual& ind : individuals) {
         ind.clearDominatedIndividuals();
@@ -242,40 +245,26 @@ void Population::fastNonDominatedSort() {
 
     // update individuals' rank based on front position
     for (size_t currentFrontIndex = 0; currentFrontIndex < fronts.size(); ++currentFrontIndex) {
-        std::cout << "Front " << currentFrontIndex << " has " << fronts[currentFrontIndex].size() << " individuals.\n";
-
         for (auto* individual : fronts[currentFrontIndex]) {
             individual->setRank(currentFrontIndex);
         }
     }
-
-    std::cout << "Fast non-dominated sort completed. Total fronts: " << fronts.size() << std::endl;
 }
 
 void Population::evolve(int generations) {
     std::cout << "Starting evolution process...\n";
     for (int gen = 0; gen < generations; ++gen) {
-        std::cout << "Generation: " << gen << std::endl;
-
-        printPopulationInfo();
+        std::cout << "GENERATION: " << gen << std::endl;
 
         // step 1: sort the population into Pareto fronts
-        std::cout << "Sorting into Pareto fronts...\n";
         fastNonDominatedSort();
 
-        printPopulationInfo();
-
         // step 2: calculate crowding distance within each front
-        std::cout << "Calculating crowding distances...\n";
         for (auto& front : fronts) {
             calculateCrowdingDistance(front);
         }
 
-        printPopulationInfo();
-        checkEmptyGenotypes();
-
         // step 3: selection, crossover and mutation to create a new offspring pool
-        std::cout << "Performing parent selection:\n";
         std::vector<Individual> offspring;
         int tournamentSize = 3;
 
@@ -287,27 +276,21 @@ void Population::evolve(int generations) {
         }
 
         // step 4: evaluate objectives for offspring
-        std::cout << "Evaluating objectives for offspring...\n";
         for (Individual& child : offspring) {
             child.evaluateObjectives(events);
         }
 
-        checkEmptyGenotypes();
-
         // step 5: combine, sort, and select the next generation from parents and offspring
-        std::cout << "Combining and selecting the next generation...\n";
         individuals.insert(individuals.end(), offspring.begin(), offspring.end());
         fastNonDominatedSort(); // Re-sort combined population
-        individuals = survivorSelection(populationSize); // Select the top individuals
 
-        checkEmptyGenotypes();
-
-        std::cout << "Generation " << gen << " completed.\n\n";
-        printPopulationInfo();
+        individuals = survivorSelection(populationSize);
+        fastNonDominatedSort();
     }
 
     // Final metrics calculation
     std::cout << "Calculating final metrics...\n";
+
     Individual finalIndividual = findFittest();
 
     std::cout << finalIndividual.getGenotype().size() << std::endl;
@@ -338,7 +321,7 @@ int Population::countUnique(const std::vector<Individual>& population) {
 }
 
 const Individual& Population::findFittest() const {
-    std::cout << "Got here!" << std::endl;
+    std::cout << "Trying to find fittest..." << std::endl;
 
     if (fronts.empty() || fronts.front().empty()) {
         throw std::runtime_error("No individuals in the population or the first front is empty.");
@@ -351,7 +334,10 @@ const Individual& Population::findFittest() const {
                                         return a->getCrowdingDistance() > b->getCrowdingDistance();
                                     });
 
-    std::cout << "Got here too!" << std::endl;
+    std::cout << "Finished finding fittest..." << std::endl;
+    if ((*fittest)->getGenotype().size() == 0) {
+        std::cout << "Fittest has genotype of length 0!\n";
+    }
 
     return **fittest;
 }
@@ -370,15 +356,29 @@ const Individual Population::findLeastFit() {
 }
 
 void Population::checkEmptyGenotypes() {
-    std::cout << "Checking for empty genotypes..." << std::endl;
+    std::cout << "Checking for empty genotypes in the entire population..." << std::endl;
+    // Check entire population
     for (const Individual& individual : individuals) {
         if (individual.getGenotype().empty()) {
-            std::cout << "Empty genotype found!" << std::endl;
-            throw std::runtime_error("Empty genotype encountered. Terminating program.");
+            std::cout << "Empty genotype found in the population!" << std::endl;
+            throw std::runtime_error("Empty genotype encountered in the population. Terminating program.");
         }
     }
-    std::cout << "No empty  genotypes." << std::endl;
+    std::cout << "No empty genotypes in the population." << std::endl;
+
+    // Now, check each front
+    std::cout << "Checking for empty genotypes in each front..." << std::endl;
+    for (const auto& front : fronts) {
+        for (const Individual* individual : front) {
+            if (individual->getGenotype().empty()) {
+                std::cout << "Empty genotype found in a front!" << std::endl;
+                throw std::runtime_error("Empty genotype encountered in a front. Terminating program.");
+            }
+        }
+    }
+    std::cout << "No empty genotypes in any front." << std::endl;
 }
+
 
 void Population::printPopulationInfo() {
     std::cout << "Population information:" << std::endl;
