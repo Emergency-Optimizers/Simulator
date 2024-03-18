@@ -21,9 +21,6 @@
 class Simulator {
  private:
     std::mt19937& rng;
-    Incidents& incidents;
-    Stations& stations;
-    ODMatrix& odMatrix;
     AmbulanceAllocator& ambulanceAllocator;
     EventHandler eventHandler;
     DispatchEngineStrategyType dispatchStrategy;
@@ -31,9 +28,6 @@ class Simulator {
  public:
     Simulator(
         std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event> events

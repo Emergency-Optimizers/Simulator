@@ -19,14 +19,14 @@
 class MonteCarloSimulator {
  private:
     std::mt19937& rnd;
-    Incidents& incidents;
-    Incidents filteredIncidents;
+    std::vector<int> filteredIncidents;
     const int windowSize;
     const int year;
     const int month;
     const int day;
     const bool dayShift;
     std::vector<double> weights;
+
     void generateHourlyIncidentProbabilityDistribution();
     void generateMinuteIncidentProbabilityDistribution();
     void generateTriageProbabilityDistribution();
@@ -51,9 +51,9 @@ class MonteCarloSimulator {
     std::map<int, int64_t> indexToGridIdMapping;
     std::map<int64_t, int> gridIdToIndexMapping;
     std::vector<std::vector<std::vector<double>>> locationProbabilityDistribution;
+
     MonteCarloSimulator(
         std::mt19937& rnd,
-        Incidents& incidents,
         const int year,
         const int month,
         const int day,

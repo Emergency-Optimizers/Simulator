@@ -8,18 +8,18 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Ambulance.hpp"
 
-AmbulanceAllocator::AmbulanceAllocator(Stations& stations) : stations(stations) {}
+AmbulanceAllocator::AmbulanceAllocator() {}
 
 void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots) {
     ambulances.clear();
 
-    std::vector<unsigned> depotIndices = stations.getDepotIndices();
+    std::vector<unsigned> depotIndices = Stations::getInstance().getDepotIndices();
 
     int ambulanceId = 0;
     for (int depotId = 0; depotId < totalAllocatedAmbulancesAtDepots.size(); depotId++) {
         int depotIndex = depotIndices[depotId];
         int numberOfAmbulancesInDepot = totalAllocatedAmbulancesAtDepots[depotId];
-        const int64_t depotGridId = stations.get<int64_t>("grid_id", depotIndex);
+        const int64_t depotGridId = Stations::getInstance().get<int64_t>("grid_id", depotIndex);
 
         for (int i = 0; i < numberOfAmbulancesInDepot; i++) {
             Ambulance ambulance;

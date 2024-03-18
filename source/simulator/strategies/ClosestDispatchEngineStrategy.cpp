@@ -11,37 +11,31 @@
 
 void ClosestDispatchEngineStrategy::run(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
     switch (events[eventIndex].type) {
         case EventType::ASSIGNING_AMBULANCE:
-            assigningAmbulance(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            assigningAmbulance(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
-            dispatchingToScene(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            dispatchingToScene(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_HOSPITAL:
-            dispatchingToHospital(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            dispatchingToHospital(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_DEPOT:
-            dispatchingToDepot(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            dispatchingToDepot(rng, ambulances, events, eventIndex);
             break;
         case EventType::FINISHED:
-            finishingEvent(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            finishingEvent(rng, ambulances, events, eventIndex);
             break;
     }
 }
 
 void ClosestDispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -68,7 +62,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
         if (ambulances[availableAmbulanceIndicies[i]].assignedEventId != -1) {
             int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
 
-            int totalTravelTime = odMatrix.getTravelTime(
+            int totalTravelTime = ODMatrix::getInstance().getTravelTime(
                 ambulances[availableAmbulanceIndicies[i]].currentGridId,
                 events[currentAmbulanceEventIndex].gridId
             );
@@ -77,11 +71,10 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
                 ambulances[availableAmbulanceIndicies[i]].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
                 events[currentAmbulanceEventIndex].timer - totalTravelTime,
-                events[eventIndex].timer,
-                odMatrix
+                events[eventIndex].timer
             );
 
-            if (!odMatrix.gridIdExists(ambulanceGridId)) {
+            if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
                 continue;
             }
         } else {
@@ -90,7 +83,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
 
         // std::pair<int, int> utm2 = Utils::idToUtm(ambulanceGridId);
         // int travelTime = Utils::calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
-        int travelTime = odMatrix.getTravelTime(ambulanceGridId, eventGridId);
+        int travelTime = ODMatrix::getInstance().getTravelTime(ambulanceGridId, eventGridId);
 
         if (travelTime < closestAmbulanceTravelTime) {
             closestAmbulanceIndex = availableAmbulanceIndicies[i];
@@ -102,7 +95,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
         int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
 
-        events[currentAmbulanceEventIndex].metrics.dispatchToDepotTime += odMatrix.getTravelTime(
+        events[currentAmbulanceEventIndex].metrics.dispatchToDepotTime += ODMatrix::getInstance().getTravelTime(
             ambulances[closestAmbulanceIndex].currentGridId,
             closestAmbulanceGridId
         );
@@ -121,9 +114,6 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
 
 void ClosestDispatchEngineStrategy::dispatchingToHospital(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -132,25 +122,25 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
     int closestHospitalIndex = -1;
     int closestHospitalTravelTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
-    std::vector<unsigned int> hospitals = stations.getHospitalIndices();
+    std::vector<unsigned int> hospitals = Stations::getInstance().getHospitalIndices();
     for (int i = 0; i < hospitals.size(); i++) {
-        int64_t hospitalGridId = stations.get<int64_t>(
+        int64_t hospitalGridId = Stations::getInstance().get<int64_t>(
             "grid_id",
             hospitals[i]
         );
-        int travelTime = odMatrix.getTravelTime(hospitalGridId, eventGridId);
+        int travelTime = ODMatrix::getInstance().getTravelTime(hospitalGridId, eventGridId);
         if (travelTime < closestHospitalTravelTime) {
             closestHospitalIndex = i;
             closestHospitalTravelTime = travelTime;
         }
     }
 
-    events[eventIndex].gridId = stations.get<int64_t>(
+    events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
         hospitals[closestHospitalIndex]
     );
 
-    int incrementSeconds = odMatrix.getTravelTime(
+    int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
         events[eventIndex].gridId
     );

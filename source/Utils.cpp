@@ -476,10 +476,9 @@ int64_t Utils::approximateLocation(
     const int64_t& startId,
     const int64_t& goalId,
     const time_t& timeAtStart,
-    const time_t& timeNow,
-    ODMatrix& odMatrix
+    const time_t& timeNow
 ) {
-    int timeToReachGoal = odMatrix.getTravelTime(startId, goalId);
+    int timeToReachGoal = ODMatrix::getInstance().getTravelTime(startId, goalId);
 
     time_t timeTravelled = timeNow - timeAtStart;
 

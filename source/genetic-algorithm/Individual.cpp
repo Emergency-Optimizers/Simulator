@@ -12,15 +12,12 @@
 
 Individual::Individual(
     std::mt19937& rnd,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Event> events,
     int numDepots,
     int numAmbulances,
     double mutationProbability,
     bool child
-) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
+) : rnd(rnd), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
     if (!child) {
         randomizeAmbulances();
     }
@@ -45,14 +42,11 @@ bool Individual::isValid() const {
 void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
     fitness = 0.0;
 
-    AmbulanceAllocator ambulanceAllocator(stations);
+    AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(genotype);
 
     Simulator simulator(
         rnd,
-        incidents,
-        stations,
-        odMatrix,
         ambulanceAllocator,
         DispatchEngineStrategyType::CLOSEST,
         events

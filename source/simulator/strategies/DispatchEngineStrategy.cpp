@@ -9,9 +9,6 @@
 
 void DispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -21,14 +18,11 @@ void DispatchEngineStrategy::assigningAmbulance(
 
 void DispatchEngineStrategy::dispatchingToScene(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    int incrementSeconds = odMatrix.getTravelTime(
+    int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
         events[eventIndex].gridId
     );
@@ -57,9 +51,6 @@ void DispatchEngineStrategy::dispatchingToScene(
 
 void DispatchEngineStrategy::dispatchingToHospital(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -69,19 +60,16 @@ void DispatchEngineStrategy::dispatchingToHospital(
 
 void DispatchEngineStrategy::dispatchingToDepot(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    events[eventIndex].gridId = stations.get<int64_t>(
+    events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
         ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
     );
 
-    int incrementSeconds = odMatrix.getTravelTime(
+    int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
         events[eventIndex].gridId
     );
@@ -92,14 +80,11 @@ void DispatchEngineStrategy::dispatchingToDepot(
 
 void DispatchEngineStrategy::finishingEvent(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    int incrementSeconds = odMatrix.getTravelTime(
+    int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
         events[eventIndex].gridId
     );

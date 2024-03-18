@@ -11,20 +11,17 @@
 
 Population::Population(
     std::mt19937& rnd,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     int populationSize,
     int numDepots,
     int numAmbulances,
     double mutationProbability,
     bool saveEventsToCSV
-) : rnd(rnd), incidents(incidents), stations(stations), odMatrix(odMatrix), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
-    MonteCarloSimulator monteCarloSim(rnd, incidents, 2019, 2, 7, true, 4);
+) : rnd(rnd), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
+    MonteCarloSimulator monteCarloSim(rnd, 2019, 2, 7, true, 4);
     events = monteCarloSim.generateEvents(saveEventsToCSV); // write to csv
 
     for (int i = 0; i < populationSize; i++) {
-        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);
+        Individual individual = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, false);
         individuals.push_back(individual);
     }
 
@@ -99,7 +96,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability);
+    Individual offspring = Individual(rnd, events, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateFitness(events);

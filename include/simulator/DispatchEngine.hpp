@@ -22,9 +22,6 @@ class DispatchEngine {
     static void dispatch(
         const DispatchEngineStrategyType strategy,
         std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,
         const int eventIndex

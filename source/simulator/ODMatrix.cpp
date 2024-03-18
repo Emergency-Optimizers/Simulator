@@ -11,8 +11,8 @@
 /* internal libraries */
 #include "simulator/ODMatrix.hpp"
 
-ODMatrix::ODMatrix(const std::string& filename) {
-    loadFromFile(filename);
+ODMatrix::ODMatrix() {
+    loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
 }
 
 void ODMatrix::loadFromFile(const std::string& filename) {

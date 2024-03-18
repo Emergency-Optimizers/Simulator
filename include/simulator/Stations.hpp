@@ -12,9 +12,16 @@
 #include "simulator/CSVReader.hpp"
 
 class Stations : public CSVReader {
- public:
+ private:
     Stations();
-    explicit Stations(const std::string& filename);
+
+ public:
+    Stations(const Stations&) = delete;
+    Stations& operator=(const Stations&) = delete;
+    static Stations& getInstance() {
+        static Stations instance;
+        return instance;
+    }
     std::vector<unsigned> getDepotIndices();
     std::vector<unsigned> getHospitalIndices();
 };

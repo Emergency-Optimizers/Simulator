@@ -13,16 +13,12 @@
 #include <random>
 /* internal libraries */
 #include "simulator/Incidents.hpp"
-#include "simulator/Stations.hpp"
 #include "simulator/ODMatrix.hpp"
 #include "simulator/Event.hpp"
 
 class Individual {
  private:
     std::mt19937& rnd;
-    Incidents& incidents;
-    Stations& stations;
-    ODMatrix& odMatrix;
     std::vector<int> genotype;
     int numDepots;
     int numAmbulances;
@@ -33,9 +29,6 @@ class Individual {
  public:
     Individual(
         std::mt19937& rnd,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         std::vector<Event> events,
         int numDepots,
         int numAmbulances,

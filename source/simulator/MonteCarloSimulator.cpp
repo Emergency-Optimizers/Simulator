@@ -7,25 +7,24 @@
 /* external libraries */
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
 #include "Constants.hpp"
-#include <iomanip>
 
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
-    Incidents& incidents,
     const int year,
     const int month,
     const int day,
     const bool dayShift,
     const unsigned windowSize
-) : rnd(rnd), incidents(incidents), windowSize(windowSize), year(year), month(month), day(day), dayShift(dayShift) {
-    filteredIncidents = incidents.rowsWithinTimeFrame(month, day, windowSize);
+) : rnd(rnd), windowSize(windowSize), year(year), month(month), day(day), dayShift(dayShift) {
+    filteredIncidents = Incidents::getInstance().rowsWithinTimeFrame(month, day, windowSize);
 
     weights = generateWeights(windowSize);
-    for (int i = 0, indexGridId = 0; i < incidents.size(); i++) {
-        int64_t gridId = incidents.get<int64_t>("grid_id", i);
+    for (int i = 0, indexGridId = 0; i < Incidents::getInstance().size(); i++) {
+        int64_t gridId = Incidents::getInstance().get<int64_t>("grid_id", i);
 
         if (gridIdToIndexMapping.count(gridId)) continue;
 
@@ -70,7 +69,10 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
 
     // get total incidents per hour for each row in the filtered dataset
     for (int i = 0; i < filteredIncidents.size(); i++) {
-        std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
+            "time_call_received",
+            filteredIncidents[i]
+        ).value();
 
         // calculate weight based on how far away the incident is from the target
         int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
@@ -96,7 +98,10 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
     std::vector<double> totalIncidents(24, 0);
 
     for (int i = 0; i < filteredIncidents.size(); i++) {
-        std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
+            "time_call_received",
+            filteredIncidents[i]
+        ).value();
 
         int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
@@ -114,7 +119,6 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
 
     minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
     Utils::save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "minute_incident_probability_distribution");
-
 }
 
 void MonteCarloSimulator::generateTriageProbabilityDistribution() {
@@ -124,12 +128,18 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     std::vector<double> totalIncidents(24, 0);
 
     for (int i = 0; i < filteredIncidents.size(); i++) {
-        std::tm timeCallReceived = filteredIncidents.get<std::optional<std::tm>>("time_call_received", i).value();
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
+            "time_call_received",
+            filteredIncidents[i]
+        ).value();
 
         int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
 
-        std::string triageImpression = filteredIncidents.get<std::string>("triage_impression_during_call", i);
+        std::string triageImpression = Incidents::getInstance().get<std::string>(
+            "triage_impression_during_call",
+            filteredIncidents[i]
+        );
 
         int indexTriage;
         if (triageImpression == "A") {
@@ -153,7 +163,6 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
     Utils::saveDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
-
 }
 
 void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
@@ -164,14 +173,14 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 
     std::vector<double> weightsYear = generateWeights(365);
 
-    for (int i = 0; i < incidents.size(); i++) {
-        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+    for (int i = 0; i < Incidents::getInstance().size(); i++) {
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
         int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
         double weight = weightsYear[dayDiff];
 
-        std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
+        std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", i);
 
-        bool canceled = !incidents.get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value();
+        bool canceled = !Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value();
 
         int indexTriage;
         if (triageImpression == "A") {
@@ -217,14 +226,14 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
 
     std::vector<double> weightsYear = generateWeights(365);
 
-    for (int i = 0; i < incidents.size(); i++) {
-        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+    for (int i = 0; i < Incidents::getInstance().size(); i++) {
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
         int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
         double weight = weightsYear[dayDiff];
 
-        std::string triageImpression = incidents.get<std::string>("triage_impression_during_call", i);
+        std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", i);
 
-        int64_t gridId = incidents.get<int64_t>("grid_id", i);
+        int64_t gridId = Incidents::getInstance().get<int64_t>("grid_id", i);
 
         int indexTriage;
         if (triageImpression == "A") {
@@ -252,7 +261,6 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
     }
 
     locationProbabilityDistribution = newLocationProbabilityDistribution;
-
 }
 
 void MonteCarloSimulator::generateWaitTimeHistograms() {
@@ -270,14 +278,22 @@ void MonteCarloSimulator::generateWaitTimeHistograms() {
 
         for (int i = 0; i < filteredIncidents.size(); i++) {
             // filter by triage impression
-            if (filteredIncidents.get<std::string>("triage_impression_during_call", i) != triageImpression) continue;
+            if (Incidents::getInstance().get<std::string>("triage_impression_during_call", filteredIncidents[i]) != triageImpression) {
+                continue;
+            }
             // filter out rows not cancelled
-            if (!filteredIncidents.get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value()) continue;
+            if (!Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", filteredIncidents[i]).has_value()) {
+                continue;
+            }
 
-            float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders("time_ambulance_arrived_at_scene", "time_ambulance_available", i);
+            float timeDiff = Incidents::getInstance().timeDifferenceBetweenHeaders(
+                "time_ambulance_arrived_at_scene",
+                "time_ambulance_available",
+                filteredIncidents[i]
+            );
             data.push_back(timeDiff);
         }
-        waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][triageImpression] = createHistogram(data, 10);
+        waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][triageImpression] = createHistogram(data, 100);
     }
 }
 
@@ -293,12 +309,22 @@ void MonteCarloSimulator::generateWaitTimeHistogram(
 
         for (int i = 0; i < filteredIncidents.size(); i++) {
             // filter by triage impression
-            if (filteredIncidents.get<std::string>("triage_impression_during_call", i) != triageImpression) continue;
+            if (Incidents::getInstance().get<std::string>("triage_impression_during_call", filteredIncidents[i]) != triageImpression) {
+                continue;
+            }
             // filter out rows with NaN values
-            if (!filteredIncidents.get<std::optional<std::tm>>(fromEventColumn, i).has_value()) continue;
-            if (!filteredIncidents.get<std::optional<std::tm>>(toEventColumn, i).has_value()) continue;
+            if (!Incidents::getInstance().get<std::optional<std::tm>>(fromEventColumn, filteredIncidents[i]).has_value()) {
+                continue;
+            }
+            if (!Incidents::getInstance().get<std::optional<std::tm>>(toEventColumn, filteredIncidents[i]).has_value()) {
+                continue;
+            }
 
-            float timeDiff = filteredIncidents.timeDifferenceBetweenHeaders(fromEventColumn, toEventColumn, i);
+            float timeDiff = Incidents::getInstance().timeDifferenceBetweenHeaders(
+                fromEventColumn,
+                toEventColumn,
+                filteredIncidents[i]
+            );
             data.push_back(timeDiff);
         }
         waitTimesHistograms[std::pair(fromEventColumn, toEventColumn)][triageImpression] = createHistogram(data, binSize);
@@ -376,14 +402,16 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
     int totalDay = -1;
     int totalNight = -1;
 
-    for (int i = 0; i < incidents.size(); i++) {
-        std::tm timeCallReceived = incidents.get<std::optional<std::tm>>("time_call_received", i).value();
+    for (int i = 0; i < Incidents::getInstance().size(); i++) {
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
         mktime(&timeCallReceived);
 
-        if (timeCallReceived.tm_yday == date.tm_yday - 1 && totalNight == -1) totalNight = incidents.get<int>("total_night", i);
+        if (timeCallReceived.tm_yday == date.tm_yday - 1 && totalNight == -1) {
+            totalNight = Incidents::getInstance().get<int>("total_night", i);
+        }
         if (timeCallReceived.tm_yday == date.tm_yday) {
-            totalMorning = incidents.get<int>("total_morning", i);
-            totalDay = incidents.get<int>("total_day", i);
+            totalMorning = Incidents::getInstance().get<int>("total_morning", i);
+            totalDay = Incidents::getInstance().get<int>("total_day", i);
             break;
         }
     }

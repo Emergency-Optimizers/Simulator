@@ -13,11 +13,8 @@
 #include "simulator/Ambulance.hpp"
 
 class AmbulanceAllocator {
- private:
-    Stations& stations;
-
  public:
     std::vector<Ambulance> ambulances;
-    explicit AmbulanceAllocator(Stations& stations);
+    explicit AmbulanceAllocator();
     void allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots);
 };

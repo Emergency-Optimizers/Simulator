@@ -13,13 +13,10 @@
 
 Simulator::Simulator(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     AmbulanceAllocator& ambulanceAllocator,
     DispatchEngineStrategyType dispatchStrategy,
     std::vector<Event> events
-) : rng(rng), incidents(incidents), stations(stations), odMatrix(odMatrix), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
+) : rng(rng), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
     eventHandler.populate(events);
 }
 
@@ -33,9 +30,6 @@ void Simulator::run(bool saveMetricsToFile) {
         DispatchEngine::dispatch(
             dispatchStrategy,
             rng,
-            incidents,
-            stations,
-            odMatrix,
             ambulanceAllocator.ambulances,
             eventHandler.events,
             eventIndex
@@ -63,7 +57,7 @@ double Simulator::averageResponseTime(const std::string& triageImpression, bool 
     for (int i = 0; i < totalEvents; i++) {
         Event event = eventHandler.events[i];
 
-        if (event.triageImpression != triageImpression || incidents.gridIdUrban[event.metrics.incidentGridId] != urban) continue;
+        if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.metrics.incidentGridId] != urban) continue;
 
         totalMetrics.callProcessedTime += eventHandler.events[i].metrics.callProcessedTime;
         totalMetrics.dispatchToSceneTime += eventHandler.events[i].metrics.dispatchToSceneTime;
@@ -91,7 +85,7 @@ double Simulator::responseTimeViolations() {
     for (int i = 0; i < totalEvents; i++) {
         int responseTime = eventHandler.events[i].metrics.callProcessedTime + eventHandler.events[i].metrics.dispatchToSceneTime;
 
-        bool urban = incidents.gridIdUrban[eventHandler.events[i].metrics.incidentGridId];
+        bool urban = Incidents::getInstance().gridIdUrban[eventHandler.events[i].metrics.incidentGridId];
         std::string triage = eventHandler.events[i].triageImpression;
 
         if (triage == "A") {

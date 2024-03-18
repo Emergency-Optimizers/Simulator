@@ -18,21 +18,8 @@ Stations::Stations() {
         {"region", Utils::toString},
         {"urban_settlement", Utils::toBool},
     };
-}
 
-Stations::Stations(const std::string& filename) {
-    schemaMapping = {
-        {"type", Utils::toString},
-        {"grid_id", Utils::toInt64},
-        {"x", Utils::toInt},
-        {"y", Utils::toInt},
-        {"longitude", Utils::toFloat},
-        {"latitude", Utils::toFloat},
-        {"region", Utils::toString},
-        {"urban_settlement", Utils::toBool},
-    };
-
-    loadFromFile(filename);
+    loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
 }
 
 std::vector<unsigned> Stations::getDepotIndices() {

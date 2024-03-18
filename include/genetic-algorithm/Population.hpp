@@ -21,9 +21,6 @@
 class Population {
  private:
     std::mt19937& rnd;
-    Incidents& incidents;
-    Stations& stations;
-    ODMatrix& odMatrix;
     std::vector<Event> events = { };
     std::vector<Individual> individuals;
     int populationSize;
@@ -34,9 +31,6 @@ class Population {
  public:
     Population::Population(
         std::mt19937& rnd,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         int populationSize,
         int numDepots,
         int numAmbulances,
