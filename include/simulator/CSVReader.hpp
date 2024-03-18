@@ -14,7 +14,6 @@
 #include <functional>
 #include <optional>
 /* internal libraries */
-#include "simulator/CSVRow.hpp"
 #include "Utils.hpp"
 
 using ToCellType = CellType(*)(const std::string&);
