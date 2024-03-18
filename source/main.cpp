@@ -17,10 +17,11 @@
 
 int main() {
     std::mt19937 rnd(0);
-
+    std::cout << "Loading incidents..." << std::endl;
     Incidents incidents;
     incidents.loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
-
+/*
+    std::cout << "Loading stations..." << std::endl;
     Stations stations;
     stations.loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
 
@@ -41,11 +42,13 @@ int main() {
     // run the genetic algorithm for the specified number of generations
     population.evolve(generations);
 
+    std::cout << "Got out! " << std::endl;
+
     // find and print the fittest individual after the final generation
     Individual fittest = population.findFittest();
     std::cout << "Fittest Individual After Evolution: " << std::endl;
     std::cout << "Valid: " << fittest.isValid() << std::endl;
     fittest.printChromosome();
-
+*/
     return 0;
 }

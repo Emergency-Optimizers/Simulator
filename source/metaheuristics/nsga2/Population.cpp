@@ -264,7 +264,6 @@ void Population::evolve(int generations) {
         fastNonDominatedSort();
 
         printPopulationInfo();
-        checkEmptyGenotypes();
 
         // step 2: calculate crowding distance within each front
         std::cout << "Calculating crowding distances...\n";
@@ -293,11 +292,15 @@ void Population::evolve(int generations) {
             child.evaluateObjectives(events);
         }
 
+        checkEmptyGenotypes();
+
         // step 5: combine, sort, and select the next generation from parents and offspring
         std::cout << "Combining and selecting the next generation...\n";
         individuals.insert(individuals.end(), offspring.begin(), offspring.end());
         fastNonDominatedSort(); // Re-sort combined population
         individuals = survivorSelection(populationSize); // Select the top individuals
+
+        checkEmptyGenotypes();
 
         std::cout << "Generation " << gen << " completed.\n\n";
         printPopulationInfo();
@@ -306,8 +309,10 @@ void Population::evolve(int generations) {
     // Final metrics calculation
     std::cout << "Calculating final metrics...\n";
     Individual finalIndividual = findFittest();
+
+    std::cout << finalIndividual.getGenotype().size() << std::endl;
     finalIndividual.printChromosome();
-    std::cout << finalIndividual.;
+    printBestScoresForEachObjective();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateObjectives(events, saveMetricsToFile);
     std::cout << "Evolution process completed.\n";
@@ -347,6 +352,7 @@ const Individual& Population::findFittest() const {
                                     });
 
     std::cout << "Got here too!" << std::endl;
+
     return **fittest;
 }
 
@@ -371,6 +377,7 @@ void Population::checkEmptyGenotypes() {
             throw std::runtime_error("Empty genotype encountered. Terminating program.");
         }
     }
+    std::cout << "No empty  genotypes." << std::endl;
 }
 
 void Population::printPopulationInfo() {
@@ -380,5 +387,32 @@ void Population::printPopulationInfo() {
 
     for (size_t i = 0; i < fronts.size(); ++i) {
         std::cout << "Front " << i << " has " << fronts[i].size() << " members." << std::endl;
+    }
+}
+
+void Population::printBestScoresForEachObjective() const {
+    if (fronts.empty() || fronts.front().empty()) {
+        std::cerr << "No non-dominated individuals available." << std::endl;
+        return;
+    }
+
+    const auto& firstFront = fronts.front();
+    std::vector<double> bestScores(numObjectives, std::numeric_limits<double>::max()); // For minimization, initialize with max value
+    std::vector<int> bestIndividualIndices(numObjectives, -1); // Track the index of the best individual for each objective
+
+    for (int objective = 0; objective < numObjectives; ++objective) {
+        for (int i = 0; i < firstFront.size(); ++i) {
+            const auto& individualObjectives = firstFront[i]->getObjectives();
+            if (individualObjectives[objective] < bestScores[objective]) { // Change < to > for maximization objectives
+                bestScores[objective] = individualObjectives[objective];
+                bestIndividualIndices[objective] = i;
+            }
+        }
+    }
+
+    for (int objective = 0; objective < numObjectives; ++objective) {
+        std::cout << "Objective " << objective << ": Best Score = "
+                  << bestScores[objective] << ", Individual Index = "
+                  << bestIndividualIndices[objective] << std::endl;
     }
 }

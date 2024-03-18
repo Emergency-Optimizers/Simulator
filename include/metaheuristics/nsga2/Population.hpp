@@ -59,4 +59,5 @@ class Population {
     const Individual findLeastFit();
     void checkEmptyGenotypes();
     void printPopulationInfo();
+    void printBestScoresForEachObjective() const;
 };

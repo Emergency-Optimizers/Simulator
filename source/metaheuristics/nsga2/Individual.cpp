@@ -186,9 +186,12 @@ void Individual::removeAmbulances(int ambulancesToRemove) {
 }
 
 void Individual::printChromosome() const {
+    std::cout << "Okay gonna try: " << genotype.size() << std::endl;
     for (int i = 0; i < genotype.size(); i++) {
         std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
-    }
+    }        
+    std::cout << "Heelep" << std::endl;
+
 }
 
 const std::vector<int>& Individual::getGenotype() const {
