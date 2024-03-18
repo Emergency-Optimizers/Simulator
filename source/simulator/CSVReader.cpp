@@ -11,7 +11,6 @@
 #include "simulator/CSVReader.hpp"
 
 void CSVReader::loadFromFile(const std::string& filename) {
-    std::cout <<"Reading file.\n";
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -26,15 +25,12 @@ void CSVReader::loadFromFile(const std::string& filename) {
             headers.push_back(column);
         }
     }
-    std::cout <<"Reading file 2.\n";
     while (std::getline(file, line)) {
         parseRow(line);
     }
-    std::cout <<"Reading file 3.\n";
 }
 
 void CSVReader::parseRow(const std::string& line) {
-    std::cout << "parsing" << std::endl;
     std::stringstream ss(line);
     std::string cell;
     std::vector<CellType> row;

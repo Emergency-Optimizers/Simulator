@@ -80,7 +80,7 @@ void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveM
     // objectives[6] = simulator.calculateUHU();
 
     // mock objectives for purpose of testing:
-    objectives[0] = simulator.getResponseTime();
+    objectives[0] = simulator.averageResponseTime("A", true);
     objectives[1] = calculateUniformityObjective();
     objectives[2] = calculateMinimizeMaxDepotObjective();
 }
