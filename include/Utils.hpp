@@ -65,7 +65,8 @@ class Utils {
         const int64_t& startId,
         const int64_t& goalId,
         const time_t& timeAtStart,
-        const time_t& timeNow
+        const time_t& timeNow,
+        const std::string& triage
     );
     static int findEventIndexFromId(const std::vector<Event>& events, const int id);
     template <typename T>

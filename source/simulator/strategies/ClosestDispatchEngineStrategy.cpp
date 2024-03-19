@@ -44,7 +44,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
-        events[eventIndex].timer += 60;
+        events[eventIndex].updateTimer(60);
         events[eventIndex].metrics.waitingForAmbulanceTime += 60;
 
         return;
@@ -62,16 +62,12 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
         if (ambulances[availableAmbulanceIndicies[i]].assignedEventId != -1) {
             int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
 
-            int totalTravelTime = ODMatrix::getInstance().getTravelTime(
-                ambulances[availableAmbulanceIndicies[i]].currentGridId,
-                events[currentAmbulanceEventIndex].gridId
-            );
-
             ambulanceGridId = Utils::approximateLocation(
                 ambulances[availableAmbulanceIndicies[i]].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
-                events[currentAmbulanceEventIndex].timer - totalTravelTime,
-                events[eventIndex].timer
+                events[currentAmbulanceEventIndex].prevTimer,
+                events[eventIndex].timer,
+                events[currentAmbulanceEventIndex].triageImpression
             );
 
             if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
@@ -83,7 +79,13 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
 
         // std::pair<int, int> utm2 = Utils::idToUtm(ambulanceGridId);
         // int travelTime = Utils::calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
-        int travelTime = ODMatrix::getInstance().getTravelTime(ambulanceGridId, eventGridId);
+        int travelTime = ODMatrix::getInstance().getTravelTime(
+            ambulanceGridId,
+            eventGridId,
+            false,
+            events[eventIndex].triageImpression,
+            events[eventIndex].timer
+        );
 
         if (travelTime < closestAmbulanceTravelTime) {
             closestAmbulanceIndex = availableAmbulanceIndicies[i];
@@ -97,7 +99,10 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
 
         events[currentAmbulanceEventIndex].metrics.dispatchToDepotTime += ODMatrix::getInstance().getTravelTime(
             ambulances[closestAmbulanceIndex].currentGridId,
-            closestAmbulanceGridId
+            closestAmbulanceGridId,
+            true,
+            events[currentAmbulanceEventIndex].triageImpression,
+            events[currentAmbulanceEventIndex].prevTimer
         );
 
         events[currentAmbulanceEventIndex].gridId = closestAmbulanceGridId;
@@ -128,7 +133,13 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
             "grid_id",
             hospitals[i]
         );
-        int travelTime = ODMatrix::getInstance().getTravelTime(hospitalGridId, eventGridId);
+        int travelTime = ODMatrix::getInstance().getTravelTime(
+            hospitalGridId,
+            eventGridId,
+            false,
+            events[eventIndex].triageImpression,
+            events[eventIndex].timer
+        );
         if (travelTime < closestHospitalTravelTime) {
             closestHospitalIndex = i;
             closestHospitalTravelTime = travelTime;
@@ -142,15 +153,18 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
+        events[eventIndex].gridId,
+        false,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
     );
-    events[eventIndex].timer += incrementSeconds;
+    events[eventIndex].updateTimer(incrementSeconds);
     events[eventIndex].metrics.dispatchToHospitalTime += incrementSeconds;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
-    events[eventIndex].timer += events[eventIndex].secondsWaitAvailable;
+    events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable);
     events[eventIndex].metrics.arrivalAtHospitalTime += events[eventIndex].secondsWaitAvailable;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 

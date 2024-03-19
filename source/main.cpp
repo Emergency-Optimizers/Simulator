@@ -4,12 +4,14 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
+/* external libraries */
 #include <iostream>
 #include <chrono>
 /* internal libraries */
 #include "simulator/Incidents.hpp"
 #include "simulator/Stations.hpp"
 #include "simulator/ODMatrix.hpp"
+#include "simulator/Traffic.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
@@ -22,12 +24,13 @@ int main() {
     Incidents::getInstance();
     Stations::getInstance();
     ODMatrix::getInstance();
+    Traffic::getInstance();
 
-    int populationSize = 50;
+    int populationSize = 1;
     int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
-    int generations = 50;
+    int generations = 1;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;

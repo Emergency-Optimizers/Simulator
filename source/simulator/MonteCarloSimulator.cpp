@@ -483,7 +483,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         event.timer = std::mktime(&event.callReceived);
 
         // remove event.secondsWaitAppointingResource
-        event.timer += event.secondsWaitCallAnswered + 30;
+        event.updateTimer(event.secondsWaitCallAnswered + 30);
         event.metrics.callProcessedTime += event.secondsWaitCallAnswered + 30;
 
         event.metrics.incidentGridId = event.gridId;

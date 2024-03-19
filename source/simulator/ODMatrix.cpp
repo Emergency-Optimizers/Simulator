@@ -10,6 +10,7 @@
 #include <iostream>
 /* internal libraries */
 #include "simulator/ODMatrix.hpp"
+#include "simulator/Traffic.hpp"
 
 ODMatrix::ODMatrix() {
     loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
@@ -53,12 +54,30 @@ void ODMatrix::loadFromFile(const std::string& filename) {
     file.close();
 }
 
-int ODMatrix::getTravelTime(const int64_t& id1, const int64_t& id2) {
+int ODMatrix::getTravelTime(
+    const int64_t& id1,
+    const int64_t& id2,
+    const bool forceTrafficFactor,
+    const std::string& triage,
+    const time_t& time
+) {
     if (idToIndexMap.find(id1) == idToIndexMap.end() || idToIndexMap.find(id2) == idToIndexMap.end()) {
         std::cerr << "Invalid IDs\n";
         return 0;
     }
-    return matrix[idToIndexMap[id1]][idToIndexMap[id2]] + 20;
+
+    int travelTime = matrix[idToIndexMap[id1]][idToIndexMap[id2]];
+
+    if (travelTime == 0) {
+        travelTime = 60;
+    }
+
+    if (forceTrafficFactor || triage == "V1") {
+        double trafficFactor = Traffic::getInstance().getTrafficFactor(time);
+        travelTime = static_cast<int>(round(static_cast<double>(travelTime) * trafficFactor));
+    }
+
+    return travelTime;
 }
 
 bool ODMatrix::gridIdExists(const int64_t& id) {

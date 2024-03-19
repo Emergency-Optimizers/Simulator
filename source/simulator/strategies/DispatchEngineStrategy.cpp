@@ -24,9 +24,12 @@ void DispatchEngineStrategy::dispatchingToScene(
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
+        events[eventIndex].gridId,
+        false,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
     );
-    events[eventIndex].timer += incrementSeconds;
+    events[eventIndex].updateTimer(incrementSeconds);
     events[eventIndex].metrics.dispatchToSceneTime += incrementSeconds;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
@@ -34,14 +37,14 @@ void DispatchEngineStrategy::dispatchingToScene(
 
     if (events[eventIndex].secondsWaitDepartureScene != -1) {
         incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
-        events[eventIndex].timer += incrementSeconds;
+        events[eventIndex].updateTimer(incrementSeconds);
         events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
         ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
         incrementSeconds = events[eventIndex].secondsWaitAvailable;
-        events[eventIndex].timer += incrementSeconds;
+        events[eventIndex].updateTimer(incrementSeconds);
         events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
         ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
@@ -71,9 +74,12 @@ void DispatchEngineStrategy::dispatchingToDepot(
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
+        events[eventIndex].gridId,
+        true,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
     );
-    events[eventIndex].timer += incrementSeconds;
+    events[eventIndex].updateTimer(incrementSeconds);
 
     events[eventIndex].type = EventType::FINISHED;
 }
@@ -86,7 +92,10 @@ void DispatchEngineStrategy::finishingEvent(
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
+        events[eventIndex].gridId,
+        true,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
     );
     events[eventIndex].metrics.dispatchToDepotTime += incrementSeconds;
 

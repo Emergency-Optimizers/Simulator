@@ -25,6 +25,12 @@ class ODMatrix {
         static ODMatrix instance;
         return instance;
     }
-    int getTravelTime(const int64_t& id1, const int64_t& id2);
+    int getTravelTime(
+        const int64_t& id1,
+        const int64_t& id2,
+        const bool forceTrafficFactor,
+        const std::string& triage,
+        const time_t& time
+    );
     bool gridIdExists(const int64_t& id);
 };

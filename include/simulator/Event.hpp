@@ -21,6 +21,7 @@ struct Event {
     int id = -1;
     EventType type = EventType::ASSIGNING_AMBULANCE;
     std::time_t timer;
+    std::time_t prevTimer = 0;
     int assignedAmbulanceIndex = -1;
     EventPerformanceMetrics metrics;
     std::string triageImpression;
@@ -44,5 +45,10 @@ struct Event {
         std::stringstream ss;
         ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
         return ss.str();
+    }
+
+    void updateTimer(int increment) {
+        prevTimer = timer;
+        timer += increment;
     }
 };

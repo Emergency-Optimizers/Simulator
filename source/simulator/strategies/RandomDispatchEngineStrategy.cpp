@@ -48,16 +48,12 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
         if (ambulances[randomAmbulanceIndex].assignedEventId != -1) {
             int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[randomAmbulanceIndex].assignedEventId);
 
-            int totalTravelTime = ODMatrix::getInstance().getTravelTime(
-                ambulances[randomAmbulanceIndex].currentGridId,
-                events[currentAmbulanceEventIndex].gridId
-            );
-
             int64_t ambulanceGridId = Utils::approximateLocation(
                 ambulances[randomAmbulanceIndex].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
-                events[currentAmbulanceEventIndex].timer - totalTravelTime,
-                events[eventIndex].timer
+                events[currentAmbulanceEventIndex].prevTimer,
+                events[eventIndex].timer,
+                events[currentAmbulanceEventIndex].triageImpression
             );
 
             if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
@@ -67,7 +63,10 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
 
             events[currentAmbulanceEventIndex].metrics.dispatchToDepotTime += ODMatrix::getInstance().getTravelTime(
                 ambulances[randomAmbulanceIndex].currentGridId,
-                ambulanceGridId
+                ambulanceGridId,
+                true,
+                events[currentAmbulanceEventIndex].triageImpression,
+                events[currentAmbulanceEventIndex].prevTimer
             );
 
             events[currentAmbulanceEventIndex].gridId = ambulanceGridId;
@@ -83,7 +82,7 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
-        events[eventIndex].timer += 60;
+        events[eventIndex].updateTimer(60);
         events[eventIndex].metrics.waitingForAmbulanceTime += 60;
 
         return;
@@ -107,15 +106,18 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
+        events[eventIndex].gridId,
+        false,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
     );
-    events[eventIndex].timer += incrementSeconds;
+    events[eventIndex].updateTimer(incrementSeconds);
     events[eventIndex].metrics.dispatchToHospitalTime += incrementSeconds;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
-    events[eventIndex].timer += events[eventIndex].secondsWaitAvailable;
+    events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable);
     events[eventIndex].metrics.arrivalAtHospitalTime += events[eventIndex].secondsWaitAvailable;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
