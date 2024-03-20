@@ -10,10 +10,10 @@
 
 AmbulanceAllocator::AmbulanceAllocator() {}
 
-void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots) {
+void AmbulanceAllocator::allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots, const bool useExtraDepots) {
     ambulances.clear();
 
-    std::vector<unsigned> depotIndices = Stations::getInstance().getDepotIndices();
+    std::vector<unsigned> depotIndices = Stations::getInstance().getDepotIndices(useExtraDepots);
 
     int ambulanceId = 0;
     for (int depotId = 0; depotId < totalAllocatedAmbulancesAtDepots.size(); depotId++) {

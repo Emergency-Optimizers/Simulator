@@ -12,16 +12,23 @@
 Population::Population(
     std::mt19937& rnd,
     int populationSize,
-    int numDepots,
     int numAmbulances,
     double mutationProbability,
+    const bool dayShift,
     bool saveEventsToCSV
-) : rnd(rnd), populationSize(populationSize), numDepots(numDepots), numAmbulances(numAmbulances), mutationProbability(mutationProbability) {
-    MonteCarloSimulator monteCarloSim(rnd, 2019, 2, 7, true, 4);
-    events = monteCarloSim.generateEvents(saveEventsToCSV); // write to csv
+) : rnd(rnd), populationSize(populationSize), numAmbulances(numAmbulances), mutationProbability(mutationProbability), dayShift(dayShift) {
+    int year = 2019;
+    int month = 2;
+    int day = 7;
+    unsigned windowSize = 4;
+    MonteCarloSimulator monteCarloSim(rnd, year, month, day, dayShift, windowSize);
+
+    numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
+
+    events = monteCarloSim.generateEvents(saveEventsToCSV);
 
     for (int i = 0; i < populationSize; i++) {
-        Individual individual = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, false);
+        Individual individual = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift, false);
         individuals.push_back(individual);
     }
 
@@ -96,7 +103,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, events, numDepots, numAmbulances, mutationProbability);
+    Individual offspring = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateFitness(events);

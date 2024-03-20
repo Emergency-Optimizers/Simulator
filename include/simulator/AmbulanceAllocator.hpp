@@ -16,5 +16,5 @@ class AmbulanceAllocator {
  public:
     std::vector<Ambulance> ambulances;
     explicit AmbulanceAllocator();
-    void allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots);
+    void allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots, const bool useExtraDepots);
 };

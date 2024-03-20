@@ -24,6 +24,7 @@ class Individual {
     int numAmbulances;
     mutable double fitness = 0;
     double mutationProbability;
+    const bool dayShift;
     bool child;
 
  public:
@@ -33,6 +34,7 @@ class Individual {
         int numDepots,
         int numAmbulances,
         double mutationProbability,
+        const bool dayShift,
         bool child = true
     );
     void randomizeAmbulances();

@@ -22,6 +22,6 @@ class Stations : public CSVReader {
         static Stations instance;
         return instance;
     }
-    std::vector<unsigned> getDepotIndices();
+    std::vector<unsigned> getDepotIndices(const bool useExtraDepots);
     std::vector<unsigned> getHospitalIndices();
 };

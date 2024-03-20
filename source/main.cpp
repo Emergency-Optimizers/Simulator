@@ -27,14 +27,14 @@ int main() {
     Traffic::getInstance();
 
     int populationSize = 1;
-    int numDepots = 19;
     int numAmbulances = 45;
     double mutationProbability = 0.05;
     int generations = 1;
+    bool dayShift = true;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
-    Population population(rnd, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
+    Population population(rnd, populationSize, numAmbulances, mutationProbability, dayShift, saveEventsToCSV);
 
     // run the genetic algorithm for the specified number of generations
     auto start = std::chrono::high_resolution_clock::now();

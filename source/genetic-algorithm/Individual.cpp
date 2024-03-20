@@ -16,8 +16,9 @@ Individual::Individual(
     int numDepots,
     int numAmbulances,
     double mutationProbability,
+    const bool dayShift,
     bool child
-) : rnd(rnd), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), child(child) {
+) : rnd(rnd), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), fitness(0.0), mutationProbability(mutationProbability), dayShift(dayShift), child(child) {
     if (!child) {
         randomizeAmbulances();
     }
@@ -43,7 +44,7 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
     fitness = 0.0;
 
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(genotype);
+    ambulanceAllocator.allocate(genotype, dayShift);
 
     Simulator simulator(
         rnd,

@@ -27,14 +27,15 @@ class Population {
     int numDepots;
     int numAmbulances;
     double mutationProbability;
+    const bool dayShift;
 
  public:
     Population::Population(
         std::mt19937& rnd,
         int populationSize,
-        int numDepots,
         int numAmbulances,
         double mutationProbability,
+        const bool dayShift,
         bool saveEventsToCSV
     );
     void evaluateFitness();
