@@ -66,18 +66,18 @@ int ODMatrix::getTravelTime(
         return 0;
     }
 
-    int travelTime = matrix[idToIndexMap[id1]][idToIndexMap[id2]];
+    float travelTime = matrix[idToIndexMap[id1]][idToIndexMap[id2]];
 
     if (travelTime == 0) {
-        travelTime = 60;
+        travelTime = 60.0;
     }
 
     if (forceTrafficFactor || triage == "V1") {
         double trafficFactor = Traffic::getInstance().getTrafficFactor(time);
-        travelTime = static_cast<int>(round(static_cast<double>(travelTime) * trafficFactor));
+        travelTime = static_cast<float>(round(static_cast<double>(travelTime) * trafficFactor));
     }
 
-    return travelTime;
+    return static_cast<int>(floor(travelTime));
 }
 
 bool ODMatrix::gridIdExists(const int64_t& id) {
