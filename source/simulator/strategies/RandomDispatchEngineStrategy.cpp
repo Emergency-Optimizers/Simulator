@@ -38,7 +38,11 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances, events);
+    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(
+        ambulances,
+        events,
+        events[eventIndex].timer
+    );
 
     int randomAmbulanceIndex = -1;
     while (!availableAmbulanceIndicies.empty()) {

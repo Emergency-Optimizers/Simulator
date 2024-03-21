@@ -40,7 +40,11 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances, events);
+    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(
+        ambulances,
+        events,
+        events[eventIndex].timer
+    );
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {

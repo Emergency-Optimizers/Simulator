@@ -65,7 +65,8 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
             times.push_back(ambulanceAllocator.ambulances[i].timeUnavailable);
             std::cout
                 << "Ambulance " << i << ": "
-                << (ambulanceAllocator.ambulances[i].timeUnavailable / 60) / 60 << " hours"
+                << "Working: " << (ambulanceAllocator.ambulances[i].timeUnavailable / 60) / 60 << " hours"
+                << ", Break: " << (ambulanceAllocator.ambulances[i].timeNotWorking / 60) / 60 << " hours"
                 << std::endl;
         }
         std::cout

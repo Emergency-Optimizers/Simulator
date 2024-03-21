@@ -49,7 +49,11 @@ class Utils {
     static int compareTime(const std::tm& time_1, const std::tm& time_2);
     static float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
     static int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times);
-    static std::vector<unsigned> getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances, const std::vector<Event>& events);
+    static std::vector<unsigned> getAvailableAmbulanceIndicies(
+        std::vector<Ambulance>& ambulances,
+        const std::vector<Event>& events,
+        const time_t& currentTime
+    );
     static int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay);
     static int weightedLottery(
         std::mt19937& rnd,

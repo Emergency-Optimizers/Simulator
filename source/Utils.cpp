@@ -144,18 +144,22 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     return lhs.tm_sec < rhs.tm_sec;
 }
 
-std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(const std::vector<Ambulance>& ambulances, const std::vector<Event>& events) {
+std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(
+    std::vector<Ambulance>& ambulances,
+    const std::vector<Event>& events,
+    const time_t& currentTime
+) {
     std::vector<unsigned> availableAmbulanceIndicies;
 
     for (int i = 0; i < ambulances.size(); i++) {
-        if (ambulances[i].assignedEventId == -1) {
+        int eventIndex = -1;
+
+        if (ambulances[i].assignedEventId != -1) {
+            eventIndex = findEventIndexFromId(events, ambulances[i].assignedEventId);
+        }
+
+        if (ambulances[i].isAvailable(events, eventIndex, currentTime)) {
             availableAmbulanceIndicies.push_back(i);
-        } else {
-            for (int j = 0; j < events.size(); j++) {
-                if (events[j].id == ambulances[i].assignedEventId && events[j].type == EventType::FINISHED) {
-                    availableAmbulanceIndicies.push_back(i);
-                }
-            }
         }
     }
 
