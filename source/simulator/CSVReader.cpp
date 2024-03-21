@@ -34,7 +34,7 @@ void CSVReader::loadFromFile(const std::string& filename) {
 void CSVReader::parseRow(const std::string& line) {
     std::stringstream ss(line);
     std::string cell;
-    std::vector<CellType> row;
+    std::vector<ValueType> row;
 
     std::size_t columnIndex = 0;
     while (std::getline(ss, cell, ',') && columnIndex < headers.size()) {
@@ -45,7 +45,7 @@ void CSVReader::parseRow(const std::string& line) {
     rows.push_back(std::move(row));
 }
 
-const std::vector<CellType>& CSVReader::operator[](std::size_t index) const {
+const std::vector<ValueType>& CSVReader::operator[](std::size_t index) const {
     if (index < rows.size()) {
         return rows[index];
     } else {
@@ -70,7 +70,7 @@ void CSVReader::printRow(const std::size_t index) {
     const auto& row = rows[index];
     for (std::size_t i = 0; i < headers.size(); ++i) {
         const auto& cell = row[i];
-        std::cout << '\t' << headers[i] << ": " << Utils::cellTypeToString(cell) << std::endl;
+        std::cout << '\t' << headers[i] << ": " << Utils::valueTypeToString(cell) << std::endl;
     }
 }
 

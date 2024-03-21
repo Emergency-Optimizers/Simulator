@@ -6,17 +6,17 @@
 
 /* internal libraries */
 #include "genetic-algorithm/Population.hpp"
+#include "Settings.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
 Population::Population(
     std::mt19937& rnd,
     int populationSize,
-    int numAmbulances,
     double mutationProbability,
     const bool dayShift,
     bool saveEventsToCSV
-) : rnd(rnd), populationSize(populationSize), numAmbulances(numAmbulances), mutationProbability(mutationProbability), dayShift(dayShift) {
+) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), dayShift(dayShift) {
     int year = 2019;
     int month = 2;
     int day = 7;
@@ -24,6 +24,7 @@ Population::Population(
     MonteCarloSimulator monteCarloSim(rnd, year, month, day, dayShift, windowSize);
 
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
+    numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
 
     events = monteCarloSim.generateEvents(saveEventsToCSV);
 

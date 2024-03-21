@@ -19,31 +19,31 @@
 #include "Utils.hpp"
 #include "simulator/CSVReader.hpp"
 
-CellType Utils::toInt(const std::string& str) {
+ValueType Utils::toInt(const std::string& str) {
     return std::stoi(str);
 }
 
-CellType Utils::toInt64(const std::string& str) {
+ValueType Utils::toInt64(const std::string& str) {
     return std::stoll(str);
 }
 
-CellType Utils::toFloat(const std::string& str) {
+ValueType Utils::toFloat(const std::string& str) {
     return std::stof(str);
 }
 
-CellType Utils::toDouble(const std::string& str) {
+ValueType Utils::toDouble(const std::string& str) {
     return std::stod(str);
 }
 
-CellType Utils::toString(const std::string& str) {
+ValueType Utils::toString(const std::string& str) {
     return str;
 }
 
-CellType Utils::toBool(const std::string& str) {
+ValueType Utils::toBool(const std::string& str) {
     return str == "True" || str == "true";
 }
 
-CellType Utils::toDateTime(const std::string& str) {
+ValueType Utils::toDateTime(const std::string& str) {
     if (str.empty()) {
         return std::nullopt;
     }
@@ -64,7 +64,7 @@ std::string Utils::tmToString(const std::tm& time) {
     return ss.str();
 }
 
-std::string Utils::cellTypeToString(const CellType& cell) {
+std::string Utils::valueTypeToString(const ValueType& cell) {
     return std::visit([](auto&& arg) -> std::string {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, int>) {

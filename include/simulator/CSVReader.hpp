@@ -16,14 +16,10 @@
 /* internal libraries */
 #include "Utils.hpp"
 
-using ToCellType = CellType(*)(const std::string&);
-
-using SchemaMapping = std::unordered_map<std::string, ToCellType>;
-
 class CSVReader {
  protected:
     SchemaMapping schemaMapping;
-    std::vector<std::vector<CellType>> rows;
+    std::vector<std::vector<ValueType>> rows;
     std::vector<std::string> headers;
 
     virtual void parseRow(const std::string& line);
@@ -31,7 +27,7 @@ class CSVReader {
  public:
     virtual ~CSVReader() = default;
     virtual void loadFromFile(const std::string& filename);
-    const std::vector<CellType>& operator[](std::size_t index) const;
+    const std::vector<ValueType>& operator[](std::size_t index) const;
     std::size_t size() const;
     const std::vector<std::string>& getHeaders() const;
     void printRow(std::size_t index);

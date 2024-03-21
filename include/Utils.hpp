@@ -19,7 +19,7 @@
 #include "simulator/Event.hpp"
 #include "simulator/ODMatrix.hpp"
 
-using CellType = std::variant<
+using ValueType = std::variant<
     int,
     int64_t,
     float,
@@ -28,21 +28,23 @@ using CellType = std::variant<
     bool,
     std::optional<std::tm>
 >;
+using ToValueType = ValueType(*)(const std::string&);
+using SchemaMapping = std::unordered_map<std::string, ToValueType>;
 
 class Utils {
  private:
     static bool tm_less(const std::tm& lhs, const std::tm& rhs);
 
  public:
-    static CellType toInt(const std::string& str);
-    static CellType toInt64(const std::string& str);
-    static CellType toFloat(const std::string& str);
-    static CellType toDouble(const std::string& str);
-    static CellType toString(const std::string& str);
-    static CellType toBool(const std::string& str);
-    static CellType toDateTime(const std::string& str);
+    static ValueType toInt(const std::string& str);
+    static ValueType toInt64(const std::string& str);
+    static ValueType toFloat(const std::string& str);
+    static ValueType toDouble(const std::string& str);
+    static ValueType toString(const std::string& str);
+    static ValueType toBool(const std::string& str);
+    static ValueType toDateTime(const std::string& str);
     static std::string tmToString(const std::tm& time);
-    static std::string cellTypeToString(const CellType& cell);
+    static std::string valueTypeToString(const ValueType& cell);
     static std::tm stringToTm(const std::string& str);
     static int compareTime(const std::tm& time_1, const std::tm& time_2);
     static float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);

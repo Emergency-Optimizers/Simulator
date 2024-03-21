@@ -33,7 +33,6 @@ class Population {
     Population::Population(
         std::mt19937& rnd,
         int populationSize,
-        int numAmbulances,
         double mutationProbability,
         const bool dayShift,
         bool saveEventsToCSV

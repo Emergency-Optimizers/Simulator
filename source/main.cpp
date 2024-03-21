@@ -8,6 +8,7 @@
 #include <iostream>
 #include <chrono>
 /* internal libraries */
+#include "Settings.hpp"
 #include "simulator/Incidents.hpp"
 #include "simulator/Stations.hpp"
 #include "simulator/ODMatrix.hpp"
@@ -21,30 +22,32 @@
 int main() {
     std::mt19937 rnd(0);
 
+    Settings::LoadSettings();
     Incidents::getInstance();
     Stations::getInstance();
     ODMatrix::getInstance();
     Traffic::getInstance();
 
-    int populationSize = 1;
-    int numAmbulances = 45;
-    double mutationProbability = 0.05;
-    int generations = 1;
-    bool dayShift = true;
     bool saveEventsToCSV = true;
 
     std::cout << "Starting GA..." << std::endl;
-    Population population(rnd, populationSize, numAmbulances, mutationProbability, dayShift, saveEventsToCSV);
+    Population population(
+        rnd,
+        Settings::get<int>("POPULATION_SIZE"),
+        Settings::get<float>("MUTATION_PROBABILITY"),
+        Settings::get<bool>("SIMULATE_DAY_SHIFT"),
+        saveEventsToCSV
+    );
 
     // run the genetic algorithm for the specified number of generations
     auto start = std::chrono::high_resolution_clock::now();
-    population.evolve(generations);
+    population.evolve(Settings::get<int>("GENERATION_SIZE"));
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     // find and print the fittest individual after the final generation
     std::cout << "\n[--- GA completed in " << duration / 1000 << " seconds ---]" << std::endl;
-    std::cout << "Generations: " << generations << ", population size: " << populationSize << std::endl;
+    std::cout << "Generations: " << Settings::get<int>("GENERATION_SIZE") << ", population size: " << Settings::get<int>("POPULATION_SIZE") << std::endl;
     Individual fittest = population.findFittest();
     std::cout << "Fittest Individual: " << fittest.getFitness();
     std::cout << (fittest.isValid() ? " [valid]\n" : " [invalid]\n")  << std::endl;
