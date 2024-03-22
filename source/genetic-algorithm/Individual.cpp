@@ -147,8 +147,9 @@ void Individual::removeAmbulances(int ambulancesToRemove) {
 }
 
 void Individual::printChromosome() const {
+    std::vector<unsigned int> depotIndicies = Stations::getInstance().getDepotIndices(true);
     for (int i = 0; i < genotype.size(); i++) {
-        std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
+        std::cout << "Depot " << Stations::getInstance().get<std::string>("name", depotIndicies[i]) << ": " << genotype[i] << " ambulances" << std::endl;
     }
 }
 

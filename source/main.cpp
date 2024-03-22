@@ -20,6 +20,7 @@
 #include "genetic-algorithm/Population.hpp"
 
 int main() {
+    std::locale::global(std::locale("en_US.utf8"));
     std::mt19937 rnd(0);
 
     Settings::LoadSettings();

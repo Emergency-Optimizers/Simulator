@@ -9,6 +9,7 @@
 
 Stations::Stations() {
     schemaMapping = {
+        {"name", Utils::toString},
         {"type", Utils::toString},
         {"grid_id", Utils::toInt64},
         {"x", Utils::toInt},
