@@ -15,6 +15,10 @@
 class AmbulanceAllocator {
  public:
     std::vector<Ambulance> ambulances;
-    explicit AmbulanceAllocator();
-    void allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots, const bool useExtraDepots);
+    void allocate(
+        const std::vector<Event>& events,
+        const std::vector<int>& totalAllocatedAmbulancesAtDepots,
+        const bool dayshift
+    );
+    void allocateAndScheduleBreaks(const time_t& shiftStart, const time_t& shiftEnd);
 };

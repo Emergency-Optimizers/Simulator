@@ -44,7 +44,7 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
     fitness = 0.0;
 
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(genotype, dayShift);
+    ambulanceAllocator.allocate(events, genotype, dayShift);
 
     Simulator simulator(
         rnd,

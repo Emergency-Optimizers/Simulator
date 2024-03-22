@@ -13,7 +13,9 @@
 #include "simulator/Traffic.hpp"
 
 ODMatrix::ODMatrix() {
+    std::cout << "Loading OD Matrix..." << std::flush;
     loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
+    std::cout << "\rLoading OD Matrix... " << "\tDONE" << std::endl;
 }
 
 void ODMatrix::loadFromFile(const std::string& filename) {

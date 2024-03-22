@@ -10,7 +10,7 @@
 #include <iomanip>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
-#include "Constants.hpp"
+#include "Settings.hpp"
 
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
@@ -191,7 +191,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START && timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+        int indexShift = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START") && timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END") ? 0 : 1;
 
         if (canceled) totalIncidentsPer[indexTriage][indexShift] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
@@ -244,7 +244,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= DAY_SHIFT_START && timeCallReceived.tm_hour <= DAY_SHIFT_END ? 0 : 1;
+        int indexShift = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START") && timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END") ? 0 : 1;
 
         totalIncidentsPerLocation[indexTriage][indexShift][gridIdToIndexMapping[gridId]] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
@@ -426,8 +426,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
     int indexShift = dayShift ? 0 : 1;
     std::vector<std::pair<int, int>> indexRangesHour = dayShift ?
-        std::vector<std::pair<int, int>>{{7, 21}} :
-        std::vector<std::pair<int, int>>{{0, 6}, {22, 23}};
+        std::vector<std::pair<int, int>>{{Settings::get<int>("DAY_SHIFT_START"), Settings::get<int>("DAY_SHIFT_END")}} :
+        std::vector<std::pair<int, int>>{{0, Settings::get<int>("DAY_SHIFT_START") - 1}, {Settings::get<int>("DAY_SHIFT_END") + 1, 23}};
 
     for (int i = 0; i < totalEvents; i++) {
         Event event;

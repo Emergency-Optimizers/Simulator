@@ -95,12 +95,13 @@ void DispatchEngineStrategy::finishingEvent(
         events[eventIndex].gridId,
         true,
         events[eventIndex].triageImpression,
-        events[eventIndex].timer
+        events[eventIndex].prevTimer
     );
     events[eventIndex].metrics.dispatchToDepotTime += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
     ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = -1;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].checkScheduledBreak(events[eventIndex].timer);
     events[eventIndex].assignedAmbulanceIndex = -1;
 
     events[eventIndex].type = EventType::NONE;

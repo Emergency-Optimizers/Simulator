@@ -29,11 +29,14 @@ class Settings {
         {"SIMULATE_MONTH", &Utils::toInt},
         {"SIMULATE_DAY", &Utils::toInt},
         {"SIMULATE_DAY_SHIFT", &Utils::toBool},
-        {"SIMULATION_GENERATION_WINDOW_SIZE", &Utils::toInt}
+        {"SIMULATION_GENERATION_WINDOW_SIZE", &Utils::toInt},
+        {"DAY_SHIFT_START", &Utils::toInt},
+        {"DAY_SHIFT_END", &Utils::toInt}
     };
 
  public:
     static void LoadSettings() {
+        std::cout << "Loading Settings..." << std::flush;
         const std::string& filename = "../settings.txt";
         std::ifstream file(filename);
         std::string line;
@@ -57,6 +60,7 @@ class Settings {
                 }
             }
         }
+        std::cout << "\rLoading Settings... " << "\tDONE" << std::endl;
     }
 
     template<typename T>

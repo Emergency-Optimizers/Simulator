@@ -37,7 +37,9 @@ Incidents::Incidents() {
         {"total_night", Utils::toInt}
     };
 
+    std::cout << "Loading Incidents..." << std::flush;
     loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv");
+    std::cout << "\rLoading Incidents... " << "\tDONE" << std::endl;
 
     for (int i = 0; i < size(); i++) {
         int64_t grid_id = get<int64_t>("grid_id", i);

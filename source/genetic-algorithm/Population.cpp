@@ -17,11 +17,14 @@ Population::Population(
     const bool dayShift,
     bool saveEventsToCSV
 ) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), dayShift(dayShift) {
-    int year = 2019;
-    int month = 2;
-    int day = 7;
-    unsigned windowSize = 4;
-    MonteCarloSimulator monteCarloSim(rnd, year, month, day, dayShift, windowSize);
+    MonteCarloSimulator monteCarloSim(
+        rnd,
+        Settings::get<int>("SIMULATE_YEAR"),
+        Settings::get<int>("SIMULATE_MONTH"),
+        Settings::get<int>("SIMULATE_DAY"),
+        dayShift,
+        Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
+    );
 
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
     numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
@@ -140,10 +143,11 @@ void Population::evolve(int generations) {
         }
 
         Individual fittest = findFittest();
-        std::cout << "Generation " << gen  << ": " << fittest.getFitness() << ", [" << countUnique(individuals) << "] unique individuals" << std::endl;
-        
-      }
-      
+        std::cout << "Generation " << gen  << ": " << fittest.getFitness()
+            << ", [" << countUnique(individuals) << "] unique individuals"
+            << std::endl;
+    }
+
     // run one last time to print metrics
     Individual finalIndividual = findFittest();
     bool saveMetricsToFile = true;
