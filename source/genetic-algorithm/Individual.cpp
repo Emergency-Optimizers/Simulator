@@ -9,6 +9,7 @@
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
+#include "file-reader/Stations.hpp"
 
 Individual::Individual(
     std::mt19937& rnd,

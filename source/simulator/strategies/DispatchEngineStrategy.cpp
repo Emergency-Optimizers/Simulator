@@ -6,6 +6,8 @@
 
 /* internal libraries */
 #include "simulator/strategies/DispatchEngineStrategy.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/ODMatrix.hpp"
 
 void DispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,

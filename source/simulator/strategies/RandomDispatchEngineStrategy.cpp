@@ -6,6 +6,9 @@
 
 /* internal libraries */
 #include "simulator/strategies/RandomDispatchEngineStrategy.hpp"
+#include "Utils.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/ODMatrix.hpp"
 
 void RandomDispatchEngineStrategy::run(
     std::mt19937& rng,

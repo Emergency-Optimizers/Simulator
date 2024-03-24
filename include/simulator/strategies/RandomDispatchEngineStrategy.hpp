@@ -11,6 +11,8 @@
 #include <random>
 /* internal libraries */
 #include "simulator/strategies/DispatchEngineStrategy.hpp"
+#include "simulator/Ambulance.hpp"
+#include "simulator/Event.hpp"
 
 class RandomDispatchEngineStrategy : public DispatchEngineStrategy {
  protected:

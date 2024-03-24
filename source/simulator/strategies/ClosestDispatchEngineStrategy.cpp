@@ -8,6 +8,9 @@
 #include <limits>
 /* internal libraries */
 #include "simulator/strategies/ClosestDispatchEngineStrategy.hpp"
+#include "Utils.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/ODMatrix.hpp"
 
 void ClosestDispatchEngineStrategy::run(
     std::mt19937& rng,
