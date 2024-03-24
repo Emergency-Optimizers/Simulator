@@ -9,6 +9,7 @@
 /* external libraries */
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 /* internal libraries */

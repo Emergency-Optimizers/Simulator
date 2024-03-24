@@ -4,6 +4,8 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
+/* external libraries */
+#include <iostream>
 /* internal libraries */
 #include "file-reader/Incidents.hpp"
 

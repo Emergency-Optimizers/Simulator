@@ -5,7 +5,10 @@
  */
 
 /* external libraries */
+#include <iostream>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include <numeric>
 #include <chrono>

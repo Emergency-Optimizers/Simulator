@@ -7,7 +7,7 @@
 /* internal libraries */
 #include "simulator/Event.hpp"
 
-void Event::updateTimer(const int increment, const std::string& metric = "") {
+void Event::updateTimer(const int increment, const std::string& metric) {
     prevTimer = timer;
     timer += increment;
 

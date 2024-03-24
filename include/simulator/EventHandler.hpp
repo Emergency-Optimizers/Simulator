@@ -7,10 +7,8 @@
 #pragma once
 
 /* external libraries */
-#include <string>
 #include <vector>
 /* internal libraries */
-#include "file-reader/Incidents.hpp"
 #include "simulator/Event.hpp"
 
 class EventHandler {

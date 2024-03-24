@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <ctime>
 /* internal libraries */
 #include "simulator/EventType.hpp"
 

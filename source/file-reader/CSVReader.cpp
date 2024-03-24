@@ -6,6 +6,8 @@
 
 /* external libraries */
 #include <fstream>
+#include <iostream>
+#include <sstream>
 /* internal libraries */
 #include "file-reader/CSVReader.hpp"
 
