@@ -9,10 +9,6 @@
 /* external libraries */
 #include <string>
 #include <vector>
-#include <variant>
-#include <unordered_map>
-#include <functional>
-#include <optional>
 /* internal libraries */
 #include "Utils.hpp"
 
@@ -22,17 +18,16 @@ class CSVReader {
     std::vector<std::vector<ValueType>> rows;
     std::vector<std::string> headers;
 
-    virtual void parseRow(const std::string& line);
+    void parseRow(const std::string& line);
 
  public:
-    virtual ~CSVReader() = default;
-    virtual void loadFromFile(const std::string& filename);
-    const std::vector<ValueType>& operator[](std::size_t index) const;
-    std::size_t size() const;
-    const std::vector<std::string>& getHeaders() const;
-    void printRow(std::size_t index);
+    ~CSVReader() = default;
+    void loadFromFile(const std::string& filename);
+    const std::vector<ValueType>& operator[](const int index) const;
+    int size() const;
     void print();
-    const std::vector<std::tm> getColumnOfTimes(const std::string& header);
+    void printRow(const int index);
+
     template <typename T>
     T get(const std::string& header, const int index) {
         return std::get<T>(rows[index][findIndex(headers, header)]);
