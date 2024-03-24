@@ -8,8 +8,8 @@
 #include <map>
 /* internal libraries */
 #include "simulator/AmbulanceAllocator.hpp"
-#include "simulator/Ambulance.hpp"
 #include "file-reader/Settings.hpp"
+#include "file-reader/Stations.hpp"
 
 void AmbulanceAllocator::allocate(
     const std::vector<Event>& events,
