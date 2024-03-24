@@ -38,7 +38,7 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(
+    std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
         ambulances,
         events,
         events[eventIndex].timer
@@ -46,13 +46,13 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
 
     int randomAmbulanceIndex = -1;
     while (!availableAmbulanceIndicies.empty()) {
-        int randomAvailableAmbulanceIndex = Utils::getRandomInt(rng, 0, availableAmbulanceIndicies.size() - 1);
+        int randomAvailableAmbulanceIndex = getRandomInt(rng, 0, availableAmbulanceIndicies.size() - 1);
         randomAmbulanceIndex = availableAmbulanceIndicies[randomAvailableAmbulanceIndex];
 
         if (ambulances[randomAmbulanceIndex].assignedEventId != -1) {
-            int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[randomAmbulanceIndex].assignedEventId);
+            int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[randomAmbulanceIndex].assignedEventId);
 
-            int64_t ambulanceGridId = Utils::approximateLocation(
+            int64_t ambulanceGridId = approximateLocation(
                 ambulances[randomAmbulanceIndex].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
                 events[currentAmbulanceEventIndex].prevTimer,
@@ -109,7 +109,7 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
 ) {
     events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
-        Utils::getRandomElement(rng, Stations::getInstance().getHospitalIndices())
+        getRandomElement(rng, Stations::getInstance().getHospitalIndices())
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(

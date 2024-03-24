@@ -19,31 +19,31 @@
 #include "Utils.hpp"
 #include "file-reader/CSVReader.hpp"
 
-ValueType Utils::toInt(const std::string& str) {
+ValueType toInt(const std::string& str) {
     return std::stoi(str);
 }
 
-ValueType Utils::toInt64(const std::string& str) {
+ValueType toInt64(const std::string& str) {
     return std::stoll(str);
 }
 
-ValueType Utils::toFloat(const std::string& str) {
+ValueType toFloat(const std::string& str) {
     return std::stof(str);
 }
 
-ValueType Utils::toDouble(const std::string& str) {
+ValueType toDouble(const std::string& str) {
     return std::stod(str);
 }
 
-ValueType Utils::toString(const std::string& str) {
+ValueType toString(const std::string& str) {
     return str;
 }
 
-ValueType Utils::toBool(const std::string& str) {
+ValueType toBool(const std::string& str) {
     return str == "True" || str == "true";
 }
 
-ValueType Utils::toDateTime(const std::string& str) {
+ValueType toDateTime(const std::string& str) {
     if (str.empty()) {
         return std::nullopt;
     }
@@ -58,13 +58,13 @@ ValueType Utils::toDateTime(const std::string& str) {
     return tm;
 }
 
-std::string Utils::tmToString(const std::tm& time) {
+std::string tmToString(const std::tm& time) {
     std::stringstream ss;
     ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
     return ss.str();
 }
 
-std::string Utils::valueTypeToString(const ValueType& cell) {
+std::string valueTypeToString(const ValueType& cell) {
     return std::visit([](auto&& arg) -> std::string {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, int>) {
@@ -85,14 +85,14 @@ std::string Utils::valueTypeToString(const ValueType& cell) {
     }, cell);
 }
 
-std::tm Utils::stringToTm(const std::string& str) {
+std::tm stringToTm(const std::string& str) {
     std::tm time{};
     std::istringstream ss(str);
     ss >> std::get_time(&time, "%Y.%m.%dT%H:%M:%S");
     return time;
 }
 
-int Utils::compareTime(const std::tm& time_1, const std::tm& time_2) {
+int compareTime(const std::tm& time_1, const std::tm& time_2) {
     if (time_1.tm_year > time_2.tm_year) return 1;
     if (time_1.tm_year < time_2.tm_year) return -1;
     if (time_1.tm_mon > time_2.tm_mon) return 1;
@@ -108,14 +108,14 @@ int Utils::compareTime(const std::tm& time_1, const std::tm& time_2) {
     return 0;
 }
 
-float Utils::timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
+float timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
     time_t t1 = std::mktime(&time1);
     time_t t2 = std::mktime(&time2);
 
     return static_cast<float>(std::difftime(t2, t1));
 }
 
-int Utils::findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times) {
+int findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times) {
     if (times.empty()) return -1;
 
     auto lower = std::lower_bound(times.begin(), times.end(), target, tm_less);
@@ -135,7 +135,7 @@ int Utils::findClosestTimeIndex(const std::tm& target, const std::vector<std::tm
     }
 }
 
-bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
+bool tm_less(const std::tm& lhs, const std::tm& rhs) {
     if (lhs.tm_year != rhs.tm_year) return lhs.tm_year < rhs.tm_year;
     if (lhs.tm_mon != rhs.tm_mon) return lhs.tm_mon < rhs.tm_mon;
     if (lhs.tm_mday != rhs.tm_mday) return lhs.tm_mday < rhs.tm_mday;
@@ -144,7 +144,7 @@ bool Utils::tm_less(const std::tm& lhs, const std::tm& rhs) {
     return lhs.tm_sec < rhs.tm_sec;
 }
 
-std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(
+std::vector<unsigned> getAvailableAmbulanceIndicies(
     std::vector<Ambulance>& ambulances,
     const std::vector<Event>& events,
     const time_t& currentTime
@@ -166,7 +166,7 @@ std::vector<unsigned> Utils::getAvailableAmbulanceIndicies(
     return availableAmbulanceIndicies;
 }
 
-int Utils::calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay) {
+int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay) {
     int year = baseDate.tm_year;
     bool isLeapYear = (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
     int totalDaysInYear = isLeapYear ? 365 : 364;
@@ -214,7 +214,7 @@ int Utils::calculateDayDifference(const std::tm& baseDate, const int targetMonth
     return dayDiff;
 }
 
-int Utils::weightedLottery(
+int weightedLottery(
     std::mt19937& rnd,
     const std::vector<double>& weights,
     const std::vector<std::pair<int, int>>& ranges
@@ -265,13 +265,13 @@ int Utils::weightedLottery(
     return originalIndex;
 }
 
-int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
+int getRandomInt(std::mt19937& rnd, const int min, const int max) {
     std::uniform_int_distribution<> dist(min, max);
 
     return dist(rnd);
 }
 
-void Utils::saveMetricsToFile(std::vector<Event>& events) {
+void writeMetrics(std::vector<Event>& events) {
     // get current time
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
@@ -324,7 +324,7 @@ void Utils::saveMetricsToFile(std::vector<Event>& events) {
 }
 
 
-void Utils::saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
+void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
@@ -355,7 +355,7 @@ void Utils::saveDistributionToFile(const std::vector<std::vector<double>>& distr
     }
 }
 
-void Utils::save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename) {
+void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename) {
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
@@ -378,7 +378,7 @@ void Utils::save1dDistributionToFile(const std::vector<double>& distribution, co
     }
 }
 
-void Utils::save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
+void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
@@ -404,12 +404,12 @@ void Utils::save2dDistributionToFile(const std::vector<std::vector<double>>& dis
     }
 }
 
-double Utils::getRandomProbability(std::mt19937& rnd) {
+double getRandomProbability(std::mt19937& rnd) {
     std::uniform_real_distribution<> dist(0.0, 1.0);
     return dist(rnd);
 }
 
-double Utils::calculateMean(const std::vector<int>& numbers) {
+double calculateMean(const std::vector<int>& numbers) {
     double sum = 0.0;
 
     for (int num : numbers) {
@@ -419,7 +419,7 @@ double Utils::calculateMean(const std::vector<int>& numbers) {
     return numbers.empty() ? 0.0 : sum / numbers.size();
 }
 
-double Utils::calculateStandardDeviation(const std::vector<int>& numbers) {
+double calculateStandardDeviation(const std::vector<int>& numbers) {
     double mean = calculateMean(numbers);
     double varianceSum = 0.0;
 
@@ -431,24 +431,24 @@ double Utils::calculateStandardDeviation(const std::vector<int>& numbers) {
     return std::sqrt(variance);
 }
 
-double Utils::calculateEuclideanDistance(double x1, double y1, double x2, double y2) {
+double calculateEuclideanDistance(double x1, double y1, double x2, double y2) {
     return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
 }
 
-std::pair<int, int> Utils::idToUtm(int64_t grid_id) {
+std::pair<int, int> idToUtm(int64_t grid_id) {
     int x = static_cast<int>(std::floor(static_cast<double>(grid_id) * std::pow(10, -7)) - (2 * std::pow(10, 6)));
     int y = static_cast<int>(static_cast<double>(grid_id) - (std::floor(static_cast<double>(grid_id) * std::pow(10, -7)) * std::pow(10, 7)));
     return std::make_pair(x, y);
 }
 
-int64_t Utils::utmToId(const std::pair<int, int>& utm, int cellSize, int offset) {
+int64_t utmToId(const std::pair<int, int>& utm, int cellSize, int offset) {
     int64_t xCorner = std::floor((utm.first + offset) / cellSize) * cellSize - offset;
     int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
 
     return 20000000000000 + (xCorner * 10000000) + yCorner;
 }
 
-int64_t Utils::approximateLocation(
+int64_t approximateLocation(
     const int64_t& startId,
     const int64_t& goalId,
     const time_t& timeAtStart,
@@ -486,7 +486,7 @@ int64_t Utils::approximateLocation(
     return approximatedGridId;
 }
 
-int Utils::findEventIndexFromId(const std::vector<Event>& events, const int id) {
+int findEventIndexFromId(const std::vector<Event>& events, const int id) {
     for (int i = 0; i < events.size(); i++) {
         if (events[i].id == id) return i;
     }

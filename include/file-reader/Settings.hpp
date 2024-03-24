@@ -20,18 +20,18 @@ class Settings {
     static inline std::unordered_map<std::string, ValueType> configValues {};
 
     static inline SchemaMapping schema = {
-        {"POPULATION_SIZE", &Utils::toInt},
-        {"GENERATION_SIZE", &Utils::toInt},
-        {"TOTAL_AMBULANCES_DURING_DAY", &Utils::toInt},
-        {"TOTAL_AMBULANCES_DURING_NIGHT", &Utils::toInt},
-        {"MUTATION_PROBABILITY", &Utils::toFloat},
-        {"SIMULATE_YEAR", &Utils::toInt},
-        {"SIMULATE_MONTH", &Utils::toInt},
-        {"SIMULATE_DAY", &Utils::toInt},
-        {"SIMULATE_DAY_SHIFT", &Utils::toBool},
-        {"SIMULATION_GENERATION_WINDOW_SIZE", &Utils::toInt},
-        {"DAY_SHIFT_START", &Utils::toInt},
-        {"DAY_SHIFT_END", &Utils::toInt}
+        {"POPULATION_SIZE", &toInt},
+        {"GENERATION_SIZE", &toInt},
+        {"TOTAL_AMBULANCES_DURING_DAY", &toInt},
+        {"TOTAL_AMBULANCES_DURING_NIGHT", &toInt},
+        {"MUTATION_PROBABILITY", &toFloat},
+        {"SIMULATE_YEAR", &toInt},
+        {"SIMULATE_MONTH", &toInt},
+        {"SIMULATE_DAY", &toInt},
+        {"SIMULATE_DAY_SHIFT", &toBool},
+        {"SIMULATION_GENERATION_WINDOW_SIZE", &toInt},
+        {"DAY_SHIFT_START", &toInt},
+        {"DAY_SHIFT_END", &toInt}
     };
 
  public:

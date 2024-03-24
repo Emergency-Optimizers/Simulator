@@ -50,7 +50,7 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
     for (int i = 0; i < numParents; i++) {
         std::vector<Individual> tournament;
         for (int j = 0; j < tournamentSize; j++) {
-            tournament.push_back(Utils::getRandomElement(rnd, individuals));
+            tournament.push_back(getRandomElement(rnd, individuals));
         }
 
         // select the individual with the highest fitness in the tournament

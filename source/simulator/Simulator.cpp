@@ -45,7 +45,7 @@ void Simulator::run(bool saveMetricsToFile) {
     // std::cout << "\nSimulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
 
     if (saveMetricsToFile) {
-        Utils::saveMetricsToFile(eventHandler.events);
+        writeMetrics(eventHandler.events);
     }
 }
 

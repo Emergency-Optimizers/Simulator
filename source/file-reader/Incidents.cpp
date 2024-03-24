@@ -13,28 +13,28 @@
 
 Incidents::Incidents() {
     schemaMapping = {
-        {"triage_impression_during_call", Utils::toString},
-        {"resource_id", Utils::toString},
-        {"resource_type", Utils::toString},
-        {"resources_sent", Utils::toInt},
-        {"time_call_received", Utils::toDateTime},
-        {"time_incident_created", Utils::toDateTime},
-        {"time_resource_appointed", Utils::toDateTime},
-        {"time_ambulance_dispatch_to_scene", Utils::toDateTime},
-        {"time_ambulance_arrived_at_scene", Utils::toDateTime},
-        {"time_ambulance_dispatch_to_hospital", Utils::toDateTime},
-        {"time_ambulance_arrived_at_hospital", Utils::toDateTime},
-        {"time_ambulance_available", Utils::toDateTime},
-        {"grid_id", Utils::toInt64},
-        {"x", Utils::toInt},
-        {"y", Utils::toInt},
-        {"longitude", Utils::toFloat},
-        {"latitude", Utils::toFloat},
-        {"region", Utils::toString},
-        {"urban_settlement", Utils::toBool},
-        {"total_morning", Utils::toInt},
-        {"total_day", Utils::toInt},
-        {"total_night", Utils::toInt}
+        {"triage_impression_during_call", toString},
+        {"resource_id", toString},
+        {"resource_type", toString},
+        {"resources_sent", toInt},
+        {"time_call_received", toDateTime},
+        {"time_incident_created", toDateTime},
+        {"time_resource_appointed", toDateTime},
+        {"time_ambulance_dispatch_to_scene", toDateTime},
+        {"time_ambulance_arrived_at_scene", toDateTime},
+        {"time_ambulance_dispatch_to_hospital", toDateTime},
+        {"time_ambulance_arrived_at_hospital", toDateTime},
+        {"time_ambulance_available", toDateTime},
+        {"grid_id", toInt64},
+        {"x", toInt},
+        {"y", toInt},
+        {"longitude", toFloat},
+        {"latitude", toFloat},
+        {"region", toString},
+        {"urban_settlement", toBool},
+        {"total_morning", toInt},
+        {"total_day", toInt},
+        {"total_night", toInt}
     };
 
     std::cout << "Loading Incidents..." << std::flush;
@@ -53,7 +53,7 @@ float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const 
     std::tm time1 = get<std::optional<std::tm>>(header1, index).value();
     std::tm time2 = get<std::optional<std::tm>>(header2, index).value();
 
-    return Utils::timeDifferenceInSeconds(time1, time2);
+    return timeDifferenceInSeconds(time1, time2);
 }
 
 std::vector<int> Incidents::rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize) {
@@ -62,7 +62,7 @@ std::vector<int> Incidents::rowsWithinTimeFrame(const int month, const int day, 
     for (std::size_t i = 0; i < rows.size(); ++i) {
         std::tm timeCallReceived = get<std::optional<std::tm>>("time_call_received", i).value();
 
-        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
 
         bool withinWindowSize = dayDiff <= windowSize;
 

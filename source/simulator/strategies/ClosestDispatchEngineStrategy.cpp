@@ -40,7 +40,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(
+    std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
         ambulances,
         events,
         events[eventIndex].timer
@@ -58,14 +58,14 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     int64_t closestAmbulanceGridId = -1;
     int closestAmbulanceTravelTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
-    // std::pair<int, int> utm1 = Utils::idToUtm(eventGridId);
+    // std::pair<int, int> utm1 = idToUtm(eventGridId);
     for (int i = 0; i < availableAmbulanceIndicies.size(); i++) {
         int64_t ambulanceGridId;
 
         if (ambulances[availableAmbulanceIndicies[i]].assignedEventId != -1) {
-            int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
+            int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
 
-            ambulanceGridId = Utils::approximateLocation(
+            ambulanceGridId = approximateLocation(
                 ambulances[availableAmbulanceIndicies[i]].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
                 events[currentAmbulanceEventIndex].prevTimer,
@@ -80,8 +80,8 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
             ambulanceGridId = ambulances[availableAmbulanceIndicies[i]].currentGridId;
         }
 
-        // std::pair<int, int> utm2 = Utils::idToUtm(ambulanceGridId);
-        // int travelTime = Utils::calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
+        // std::pair<int, int> utm2 = idToUtm(ambulanceGridId);
+        // int travelTime = calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
         int travelTime = ODMatrix::getInstance().getTravelTime(
             ambulanceGridId,
             eventGridId,
@@ -98,7 +98,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     }
 
     if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
-        int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
+        int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
 
         int incrementSeconds = ODMatrix::getInstance().getTravelTime(
             ambulances[closestAmbulanceIndex].currentGridId,

@@ -75,7 +75,7 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
         ).value();
 
         // calculate weight based on how far away the incident is from the target
-        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
 
         totalIncidentsPerHour[timeCallReceived.tm_hour] += weight;
@@ -88,7 +88,7 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
     }
 
     hourlyIncidentProbabilityDistribution = newHourlyIncidentProbabilityDistribution;
-    Utils::save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "hourly_incident_probability_distribution");
+    save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "hourly_incident_probability_distribution");
 }
 
 void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
@@ -103,7 +103,7 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
             filteredIncidents[i]
         ).value();
 
-        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
 
         totalIncidentsPerMinute[timeCallReceived.tm_hour][timeCallReceived.tm_min] += weight;
@@ -118,7 +118,7 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
     }
 
     minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
-    Utils::save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "minute_incident_probability_distribution");
+    save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "minute_incident_probability_distribution");
 }
 
 void MonteCarloSimulator::generateTriageProbabilityDistribution() {
@@ -133,7 +133,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
             filteredIncidents[i]
         ).value();
 
-        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
 
         std::string triageImpression = Incidents::getInstance().get<std::string>(
@@ -162,7 +162,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     }
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
-    Utils::saveDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
+    saveDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
 }
 
 void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
@@ -175,7 +175,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 
     for (int i = 0; i < Incidents::getInstance().size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
-        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
         double weight = weightsYear[dayDiff];
 
         std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", i);
@@ -228,7 +228,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
 
     for (int i = 0; i < Incidents::getInstance().size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
-        int dayDiff = Utils::calculateDayDifference(timeCallReceived, month, day);
+        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
         double weight = weightsYear[dayDiff];
 
         std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", i);
@@ -435,9 +435,9 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.id = i;
 
         // get call received
-        int callReceivedHour = Utils::weightedLottery(rnd, hourlyIncidentProbabilityDistribution, indexRangesHour);
-        int callReceivedMin = Utils::weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);
-        int callReceivedSec = Utils::getRandomInt(rnd, 0, 59);
+        int callReceivedHour = weightedLottery(rnd, hourlyIncidentProbabilityDistribution, indexRangesHour);
+        int callReceivedMin = weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);
+        int callReceivedSec = getRandomInt(rnd, 0, 59);
 
         event.callReceived = {0};
         event.callReceived.tm_year = year - 1900;
@@ -449,14 +449,14 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         mktime(&event.callReceived);
 
         // get triage impression
-        int indexTriage = Utils::weightedLottery(rnd, triageProbabilityDistribution[callReceivedHour]);
+        int indexTriage = weightedLottery(rnd, triageProbabilityDistribution[callReceivedHour]);
         event.triageImpression = triageImpressions[indexTriage];
 
         // check if it should be canceled
-        bool canceled = canceledProbability[indexTriage][indexShift] > Utils::getRandomProbability(rnd);
+        bool canceled = canceledProbability[indexTriage][indexShift] > getRandomProbability(rnd);
 
         // location
-        event.gridId = indexToGridIdMapping[Utils::weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];
+        event.gridId = indexToGridIdMapping[weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];
 
         // wait times
         event.secondsWaitCallAnswered = generateRandomWaitTimeFromHistogram(

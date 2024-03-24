@@ -70,7 +70,7 @@ void CSVReader::printRow(const std::size_t index) {
     const auto& row = rows[index];
     for (std::size_t i = 0; i < headers.size(); ++i) {
         const auto& cell = row[i];
-        std::cout << '\t' << headers[i] << ": " << Utils::valueTypeToString(cell) << std::endl;
+        std::cout << '\t' << headers[i] << ": " << valueTypeToString(cell) << std::endl;
     }
 }
 

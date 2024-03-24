@@ -9,15 +9,15 @@
 
 Stations::Stations() {
     schemaMapping = {
-        {"name", Utils::toString},
-        {"type", Utils::toString},
-        {"grid_id", Utils::toInt64},
-        {"x", Utils::toInt},
-        {"y", Utils::toInt},
-        {"longitude", Utils::toFloat},
-        {"latitude", Utils::toFloat},
-        {"region", Utils::toString},
-        {"urban_settlement", Utils::toBool},
+        {"name", toString},
+        {"type", toString},
+        {"grid_id", toInt64},
+        {"x", toInt},
+        {"y", toInt},
+        {"longitude", toFloat},
+        {"latitude", toFloat},
+        {"region", toString},
+        {"urban_settlement", toBool},
     };
 
     std::cout << "Loading Stations..." << std::flush;

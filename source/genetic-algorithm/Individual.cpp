@@ -29,7 +29,7 @@ void Individual::randomizeAmbulances() {
     std::fill(genotype.begin(), genotype.end(), 0);
 
     for (int i = 0; i < numAmbulances; i++) {
-        int depotIndex = Utils::getRandomInt(rnd, 0, genotype.size() - 1);
+        int depotIndex = getRandomInt(rnd, 0, genotype.size() - 1);
         genotype[depotIndex]++;
     }
 }
@@ -71,7 +71,7 @@ void Individual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFi
         }
         std::cout
             << "Total: " << totalHours << " hours, "
-            << "Standard deviation: " << Utils::calculateStandardDeviation(times)
+            << "Standard deviation: " << calculateStandardDeviation(times)
             << std::endl;
     }
 }

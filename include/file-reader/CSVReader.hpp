@@ -35,6 +35,6 @@ class CSVReader {
     const std::vector<std::tm> getColumnOfTimes(const std::string& header);
     template <typename T>
     T get(const std::string& header, const int index) {
-        return std::get<T>(rows[index][Utils::findIndex(headers, header)]);
+        return std::get<T>(rows[index][findIndex(headers, header)]);
     }
 };

@@ -9,13 +9,13 @@
 
 Traffic::Traffic() {
     schemaMapping = {
-        {"Monday", Utils::toDouble},
-        {"Tuesday", Utils::toDouble},
-        {"Wednesday", Utils::toDouble},
-        {"Thursday", Utils::toDouble},
-        {"Friday", Utils::toDouble},
-        {"Saturday", Utils::toDouble},
-        {"Sunday", Utils::toDouble},
+        {"Monday", toDouble},
+        {"Tuesday", toDouble},
+        {"Wednesday", toDouble},
+        {"Thursday", toDouble},
+        {"Friday", toDouble},
+        {"Saturday", toDouble},
+        {"Sunday", toDouble},
     };
 
     std::cout << "Loading Traffic..." << std::flush;
