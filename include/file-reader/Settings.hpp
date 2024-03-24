@@ -9,7 +9,6 @@
 /* external libraries */
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 /* internal libraries */
@@ -18,7 +17,6 @@
 class Settings {
  private:
     static inline std::unordered_map<std::string, ValueType> configValues {};
-
     static inline SchemaMapping schema = {
         {"POPULATION_SIZE", &toInt},
         {"GENERATION_SIZE", &toInt},
@@ -31,19 +29,22 @@ class Settings {
         {"SIMULATE_DAY_SHIFT", &toBool},
         {"SIMULATION_GENERATION_WINDOW_SIZE", &toInt},
         {"DAY_SHIFT_START", &toInt},
-        {"DAY_SHIFT_END", &toInt}
+        {"DAY_SHIFT_END", &toInt},
     };
 
  public:
     static void LoadSettings() {
         std::cout << "Loading Settings..." << std::flush;
+
         const std::string& filename = "../settings.txt";
         std::ifstream file(filename);
         std::string line;
+
         while (getline(file, line)) {
             if (line == "") {
                 continue;
             }
+
             std::istringstream is_line(line);
             std::string key;
             if (getline(is_line, key, ':')) {
@@ -60,6 +61,7 @@ class Settings {
                 }
             }
         }
+
         std::cout << "\rLoading Settings... " << "\tDONE" << std::endl;
     }
 
@@ -69,10 +71,12 @@ class Settings {
         if (it == configValues.end()) {
             throw std::runtime_error("Key not found");
         }
+
         const auto& value = it->second;
         if (!std::holds_alternative<T>(value)) {
             throw std::bad_variant_access();
         }
+
         return std::get<T>(value);
     }
 };
