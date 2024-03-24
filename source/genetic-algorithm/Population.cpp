@@ -6,7 +6,7 @@
 
 /* internal libraries */
 #include "genetic-algorithm/Population.hpp"
-#include "Settings.hpp"
+#include "file-reader/Settings.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 

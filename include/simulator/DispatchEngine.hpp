@@ -13,9 +13,9 @@
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
-#include "simulator/Incidents.hpp"
-#include "simulator/Stations.hpp"
-#include "simulator/ODMatrix.hpp"
+#include "file-reader/Incidents.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/ODMatrix.hpp"
 
 class DispatchEngine {
  public:

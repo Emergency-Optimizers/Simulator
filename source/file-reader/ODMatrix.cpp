@@ -9,8 +9,8 @@
 #include <sstream>
 #include <iostream>
 /* internal libraries */
-#include "simulator/ODMatrix.hpp"
-#include "simulator/Traffic.hpp"
+#include "file-reader/ODMatrix.hpp"
+#include "file-reader/Traffic.hpp"
 
 ODMatrix::ODMatrix() {
     std::cout << "Loading OD Matrix..." << std::flush;

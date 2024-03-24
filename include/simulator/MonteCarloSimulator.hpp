@@ -13,7 +13,7 @@
 #include <utility>
 #include <string>
 /* internal libraries */
-#include "simulator/Incidents.hpp"
+#include "file-reader/Incidents.hpp"
 #include "simulator/Event.hpp"
 
 class MonteCarloSimulator {

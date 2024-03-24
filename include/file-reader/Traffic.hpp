@@ -9,7 +9,7 @@
 /* external libraries */
 #include <string>
 /* internal libraries */
-#include "simulator/CSVReader.hpp"
+#include "file-reader/CSVReader.hpp"
 
 class Traffic : public CSVReader {
  private:

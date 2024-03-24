@@ -9,7 +9,7 @@
 /* internal libraries */
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Ambulance.hpp"
-#include "Settings.hpp"
+#include "file-reader/Settings.hpp"
 
 void AmbulanceAllocator::allocate(
     const std::vector<Event>& events,

@@ -12,8 +12,7 @@
 #include <numeric>
 #include <random>
 /* internal libraries */
-#include "simulator/Incidents.hpp"
-#include "simulator/ODMatrix.hpp"
+#include "file-reader/Incidents.hpp"
 #include "simulator/Event.hpp"
 
 class Individual {

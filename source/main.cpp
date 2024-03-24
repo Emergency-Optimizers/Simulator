@@ -8,11 +8,11 @@
 #include <iostream>
 #include <chrono>
 /* internal libraries */
-#include "Settings.hpp"
-#include "simulator/Incidents.hpp"
-#include "simulator/Stations.hpp"
-#include "simulator/ODMatrix.hpp"
-#include "simulator/Traffic.hpp"
+#include "file-reader/Settings.hpp"
+#include "file-reader/Incidents.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/ODMatrix.hpp"
+#include "file-reader/Traffic.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"

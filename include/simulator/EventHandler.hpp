@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 /* internal libraries */
-#include "simulator/Incidents.hpp"
+#include "file-reader/Incidents.hpp"
 #include "simulator/Event.hpp"
 
 class EventHandler {

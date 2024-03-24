@@ -17,7 +17,7 @@
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
-#include "simulator/ODMatrix.hpp"
+#include "file-reader/ODMatrix.hpp"
 
 using ValueType = std::variant<
     int,

@@ -5,7 +5,7 @@
  */
 
 /* internal libraries */
-#include "simulator/Traffic.hpp"
+#include "file-reader/Traffic.hpp"
 
 Traffic::Traffic() {
     schemaMapping = {

@@ -13,9 +13,9 @@
 #include <random>
 /* internal libraries */
 #include "genetic-algorithm/Individual.hpp"
-#include "simulator/Incidents.hpp"
-#include "simulator/Stations.hpp"
-#include "simulator/ODMatrix.hpp"
+#include "file-reader/Incidents.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/ODMatrix.hpp"
 #include "simulator/Event.hpp"
 
 class Population {

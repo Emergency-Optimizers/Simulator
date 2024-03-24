@@ -17,7 +17,7 @@
 #include <ctime>
 /* internal libraries */
 #include "Utils.hpp"
-#include "simulator/CSVReader.hpp"
+#include "file-reader/CSVReader.hpp"
 
 ValueType Utils::toInt(const std::string& str) {
     return std::stoi(str);

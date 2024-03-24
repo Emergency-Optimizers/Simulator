@@ -9,7 +9,7 @@
 /* external libraries */
 #include <vector>
 /* internal libraries */
-#include "simulator/Stations.hpp"
+#include "file-reader/Stations.hpp"
 #include "simulator/Ambulance.hpp"
 
 class AmbulanceAllocator {

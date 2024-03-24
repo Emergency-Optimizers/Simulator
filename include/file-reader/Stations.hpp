@@ -9,7 +9,7 @@
 /* external libraries */
 #include <vector>
 /* internal libraries */
-#include "simulator/CSVReader.hpp"
+#include "file-reader/CSVReader.hpp"
 
 class Stations : public CSVReader {
  private:

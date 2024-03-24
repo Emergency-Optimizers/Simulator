@@ -10,7 +10,7 @@
 #include <iomanip>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
-#include "Settings.hpp"
+#include "file-reader/Settings.hpp"
 
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
