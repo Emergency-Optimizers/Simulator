@@ -112,7 +112,7 @@ float Utils::timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
     time_t t1 = std::mktime(&time1);
     time_t t2 = std::mktime(&time2);
 
-    return std::difftime(t2, t1);
+    return static_cast<float>(std::difftime(t2, t1));
 }
 
 int Utils::findClosestTimeIndex(const std::tm& target, const std::vector<std::tm>& times) {
@@ -129,9 +129,9 @@ int Utils::findClosestTimeIndex(const std::tm& target, const std::vector<std::tm
     auto diff2 = std::mktime(const_cast<std::tm*>(&target)) - std::mktime(const_cast<std::tm*>(&*prev));
 
     if (diff1 < diff2) {
-        return std::distance(times.begin(), lower);
+        return static_cast<int>(std::distance(times.begin(), lower));
     } else {
-        return std::distance(times.begin(), prev);
+        return static_cast<int>(std::distance(times.begin(), prev));
     }
 }
 
@@ -271,46 +271,7 @@ int Utils::getRandomInt(std::mt19937& rnd, const int min, const int max) {
     return dist(rnd);
 }
 
-void Utils::saveEventsToFile(const std::vector<Event>& events) {
-    // get current time
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
-
-    // format current time as a string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = *std::localtime(&now_time);
-    std::ostringstream oss;
-    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
-    std::string timestamp = oss.str();
-
-    // construct filename with the current date and time
-    std::string filename = "../data/events/events_" + timestamp + ".csv";
-    std::ofstream outFile(filename);
-
-    // check if the file stream is open before proceeding
-    if (!outFile.is_open()) {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        return;
-    }
-
-    // write CSV header
-    outFile << "time_call_received,triage_impression_during_call,grid_id,wait_time_incident_created,wait_time_ambulance_dispatch_to_hospital,wait_time_ambulance_available\n";
-
-    // write each event to the CSV
-    for (const auto& event : events) {
-        std::ostringstream callReceivedOss;
-        callReceivedOss << std::put_time(&event.callReceived, "%Y-%m-%d %H:%M:%S");
-        std::string callReceivedStr = callReceivedOss.str();
-
-        outFile << callReceivedStr << ","
-                << event.triageImpression << ","
-                << event.gridId << ","
-                << event.secondsWaitCallAnswered << ","
-                << event.secondsWaitDepartureScene << ","
-                << event.secondsWaitAvailable << "\n";
-    }
-}
-
-void Utils::saveMetricsToFile(const std::vector<Event>& events) {
+void Utils::saveMetricsToFile(std::vector<Event>& events) {
     // get current time
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
@@ -332,22 +293,33 @@ void Utils::saveMetricsToFile(const std::vector<Event>& events) {
     }
 
     // write CSV header
-    outFile << "time_call_received,triage_impression_during_call,grid_id,call_processed_time,dispatch_to_scene_time,arrival_at_scene_time,dispatch_to_hospital_time,arrival_at_hospital_time,dispatch_to_depot_time,waiting_for_ambulance_time\n";
+    outFile
+        << "time_call_received" << ","
+        << "triage_impression_during_call" << ","
+        << "grid_id" << ","
+        << "duration_incident_creation" << ","
+        << "duration_resource_appointment" << ","
+        << "duration_resource_preparing_departure" << ","
+        << "duration_dispatching_to_scene" << ","
+        << "duration_at_scene" << ","
+        << "duration_dispatching_to_hospital" << ","
+        << "duration_at_hospital" << ","
+        << "duration_dispatching_to_depot" << std::endl;
 
-    for (const auto& event : events) {
-        std::string callReceivedStr = event.tmToString(event.callReceived);
-
+    for (Event& event : events) {
         // write each metric to the CSV
-        outFile << callReceivedStr << ","
-                << event.triageImpression << ","
-                << event.gridId << ","
-                << event.metrics.callProcessedTime << ","
-                << event.metrics.dispatchToSceneTime << ","
-                << event.metrics.arrivalAtSceneTime << ","
-                << event.metrics.dispatchToHospitalTime << ","
-                << event.metrics.arrivalAtHospitalTime << ","
-                << event.metrics.dispatchToDepotTime << ","
-                << event.metrics.waitingForAmbulanceTime << "\n";
+        outFile
+            << tmToString(event.callReceived) << ","
+            << event.triageImpression << ","
+            << std::to_string(event.incidentGridId) << ","
+            << std::to_string(event.metrics["duration_incident_creation"]) << ","
+            << std::to_string(event.metrics["duration_resource_appointment"]) << ","
+            << std::to_string(event.metrics["duration_resource_preparing_departure"]) << ","
+            << std::to_string(event.metrics["duration_dispatching_to_scene"]) << ","
+            << std::to_string(event.metrics["duration_at_scene"]) << ","
+            << std::to_string(event.metrics["duration_dispatching_to_hospital"]) << ","
+            << std::to_string(event.metrics["duration_at_hospital"]) << ","
+            << std::to_string(event.metrics["duration_dispatching_to_depot"]) << std::endl;
     }
 }
 
@@ -464,8 +436,8 @@ double Utils::calculateEuclideanDistance(double x1, double y1, double x2, double
 }
 
 std::pair<int, int> Utils::idToUtm(int64_t grid_id) {
-    int x = std::floor(grid_id * std::pow(10, -7)) - (2 * static_cast<int>(std::pow(10, 6)));
-    int y = grid_id - (std::floor(grid_id * std::pow(10, -7)) * static_cast<int64_t>(std::pow(10, 7)));
+    int x = static_cast<int>(std::floor(static_cast<double>(grid_id) * std::pow(10, -7)) - (2 * std::pow(10, 6)));
+    int y = static_cast<int>(static_cast<double>(grid_id) - (std::floor(static_cast<double>(grid_id) * std::pow(10, -7)) * std::pow(10, 7)));
     return std::make_pair(x, y);
 }
 

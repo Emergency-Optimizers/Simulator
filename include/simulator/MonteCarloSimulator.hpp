@@ -61,5 +61,5 @@ class MonteCarloSimulator {
         const unsigned windowSize
     );
     std::vector<double> generateWeights(int windowSize, double sigma = 1.0);
-    std::vector<Event> generateEvents(bool saveEventsToCSV);
+    std::vector<Event> generateEvents();
 };

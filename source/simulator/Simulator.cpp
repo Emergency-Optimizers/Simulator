@@ -50,108 +50,45 @@ void Simulator::run(bool saveMetricsToFile) {
 }
 
 double Simulator::averageResponseTime(const std::string& triageImpression, bool urban) {
-    int totalEvents = eventHandler.events.size();
-    if (totalEvents == 0) return 0;
-
-    EventPerformanceMetrics totalMetrics;
-    for (int i = 0; i < totalEvents; i++) {
+    int totalEvents = 0;
+    float totalResponseTime = 0;
+    for (int i = 0; i < eventHandler.events.size(); i++) {
         Event event = eventHandler.events[i];
 
-        if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.metrics.incidentGridId] != urban) continue;
+        if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) continue;
 
-        totalMetrics.callProcessedTime += eventHandler.events[i].metrics.callProcessedTime;
-        totalMetrics.dispatchToSceneTime += eventHandler.events[i].metrics.dispatchToSceneTime;
-        totalMetrics.arrivalAtSceneTime += eventHandler.events[i].metrics.arrivalAtSceneTime;
-        totalMetrics.dispatchToHospitalTime += eventHandler.events[i].metrics.dispatchToHospitalTime;
-        totalMetrics.arrivalAtHospitalTime += eventHandler.events[i].metrics.arrivalAtHospitalTime;
-        totalMetrics.dispatchToDepotTime += eventHandler.events[i].metrics.dispatchToDepotTime;
-        totalMetrics.waitingForAmbulanceTime += eventHandler.events[i].metrics.waitingForAmbulanceTime;
+        totalResponseTime += event.getResponseTime();
+        totalEvents++;
     }
 
-    double totalResponseTime = static_cast<double>(
-        totalMetrics.callProcessedTime + totalMetrics.waitingForAmbulanceTime + totalMetrics.dispatchToSceneTime
-    );
-    if (totalResponseTime == 0) return 0;
+    if (totalEvents == 0) return 0;
 
-    return totalResponseTime / totalEvents;
+    return static_cast<double>(totalResponseTime) / static_cast<double>(totalEvents);
 }
 
 double Simulator::responseTimeViolations() {
-    int totalEvents = eventHandler.events.size();
-    double totalWrongs = 0;
+    int totalViolations = 0;
 
-    if (totalEvents == 0) return 0;
+    for (int i = 0; i < eventHandler.events.size(); i++) {
+        int responseTime = eventHandler.events[i].getResponseTime();
 
-    for (int i = 0; i < totalEvents; i++) {
-        int responseTime = eventHandler.events[i].metrics.callProcessedTime + eventHandler.events[i].metrics.dispatchToSceneTime;
-
-        bool urban = Incidents::getInstance().gridIdUrban[eventHandler.events[i].metrics.incidentGridId];
+        bool urban = Incidents::getInstance().gridIdUrban[eventHandler.events[i].incidentGridId];
         std::string triage = eventHandler.events[i].triageImpression;
 
         if (triage == "A") {
-            if (urban) {
-                if (responseTime > 720) totalWrongs++;
-            } else if (responseTime > 1500) {
-                totalWrongs++;
+            if (urban && responseTime > 720) {
+                totalViolations++;
+            } else if (!urban && responseTime > 1500) {
+                totalViolations++;
             }
         } else if (triage == "H") {
-            if (urban) {
-                if (responseTime > 1800) totalWrongs++;
-            } else if (responseTime > 2400) {
-                totalWrongs++;
+            if (urban && responseTime > 1800) {
+                totalViolations++;
+            } else if (!urban && responseTime > 2400) {
+                totalViolations++;
             }
         }
     }
 
-    return totalWrongs;
-}
-
-void Simulator::printAverageEventPerformanceMetrics() {
-    EventPerformanceMetrics totalMetrics;
-    int totalEvents = eventHandler.events.size();
-
-    if (totalEvents == 0) return;
-
-    for (int i = 0; i < totalEvents; i++) {
-        totalMetrics.callProcessedTime += eventHandler.events[i].metrics.callProcessedTime;
-        totalMetrics.dispatchToSceneTime += eventHandler.events[i].metrics.dispatchToSceneTime;
-        totalMetrics.arrivalAtSceneTime += eventHandler.events[i].metrics.arrivalAtSceneTime;
-        totalMetrics.dispatchToHospitalTime += eventHandler.events[i].metrics.dispatchToHospitalTime;
-        totalMetrics.arrivalAtHospitalTime += eventHandler.events[i].metrics.arrivalAtHospitalTime;
-        totalMetrics.dispatchToDepotTime += eventHandler.events[i].metrics.dispatchToDepotTime;
-        totalMetrics.waitingForAmbulanceTime += eventHandler.events[i].metrics.waitingForAmbulanceTime;
-    }
-
-    std::cout << std::fixed << std::setprecision(2);
-    double averageTimeSpentProcessingCall = static_cast<double>(totalMetrics.callProcessedTime) / totalEvents;
-    std::cout << "\nAverage time spent on processing call: "
-        << averageTimeSpentProcessingCall << " seconds (" << averageTimeSpentProcessingCall / 60 << " min)\n";
-
-    double averageTimeSpentDispatchToScene = static_cast<double>(totalMetrics.dispatchToSceneTime) / totalEvents;
-    std::cout << "Average time spent on dispatching to scene: "
-        << averageTimeSpentDispatchToScene << " seconds (" << averageTimeSpentDispatchToScene / 60 << " min)\n";
-
-    double averageTimeSpentArrivalAtScene = static_cast<double>(totalMetrics.arrivalAtSceneTime) / totalEvents;
-    std::cout << "Average time spent on arrival at scene: "
-        << averageTimeSpentArrivalAtScene << " seconds (" << averageTimeSpentArrivalAtScene / 60 << " min)\n";
-
-    double averageTimeSpentDispatchToHospital = static_cast<double>(totalMetrics.dispatchToHospitalTime) / totalEvents;
-    std::cout << "Average time spent on dispatching to hospital: "
-        << averageTimeSpentDispatchToHospital << " seconds (" << averageTimeSpentDispatchToHospital / 60 << " min)\n";
-
-    double averageTimeSpentArrivalAtHospital = static_cast<double>(totalMetrics.arrivalAtHospitalTime) / totalEvents;
-    std::cout << "Average time spent on arrival at hospital: "
-        << averageTimeSpentArrivalAtHospital << " seconds (" << averageTimeSpentArrivalAtHospital / 60 << " min)\n";
-
-    double averageTimeSpentDispatchToDepot = static_cast<double>(totalMetrics.dispatchToDepotTime) / totalEvents;
-    std::cout << "Average time spent on dispatching to depot: "
-        << averageTimeSpentDispatchToDepot << " seconds (" << averageTimeSpentDispatchToDepot / 60 << " min)\n";
-
-    double averageTimeSpentWaitingForAmbulance = static_cast<double>(totalMetrics.waitingForAmbulanceTime) / totalEvents;
-    std::cout << "Average time spent on waiting for ambulance: "
-        << averageTimeSpentWaitingForAmbulance << " seconds (" << averageTimeSpentWaitingForAmbulance / 60 << " min)\n";
-
-    double averageResponseTime = static_cast<double>(totalMetrics.callProcessedTime + totalMetrics.dispatchToSceneTime) / totalEvents;
-    std::cout << "Average response time: "
-        << averageResponseTime << " seconds (" << averageResponseTime / 60 << " min)\n";
+    return static_cast<double>(totalViolations);
 }

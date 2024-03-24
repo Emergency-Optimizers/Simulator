@@ -75,6 +75,10 @@ class Utils {
         const std::string& triage
     );
     static int findEventIndexFromId(const std::vector<Event>& events, const int id);
+    static void saveMetricsToFile(std::vector<Event>& events);
+    static void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
+    static void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
+    static void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
     template <typename T>
     static int findIndex(const std::vector<T>& vec, const T& value) {
         auto it = std::find(vec.begin(), vec.end(), value);
@@ -90,9 +94,4 @@ class Utils {
         std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
         return vec[rndBetween(rng)];
     }
-    static void saveEventsToFile(const std::vector<Event>& events);
-    static void saveMetricsToFile(const std::vector<Event>& events);
-    static void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
-    static void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
-    static void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 };

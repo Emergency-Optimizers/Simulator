@@ -29,23 +29,20 @@ void DispatchEngineStrategy::dispatchingToScene(
         events[eventIndex].triageImpression,
         events[eventIndex].timer
     );
-    events[eventIndex].updateTimer(incrementSeconds);
-    events[eventIndex].metrics.dispatchToSceneTime += incrementSeconds;
+    events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_scene");
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
     if (events[eventIndex].secondsWaitDepartureScene != -1) {
         incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
-        events[eventIndex].updateTimer(incrementSeconds);
-        events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+        events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
         ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
         incrementSeconds = events[eventIndex].secondsWaitAvailable;
-        events[eventIndex].updateTimer(incrementSeconds);
-        events[eventIndex].metrics.arrivalAtSceneTime += incrementSeconds;
+        events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
         ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
@@ -97,7 +94,8 @@ void DispatchEngineStrategy::finishingEvent(
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );
-    events[eventIndex].metrics.dispatchToDepotTime += incrementSeconds;
+    events[eventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
     ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = -1;

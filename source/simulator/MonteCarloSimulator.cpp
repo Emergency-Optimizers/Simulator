@@ -419,7 +419,7 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
     return dayShift ? totalDay : totalMorning + totalNight;
 }
 
-std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
+std::vector<Event> MonteCarloSimulator::generateEvents() {
     std::vector<Event> events;
 
     int totalEvents = getTotalIncidentsToGenerate();
@@ -465,6 +465,9 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         event.secondsWaitAppointingResource = generateRandomWaitTimeFromHistogram(
             waitTimesHistograms[std::pair("time_incident_created", "time_resource_appointed")][event.triageImpression]
         );
+        event.secondsWaitResourcePreparingDeparture = generateRandomWaitTimeFromHistogram(
+            waitTimesHistograms[std::pair("time_resource_appointed", "time_ambulance_dispatch_to_scene")][event.triageImpression]
+        );
 
         if (!canceled) {
             event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
@@ -483,10 +486,10 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
         event.timer = std::mktime(&event.callReceived);
 
         // remove event.secondsWaitAppointingResource
-        event.updateTimer(event.secondsWaitCallAnswered + 30);
-        event.metrics.callProcessedTime += event.secondsWaitCallAnswered + 30;
+        event.updateTimer(event.secondsWaitCallAnswered, "duration_incident_creation");
+        event.updateTimer(30, "duration_resource_appointment");
 
-        event.metrics.incidentGridId = event.gridId;
+        event.incidentGridId = event.gridId;
 
         events.push_back(event);
     }
@@ -494,11 +497,6 @@ std::vector<Event> MonteCarloSimulator::generateEvents(bool saveEventsToCSV) {
     std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
         return a.timer < b.timer;
     });
-
-
-    if (saveEventsToCSV) {
-        Utils::saveEventsToFile(events);
-    }
 
     return events;
 }

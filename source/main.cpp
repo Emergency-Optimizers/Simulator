@@ -29,15 +29,12 @@ int main() {
     ODMatrix::getInstance();
     Traffic::getInstance();
 
-    bool saveEventsToCSV = true;
-
     std::cout << "Starting GA..." << std::endl;
     Population population(
         rnd,
         Settings::get<int>("POPULATION_SIZE"),
         Settings::get<float>("MUTATION_PROBABILITY"),
-        Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-        saveEventsToCSV
+        Settings::get<bool>("SIMULATE_DAY_SHIFT")
     );
 
     // run the genetic algorithm for the specified number of generations
@@ -48,7 +45,8 @@ int main() {
 
     // find and print the fittest individual after the final generation
     std::cout << "\n[--- GA completed in " << duration / 1000 << " seconds ---]" << std::endl;
-    std::cout << "Generations: " << Settings::get<int>("GENERATION_SIZE") << ", population size: " << Settings::get<int>("POPULATION_SIZE") << std::endl;
+    std::cout << "Generations: " << Settings::get<int>("GENERATION_SIZE") << ", population size: "
+        << Settings::get<int>("POPULATION_SIZE") << std::endl;
     Individual fittest = population.findFittest();
     std::cout << "Fittest Individual: " << fittest.getFitness();
     std::cout << (fittest.isValid() ? " [valid]\n" : " [invalid]\n")  << std::endl;

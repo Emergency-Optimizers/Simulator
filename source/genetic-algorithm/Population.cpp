@@ -14,8 +14,7 @@ Population::Population(
     std::mt19937& rnd,
     int populationSize,
     double mutationProbability,
-    const bool dayShift,
-    bool saveEventsToCSV
+    const bool dayShift
 ) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), dayShift(dayShift) {
     MonteCarloSimulator monteCarloSim(
         rnd,
@@ -29,7 +28,7 @@ Population::Population(
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
     numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
 
-    events = monteCarloSim.generateEvents(saveEventsToCSV);
+    events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
         Individual individual = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift, false);

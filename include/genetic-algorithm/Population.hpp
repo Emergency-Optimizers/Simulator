@@ -34,8 +34,7 @@ class Population {
         std::mt19937& rnd,
         int populationSize,
         double mutationProbability,
-        const bool dayShift,
-        bool saveEventsToCSV
+        const bool dayShift
     );
     void evaluateFitness();
     std::vector<Individual> parentSelection(int numParents, int tournamentSize);
