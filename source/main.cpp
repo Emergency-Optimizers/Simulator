@@ -38,7 +38,7 @@ int main() {
     std::cout << "\nStarting NSGA..." << std::endl;
     Population population(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, numObjectives, mutationProbability, saveEventsToCSV);
 
-    // run the genetic algorithm for the specified number of generations
+    // run the NSGA for the specified number of generations
     auto start = std::chrono::high_resolution_clock::now();
     population.evolve(generations);
     auto end = std::chrono::high_resolution_clock::now();
