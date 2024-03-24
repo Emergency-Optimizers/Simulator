@@ -15,6 +15,7 @@ class ODMatrix {
  private:
     std::vector<std::vector<float>> matrix;
     std::unordered_map<int64_t, int> idToIndexMap;
+
     ODMatrix();
     void loadFromFile(const std::string& filename);
 
