@@ -6,8 +6,6 @@
 
 #pragma once
 
-/* external libraries */
-#include <string>
 /* internal libraries */
 #include "file-reader/CSVReader.hpp"
 
