@@ -10,6 +10,7 @@
 /* internal libraries */
 #include "simulator/Simulator.hpp"
 #include "simulator/DispatchEngine.hpp"
+#include "file-reader/Incidents.hpp"
 
 Simulator::Simulator(
     std::mt19937& rng,
@@ -55,13 +56,17 @@ double Simulator::averageResponseTime(const std::string& triageImpression, bool 
     for (int i = 0; i < eventHandler.events.size(); i++) {
         Event event = eventHandler.events[i];
 
-        if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) continue;
+        if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) {
+            continue;
+        }
 
         totalResponseTime += event.getResponseTime();
         totalEvents++;
     }
 
-    if (totalEvents == 0) return 0;
+    if (totalEvents == 0) {
+        return 0;
+    }
 
     return static_cast<double>(totalResponseTime) / static_cast<double>(totalEvents);
 }
