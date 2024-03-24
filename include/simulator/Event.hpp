@@ -7,10 +7,6 @@
 #pragma once
 
 /* external libraries */
-#include <ctime>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <string>
 #include <map>
 #include <vector>
@@ -40,24 +36,9 @@ struct Event {
     float secondsWaitResourcePreparingDeparture = -1.0f;
     float secondsWaitDepartureScene = -1.0f;
     float secondsWaitAvailable = -1.0f;
-    int64_t gridId = -1;
-    int64_t incidentGridId = -1;
+    int64_t gridId = -1i64;
+    int64_t incidentGridId = -1i64;
 
-    void updateTimer(const int increment, const std::string& metric = "") {
-        prevTimer = timer;
-        timer += increment;
-
-        if (!metric.empty()) {
-            metrics[metric] += increment;
-        }
-    }
-
-    float getResponseTime() {
-        float responseTime = metrics["duration_incident_creation"];
-        responseTime += metrics["duration_resource_appointment"];
-        responseTime += metrics["duration_resource_preparing_departure"];
-        responseTime += metrics["duration_dispatching_to_scene"];
-
-        return responseTime;
-    }
+    void updateTimer(const int increment, const std::string& metric = "");
+    float getResponseTime();
 };
