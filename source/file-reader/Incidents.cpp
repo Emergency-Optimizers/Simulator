@@ -4,10 +4,6 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
-/* external libraries */
-#include <ctime>
-#include <cmath>
-#include <chrono>
 /* internal libraries */
 #include "file-reader/Incidents.hpp"
 
@@ -34,7 +30,7 @@ Incidents::Incidents() {
         {"urban_settlement", toBool},
         {"total_morning", toInt},
         {"total_day", toInt},
-        {"total_night", toInt}
+        {"total_night", toInt},
     };
 
     std::cout << "Loading Incidents..." << std::flush;
@@ -49,7 +45,7 @@ Incidents::Incidents() {
     }
 }
 
-float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, unsigned index) {
+float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, const int index) {
     std::tm time1 = get<std::optional<std::tm>>(header1, index).value();
     std::tm time2 = get<std::optional<std::tm>>(header2, index).value();
 
