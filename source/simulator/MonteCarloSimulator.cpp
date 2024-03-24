@@ -6,11 +6,11 @@
 
 /* external libraries */
 #include <algorithm>
-#include <fstream>
 #include <iomanip>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
 #include "file-reader/Settings.hpp"
+#include "file-reader/Incidents.hpp"
 
 MonteCarloSimulator::MonteCarloSimulator(
     std::mt19937& rnd,
