@@ -47,7 +47,7 @@ void DispatchEngineStrategy::dispatchingToScene(
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
         ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
-        events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
+        events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
     }
 }
 
@@ -80,7 +80,7 @@ void DispatchEngineStrategy::dispatchingToDepot(
     );
     events[eventIndex].updateTimer(incrementSeconds);
 
-    events[eventIndex].type = EventType::FINISHED;
+    events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
 }
 
 void DispatchEngineStrategy::finishingEvent(

@@ -45,7 +45,7 @@ bool Ambulance::isAvailable(
     if (assignedEventId == -1) {
         return true;
     }
-    if (events[eventIndex].type == EventType::FINISHED) {
+    if (events[eventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
         return true;
     }
     return false;

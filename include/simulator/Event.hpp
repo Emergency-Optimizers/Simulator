@@ -16,7 +16,7 @@
 
 struct Event {
     int id = -1;
-    EventType type = EventType::ASSIGNING_AMBULANCE;
+    EventType type = EventType::RESOURCE_APPOINTMENT;
     std::time_t timer;
     std::time_t prevTimer = 0;
     int assignedAmbulanceIndex = -1;

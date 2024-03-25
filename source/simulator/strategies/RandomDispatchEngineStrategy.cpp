@@ -17,7 +17,7 @@ void RandomDispatchEngineStrategy::run(
     const int eventIndex
 ) {
     switch (events[eventIndex].type) {
-        case EventType::ASSIGNING_AMBULANCE:
+        case EventType::RESOURCE_APPOINTMENT:
             assigningAmbulance(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
@@ -26,10 +26,10 @@ void RandomDispatchEngineStrategy::run(
         case EventType::DISPATCHING_TO_HOSPITAL:
             dispatchingToHospital(rng, ambulances, events, eventIndex);
             break;
-        case EventType::DISPATCHING_TO_DEPOT:
+        case EventType::PREPARING_DISPATCH_TO_DEPOT:
             dispatchingToDepot(rng, ambulances, events, eventIndex);
             break;
-        case EventType::FINISHED:
+        case EventType::DISPATCHING_TO_DEPOT:
             finishingEvent(rng, ambulances, events, eventIndex);
             break;
     }
@@ -130,5 +130,5 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
     events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable, "duration_at_hospital");
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
-    events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
+    events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
 }
