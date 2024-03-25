@@ -13,10 +13,10 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
-#include "metaheuristics/nsga2/Individual.hpp"
-#include "metaheuristics/nsga2/Population.hpp"
-#include "metaheuristics/genetic-algorithm/GAIndividual.hpp"
-#include "metaheuristics/genetic-algorithm/GAPopulation.hpp"
+#include "metaheuristics/nsga2/IndividualNSGA.hpp"
+#include "metaheuristics/nsga2/PopulationNSGA.hpp"
+#include "metaheuristics/genetic-algorithm/IndividualGA.hpp"
+#include "metaheuristics/genetic-algorithm/PopulationGA.hpp"
 
 int main() {
     std::mt19937 rnd(0);
@@ -37,8 +37,8 @@ int main() {
     bool saveEventsToCSV = true;
     std::string simulator = "GA";
 
-    GAPopulation GApopulation(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
-    Population NSGApopulation(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, numObjectives, mutationProbability, saveEventsToCSV);
+    PopulationGA GApopulation(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, mutationProbability, saveEventsToCSV);
+    PopulationNSGA NSGApopulation(rnd, incidents, stations, odMatrix, populationSize, numDepots, numAmbulances, numObjectives, mutationProbability, saveEventsToCSV);
 
     // run the algorithm for the specified number of generations
     auto start = std::chrono::high_resolution_clock::now();

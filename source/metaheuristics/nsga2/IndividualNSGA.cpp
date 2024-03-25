@@ -1,16 +1,16 @@
 /**
- * @file Individual.cpp
+ * @file IndividualNSGA.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */
-#include "metaheuristics/nsga2/Individual.hpp"
+#include "metaheuristics/nsga2/IndividualNSGA.hpp"
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 
-Individual::Individual(
+IndividualNSGA::IndividualNSGA(
     std::mt19937& rnd,
     Incidents& incidents,
     Stations& stations,
@@ -40,7 +40,7 @@ Individual::Individual(
         }
     }
 
-void Individual::randomizeAmbulances() {
+void IndividualNSGA::randomizeAmbulances() {
     // reset all depots to 0 ambulances
     std::fill(genotype.begin(), genotype.end(), 0);
 
@@ -50,11 +50,11 @@ void Individual::randomizeAmbulances() {
     }
 }
 
-bool Individual::isValid() const {
+bool IndividualNSGA::isValid() const {
     return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
 }
 
-void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
+void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
     AmbulanceAllocator ambulanceAllocator(stations);
     ambulanceAllocator.allocate(genotype);
 
@@ -79,7 +79,7 @@ void Individual::evaluateObjectives(const std::vector<Event>& events, bool saveM
     objectives[6] = simulator.responseTimeViolations();
 }
 
-double Individual::calculateUniformityObjective() {
+double IndividualNSGA::calculateUniformityObjective() {
     // mock objective, can be removed
     double mean = std::accumulate(genotype.begin(), genotype.end(), 0.0) / genotype.size();
     double variance = std::accumulate(genotype.begin(), genotype.end(), 0.0, [mean](double acc, int val) {
@@ -89,12 +89,12 @@ double Individual::calculateUniformityObjective() {
     return variance;
 }
 
-double Individual::calculateMinimizeMaxDepotObjective() {
+double IndividualNSGA::calculateMinimizeMaxDepotObjective() {
     // mock objective, can be removed
     return *std::max_element(genotype.begin(), genotype.end());
 }
 
-bool Individual::dominates(const Individual& other) const {
+bool IndividualNSGA::dominates(const IndividualNSGA& other) const {
     // an individual dominates another if it is better in at least one objective, and no worse in all other objectives
     bool better = false;
     for (int i = 0; i < objectives.size(); ++i) {
@@ -107,7 +107,7 @@ bool Individual::dominates(const Individual& other) const {
     return better;
 }
 
-void Individual::mutate() {
+void IndividualNSGA::mutate() {
     std::uniform_real_distribution<> probDist(0.0, 1.0);
     std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
 
@@ -131,7 +131,7 @@ void Individual::mutate() {
     }
 }
 
-void Individual::repair() {
+void IndividualNSGA::repair() {
     int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
 
     while (totalAmbulances != numAmbulances) {
@@ -150,7 +150,7 @@ void Individual::repair() {
     }
 }
 
-void Individual::addAmbulances(int ambulancesToAdd) {
+void IndividualNSGA::addAmbulances(int ambulancesToAdd) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
 
 
@@ -161,7 +161,7 @@ void Individual::addAmbulances(int ambulancesToAdd) {
     }
 }
 
-void Individual::removeAmbulances(int ambulancesToRemove) {
+void IndividualNSGA::removeAmbulances(int ambulancesToRemove) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
 
     for (int i = 0; i < ambulancesToRemove; i++) {
@@ -178,94 +178,94 @@ void Individual::removeAmbulances(int ambulancesToRemove) {
     }
 }
 
-void Individual::printChromosome() const {
+void IndividualNSGA::printChromosome() const {
     for (int i = 0; i < genotype.size(); i++) {
         std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
     }        
 }
 
-const std::vector<int>& Individual::getGenotype() const {
+const std::vector<int>& IndividualNSGA::getGenotype() const {
     return genotype;
 }
 
-void Individual::setGenotype(const std::vector<int>& newGenotype) {
+void IndividualNSGA::setGenotype(const std::vector<int>& newGenotype) {
     genotype = newGenotype;
 }
 
-void Individual::setAmbulancesAtDepot(int depotIndex, int count) {
+void IndividualNSGA::setAmbulancesAtDepot(int depotIndex, int count) {
     if (depotIndex >= 0 && depotIndex < genotype.size()) {
         genotype[depotIndex] = count;
     }
 }
 
-int Individual::getAmbulancesAtDepot(int depotIndex) const {
+int IndividualNSGA::getAmbulancesAtDepot(int depotIndex) const {
     return (depotIndex >= 0 && depotIndex < genotype.size()) ? genotype[depotIndex] : -1;
 }
 
-int Individual::getNumAmbulances() const {
+int IndividualNSGA::getNumAmbulances() const {
     return numAmbulances;
 }
 
-void Individual::setNumAmbulances(int newNumAmbulances) {
+void IndividualNSGA::setNumAmbulances(int newNumAmbulances) {
     numAmbulances = newNumAmbulances;
 }
 
-int Individual::getNumDepots() const {
+int IndividualNSGA::getNumDepots() const {
     return numDepots;
 }
 
-void Individual::setNumDepots(int newNumDepots) {
+void IndividualNSGA::setNumDepots(int newNumDepots) {
     numDepots = newNumDepots;
 }
 
-double Individual::getCrowdingDistance() const {
+double IndividualNSGA::getCrowdingDistance() const {
     return crowdingDistance;
 }
 
-void Individual::setCrowdingDistance(double newCrowdingDistance) {
+void IndividualNSGA::setCrowdingDistance(double newCrowdingDistance) {
     crowdingDistance = newCrowdingDistance;
 }
 
-int Individual::getRank() const {
+int IndividualNSGA::getRank() const {
     return rank;
 }
 
-void Individual::setRank(int newRank) {
+void IndividualNSGA::setRank(int newRank) {
     rank = newRank;
 }
 
-const std::vector<double>& Individual::getObjectives() const {
+const std::vector<double>& IndividualNSGA::getObjectives() const {
     return objectives;
 }
 
-void Individual::setObjectives(const std::vector<double>& newObjectives) {
+void IndividualNSGA::setObjectives(const std::vector<double>& newObjectives) {
     objectives = newObjectives;
 }
 
-int Individual::getDominationCount() {
+int IndividualNSGA::getDominationCount() {
     return dominationCount;
 }
 
-void Individual::incrementDominationCount() {
+void IndividualNSGA::incrementDominationCount() {
     dominationCount++;
 }
 
-void Individual::decrementDominationCount() {
+void IndividualNSGA::decrementDominationCount() {
     dominationCount--;
 }
 
-void Individual::clearDominationCount() {
+void IndividualNSGA::clearDominationCount() {
     dominationCount = 0;
 }
 
-const std::vector<Individual*>& Individual::getDominatedIndividuals() const {
+const std::vector<IndividualNSGA*>& IndividualNSGA::getDominatedIndividuals() const {
     return dominatedIndividuals;
 }
 
-void Individual::nowDominates(Individual* dominatedIndividual) {
+void IndividualNSGA::nowDominates(IndividualNSGA* dominatedIndividual) {
     dominatedIndividuals.push_back(dominatedIndividual);
 } 
 
-void Individual::clearDominatedIndividuals() {
+void IndividualNSGA::clearDominatedIndividuals() {
     dominatedIndividuals.clear();
 }

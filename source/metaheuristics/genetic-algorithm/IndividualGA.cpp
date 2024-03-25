@@ -1,16 +1,16 @@
 /**
- * @file GAIndividual.cpp
+ * @file IndividualGA.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */
-#include "metaheuristics/genetic-algorithm/GAIndividual.hpp"
+#include "metaheuristics/genetic-algorithm/IndividualGA.hpp"
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 
-GAIndividual::GAIndividual(
+IndividualGA::IndividualGA(
     std::mt19937& rnd,
     Incidents& incidents,
     Stations& stations,
@@ -26,7 +26,7 @@ GAIndividual::GAIndividual(
     }
 }
 
-void GAIndividual::randomizeAmbulances() {
+void IndividualGA::randomizeAmbulances() {
     // reset all depots to 0 ambulances
     std::fill(genotype.begin(), genotype.end(), 0);
 
@@ -36,13 +36,13 @@ void GAIndividual::randomizeAmbulances() {
     }
 }
 
-bool GAIndividual::isValid() const {
+bool IndividualGA::isValid() const {
     int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
 
     return totalAmbulances == numAmbulances;
 }
 
-void GAIndividual::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
+void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
     fitness = 0.0;
 
     AmbulanceAllocator ambulanceAllocator(stations);
@@ -80,7 +80,7 @@ void GAIndividual::evaluateFitness(std::vector<Event> events, bool saveMetricsTo
     }
 }
 
-void GAIndividual::mutate() {
+void IndividualGA::mutate() {
     std::uniform_real_distribution<> probDist(0.0, 1.0);
     std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
 
@@ -104,7 +104,7 @@ void GAIndividual::mutate() {
     }
 }
 
-void GAIndividual::repair() {
+void IndividualGA::repair() {
     int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
 
     while (totalAmbulances != numAmbulances) {
@@ -123,7 +123,7 @@ void GAIndividual::repair() {
     }
 }
 
-void GAIndividual::addAmbulances(int ambulancesToAdd) {
+void IndividualGA::addAmbulances(int ambulancesToAdd) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
 
     for (int i = 0; i < ambulancesToAdd; i++) {
@@ -133,7 +133,7 @@ void GAIndividual::addAmbulances(int ambulancesToAdd) {
     }
 }
 
-void GAIndividual::removeAmbulances(int ambulancesToRemove) {
+void IndividualGA::removeAmbulances(int ambulancesToRemove) {
     std::uniform_int_distribution<> dist(0, genotype.size() - 1);
 
     for (int i = 0; i < ambulancesToRemove; i++) {
@@ -150,50 +150,50 @@ void GAIndividual::removeAmbulances(int ambulancesToRemove) {
     }
 }
 
-void GAIndividual::printChromosome() const {
+void IndividualGA::printChromosome() const {
     for (int i = 0; i < genotype.size(); i++) {
         std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
     }
 }
 
-const std::vector<int>& GAIndividual::getGenotype() const {
+const std::vector<int>& IndividualGA::getGenotype() const {
     return genotype;
 }
 
-void GAIndividual::setGenotype(const std::vector<int>& newGenotype) {
+void IndividualGA::setGenotype(const std::vector<int>& newGenotype) {
     genotype = newGenotype;
 }
 
-double GAIndividual::getFitness() const {
+double IndividualGA::getFitness() const {
     return fitness;
 }
 
-void GAIndividual::setFitness(double newFitness) {
+void IndividualGA::setFitness(double newFitness) {
     fitness = newFitness;
 }
 
-void GAIndividual::setAmbulancesAtDepot(int depotIndex, int count) {
+void IndividualGA::setAmbulancesAtDepot(int depotIndex, int count) {
     if (depotIndex >= 0 && depotIndex < genotype.size()) {
         genotype[depotIndex] = count;
     }
 }
 
-int GAIndividual::getAmbulancesAtDepot(int depotIndex) const {
+int IndividualGA::getAmbulancesAtDepot(int depotIndex) const {
     return (depotIndex >= 0 && depotIndex < genotype.size()) ? genotype[depotIndex] : -1;
 }
 
-int GAIndividual::getNumAmbulances() const {
+int IndividualGA::getNumAmbulances() const {
     return numAmbulances;
 }
 
-void GAIndividual::setNumAmbulances(int newNumAmbulances) {
+void IndividualGA::setNumAmbulances(int newNumAmbulances) {
     numAmbulances = newNumAmbulances;
 }
 
-int GAIndividual::getNumDepots() const {
+int IndividualGA::getNumDepots() const {
     return numDepots;
 }
 
-void GAIndividual::setNumDepots(int newNumDepots) {
+void IndividualGA::setNumDepots(int newNumDepots) {
     numDepots = newNumDepots;
 }

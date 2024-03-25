@@ -1,15 +1,15 @@
 /**
- * @file GAPopulation.cpp
+ * @file PopulationGA.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */
-#include "metaheuristics/genetic-algorithm/GAPopulation.hpp"
+#include "metaheuristics/genetic-algorithm/PopulationGA.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
-GAPopulation::GAPopulation(
+PopulationGA::PopulationGA(
     std::mt19937& rnd,
     Incidents& incidents,
     Stations& stations,
@@ -24,24 +24,24 @@ GAPopulation::GAPopulation(
     events = monteCarloSim.generateEvents(saveEventsToCSV); // write to csv
 
     for (int i = 0; i < populationSize; i++) {
-        GAIndividual individual = GAIndividual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);
+        IndividualGA individual = IndividualGA(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability, false);
         individuals.push_back(individual);
     }
 
     evaluateFitness();
 }
 
-void GAPopulation::evaluateFitness() {
-    for (GAIndividual& individual : individuals) {
+void PopulationGA::evaluateFitness() {
+    for (IndividualGA& individual : individuals) {
         individual.evaluateFitness(events);
     }
 }
 
-std::vector<GAIndividual> GAPopulation::parentSelection(int numParents, int tournamentSize) {
-    std::vector<GAIndividual> selectedParents;
+std::vector<IndividualGA> PopulationGA::parentSelection(int numParents, int tournamentSize) {
+    std::vector<IndividualGA> selectedParents;
 
     for (int i = 0; i < numParents; i++) {
-        std::vector<GAIndividual> tournament;
+        std::vector<IndividualGA> tournament;
         for (int j = 0; j < tournamentSize; j++) {
             tournament.push_back(Utils::getRandomElement(rnd, individuals));
         }
@@ -50,7 +50,7 @@ std::vector<GAIndividual> GAPopulation::parentSelection(int numParents, int tour
         auto best = std::max_element(
             tournament.begin(),
             tournament.end(),
-            [](const GAIndividual &a, const GAIndividual &b) {
+            [](const IndividualGA &a, const IndividualGA &b) {
                 return a.getFitness() > b.getFitness();
             }
         );
@@ -61,15 +61,15 @@ std::vector<GAIndividual> GAPopulation::parentSelection(int numParents, int tour
     return selectedParents;
 }
 
-std::vector<GAIndividual> GAPopulation::survivorSelection(int numSurvivors) {
+std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
     // sort the current population based on fitness in descending order
     std::sort(
         individuals.begin(),
         individuals.end(),
-        [](const GAIndividual &a, const GAIndividual &b) { return a.getFitness() < b.getFitness(); }
+        [](const IndividualGA &a, const IndividualGA &b) { return a.getFitness() < b.getFitness(); }
     );
 
-    std::vector<GAIndividual> survivors;
+    std::vector<IndividualGA> survivors;
 
     // calculate the actual number of survivors to keep, which is the minimum
     // of numSurvivors and the current population size to avoid out-of-bounds access
@@ -83,11 +83,11 @@ std::vector<GAIndividual> GAPopulation::survivorSelection(int numSurvivors) {
     return survivors;
 }
 
-void GAPopulation::addChildren(const std::vector<GAIndividual>& children) {
+void PopulationGA::addChildren(const std::vector<IndividualGA>& children) {
     for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
 }
 
-GAIndividual GAPopulation::crossover(const GAIndividual& parent1, const GAIndividual& parent2) {
+IndividualGA PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
     std::vector<int> offspringGenotype;
     offspringGenotype.reserve(parent1.getGenotype().size());
 
@@ -99,7 +99,7 @@ GAIndividual GAPopulation::crossover(const GAIndividual& parent1, const GAIndivi
         offspringGenotype.push_back(gene);
     }
 
-    GAIndividual offspring = GAIndividual(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability);
+    IndividualGA offspring = IndividualGA(rnd, incidents, stations, odMatrix, events, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateFitness(events);
@@ -107,7 +107,7 @@ GAIndividual GAPopulation::crossover(const GAIndividual& parent1, const GAIndivi
     return offspring;
 }
 
-void GAPopulation::evolve(int generations) {
+void PopulationGA::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {
         int numParents = populationSize / 2;
 
@@ -116,14 +116,14 @@ void GAPopulation::evolve(int generations) {
         if (numParents > 1) {
             // step 1: parent selection
             int tournamentSize = 3;
-            std::vector<GAIndividual> parents = parentSelection(numParents, tournamentSize);
+            std::vector<IndividualGA> parents = parentSelection(numParents, tournamentSize);
 
             // step 2: crossover to create offspring
-            std::vector<GAIndividual> children;
+            std::vector<IndividualGA> children;
             children.reserve(populationSize);
 
             for (int i = 0; i < populationSize; i += 2) {
-                GAIndividual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
+                IndividualGA offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
                 offspring.mutate();
                 offspring.evaluateFitness(events);
                 children.push_back(offspring);
@@ -134,18 +134,18 @@ void GAPopulation::evolve(int generations) {
             individuals = survivorSelection(populationSize);
         }
 
-        GAIndividual fittest = findFittest();
+        IndividualGA fittest = findFittest();
         std::cout << "Generation " << gen  << ": " << fittest.getFitness() << ", [" << countUnique(individuals) << "] unique individuals" << std::endl;
         
       }
       
     // run one last time to print metrics
-    GAIndividual finalIndividual = findFittest();
+    IndividualGA finalIndividual = findFittest();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateFitness(events, saveMetricsToFile);
 }
 
-int GAPopulation::countUnique(const std::vector<GAIndividual>& population) {
+int PopulationGA::countUnique(const std::vector<IndividualGA>& population) {
     std::vector<std::vector<int>> genotypes;
     genotypes.reserve(population.size());
 
@@ -163,11 +163,11 @@ int GAPopulation::countUnique(const std::vector<GAIndividual>& population) {
     return std::distance(genotypes.begin(), lastUnique);
 }
 
-const GAIndividual GAPopulation::findFittest() {
+const IndividualGA PopulationGA::findFittest() {
     auto fittest = std::max_element(
         individuals.begin(),
         individuals.end(),
-        [](const GAIndividual &a, const GAIndividual &b) {
+        [](const IndividualGA &a, const IndividualGA &b) {
             return a.getFitness() > b.getFitness();
         }
     );
@@ -175,11 +175,11 @@ const GAIndividual GAPopulation::findFittest() {
     return *fittest;
 }
 
-const GAIndividual GAPopulation::findLeastFit() {
+const IndividualGA PopulationGA::findLeastFit() {
     auto leastFit = std::min_element(
         individuals.begin(),
         individuals.end(),
-        [](const GAIndividual &a, const GAIndividual &b) {
+        [](const IndividualGA &a, const IndividualGA &b) {
             return a.getFitness() > b.getFitness();
         }
     );
@@ -187,7 +187,7 @@ const GAIndividual GAPopulation::findLeastFit() {
     return *leastFit;
 }
 
-const double GAPopulation::averageFitness() {
+const double PopulationGA::averageFitness() {
     if (individuals.empty()) {
         return 0.0;
     }
@@ -196,7 +196,7 @@ const double GAPopulation::averageFitness() {
         individuals.begin(),
         individuals.end(),
         0.0,
-        [](double sum, const GAIndividual& individual) {
+        [](double sum, const IndividualGA& individual) {
             return sum + individual.getFitness();
         }
     );

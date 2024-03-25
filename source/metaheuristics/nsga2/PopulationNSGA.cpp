@@ -1,16 +1,16 @@
 /**
- * @file Population.cpp
+ * @file PopulationNSGA.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */
-#include "metaheuristics/nsga2/Population.hpp"
+#include "metaheuristics/nsga2/PopulationNSGA.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 #include <unordered_set>
 
-Population::Population(
+PopulationNSGA::PopulationNSGA(
     std::mt19937& rnd,
     Incidents& incidents,
     Stations& stations,
@@ -35,30 +35,30 @@ Population::Population(
     events = monteCarloSim.generateEvents(saveEventsToCSV);
 
     for (int i = 0; i < populationSize; i++) {
-        Individual individual = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability, false);
+        IndividualNSGA individual = IndividualNSGA(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability, false);
         individuals.push_back(individual);
     }
     evaluateObjectives();
 }
 
-void Population::evaluateObjectives() {
-    for (Individual& individual : individuals) {
+void PopulationNSGA::evaluateObjectives() {
+    for (IndividualNSGA& individual : individuals) {
         individual.evaluateObjectives(events);
     }
 }
 
-std::vector<Individual> Population::parentSelection(int tournamentSize) {
-    std::vector<Individual> selectedParents;
+std::vector<IndividualNSGA> PopulationNSGA::parentSelection(int tournamentSize) {
+    std::vector<IndividualNSGA> selectedParents;
 
     for (int i = 0; i < 2; i++) {
-        std::vector<Individual> tournament;
+        std::vector<IndividualNSGA> tournament;
         for (int j = 0; j < tournamentSize; j++) {
             tournament.push_back(Utils::getRandomElement(rnd, individuals));
         }
 
         // tournament selection based on rank and crowding distance
         auto best = std::min_element(tournament.begin(), tournament.end(),
-                                     [](const Individual &a, const Individual &b) {
+                                     [](const IndividualNSGA &a, const IndividualNSGA &b) {
                                          // first, compare by rank (lower rank is better)
                                          if (a.getRank() != b.getRank()) {
                                              return a.getRank() < b.getRank();
@@ -73,8 +73,8 @@ std::vector<Individual> Population::parentSelection(int tournamentSize) {
     return selectedParents;
 }
 
-std::vector<Individual> Population::survivorSelection(int numSurvivors) {
-    std::vector<Individual> nextGeneration;
+std::vector<IndividualNSGA> PopulationNSGA::survivorSelection(int numSurvivors) {
+    std::vector<IndividualNSGA> nextGeneration;
     int currentFrontIndex = 0;
 
     while (nextGeneration.size() < numSurvivors && currentFrontIndex < fronts.size()) {
@@ -86,7 +86,7 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
         // Remove individuals with empty genotypes from the current front
         currentFront.erase(
             std::remove_if(currentFront.begin(), currentFront.end(),
-                           [](const Individual* individual) {
+                           [](const IndividualNSGA* individual) {
                                return individual->getGenotype().empty();
                            }),
             currentFront.end());
@@ -94,11 +94,11 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
         // If adding the entire front does not exceed numSurvivors, add all; otherwise, add as many as needed
         if (nextGeneration.size() + currentFront.size() <= numSurvivors) {
             for (auto* indPtr : currentFront) {
-                nextGeneration.push_back(*indPtr); // Dereference the pointer to get the Individual
+                nextGeneration.push_back(*indPtr); // Dereference the pointer to get the IndividualNSGA
             }
         } else {
             // Need to add partially from the current front based on crowding distance
-            std::sort(currentFront.begin(), currentFront.end(), [](const Individual* a, const Individual* b) {
+            std::sort(currentFront.begin(), currentFront.end(), [](const IndividualNSGA* a, const IndividualNSGA* b) {
                 return a->getCrowdingDistance() > b->getCrowdingDistance(); // Prefer higher crowding distance
             });
             int slotsLeft = numSurvivors - nextGeneration.size();
@@ -116,11 +116,11 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
     return nextGeneration;
 }
 
-void Population::addChildren(const std::vector<Individual>& children) {
+void PopulationNSGA::addChildren(const std::vector<IndividualNSGA>& children) {
     for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
 }
 
-Individual Population::crossover(const Individual& parent1, const Individual& parent2) {
+IndividualNSGA PopulationNSGA::crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2) {
     std::vector<int> offspringGenotype;
     offspringGenotype.reserve(parent1.getGenotype().size());
 
@@ -138,7 +138,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability);
+    IndividualNSGA offspring = IndividualNSGA(rnd, incidents, stations, odMatrix, events, numObjectives, numDepots, numAmbulances, mutationProbability);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateObjectives(events);
@@ -146,18 +146,18 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
     return offspring;
 }
 
-void Population::calculateCrowdingDistance(std::vector<Individual*>& front) {
+void PopulationNSGA::calculateCrowdingDistance(std::vector<IndividualNSGA*>& front) {
     if (front.empty()) return; // Guard against empty fronts
 
     size_t numObjectives = front[0]->getObjectives().size();
     // Initialize crowding distance for all individuals in the front
-    for (Individual* individual : front) {
+    for (IndividualNSGA* individual : front) {
         individual->setCrowdingDistance(0.0);
     }
 
     for (size_t i = 0; i < numObjectives; ++i) {
         // Sort individuals in the front based on the i-th objective
-        std::sort(front.begin(), front.end(), [i](const Individual* a, const Individual* b) {
+        std::sort(front.begin(), front.end(), [i](const IndividualNSGA* a, const IndividualNSGA* b) {
             return a->getObjectives()[i] < b->getObjectives()[i];
         });
 
@@ -177,17 +177,17 @@ void Population::calculateCrowdingDistance(std::vector<Individual*>& front) {
 }
 
 
-void Population::fastNonDominatedSort() {
+void PopulationNSGA::fastNonDominatedSort() {
     // clear domination values
-    for (Individual& ind : individuals) {
+    for (IndividualNSGA& ind : individuals) {
         ind.clearDominatedIndividuals();
         ind.setRank(-1);
         ind.clearDominationCount();
     }
 
     // clear them fronts and initialize first front
-    std::vector<std::vector<Individual*>> newFronts;
-    std::unordered_set<Individual*> addedIndividuals;
+    std::vector<std::vector<IndividualNSGA*>> newFronts;
+    std::unordered_set<IndividualNSGA*> addedIndividuals;
     fronts.clear();
     newFronts.emplace_back();
 
@@ -212,7 +212,7 @@ void Population::fastNonDominatedSort() {
     // construct subsequent fronts
     int currentFrontIndex = 0;
     while (currentFrontIndex < newFronts.size() && !newFronts[currentFrontIndex].empty()) {
-        std::vector<Individual*> nextFrontCandidates;
+        std::vector<IndividualNSGA*> nextFrontCandidates;
         // iterate over each individual in the current front
         for (auto* dominatingIndividual : newFronts[currentFrontIndex]) {
             // process each individual that the current dominatingIndividual dominates
@@ -237,7 +237,7 @@ void Population::fastNonDominatedSort() {
 
     // remove any remaining empty fronts from newFronts
     newFronts.erase(std::remove_if(newFronts.begin(), newFronts.end(),
-                                   [](const std::vector<Individual*>& front) { return front.empty(); }),
+                                   [](const std::vector<IndividualNSGA*>& front) { return front.empty(); }),
                     newFronts.end());
 
     // update the population's fronts with newFronts
@@ -251,7 +251,7 @@ void Population::fastNonDominatedSort() {
     }
 }
 
-void Population::evolve(int generations) {
+void PopulationNSGA::evolve(int generations) {
     for (int gen = 0; gen < generations; ++gen) {
         std::cout << "GENERATION: " << gen << std::endl;
 
@@ -264,18 +264,18 @@ void Population::evolve(int generations) {
         }
 
         // step 3: selection, crossover and mutation to create a new offspring pool
-        std::vector<Individual> offspring;
+        std::vector<IndividualNSGA> offspring;
         int tournamentSize = 3;
 
         while (offspring.size() < populationSize) {
-            std::vector<Individual> parents = parentSelection(tournamentSize);
-            Individual child = crossover(parents[0], parents[1]);
+            std::vector<IndividualNSGA> parents = parentSelection(tournamentSize);
+            IndividualNSGA child = crossover(parents[0], parents[1]);
             child.mutate();
             offspring.push_back(child);
         }
 
         // step 4: evaluate objectives for offspring
-        for (Individual& child : offspring) {
+        for (IndividualNSGA& child : offspring) {
             child.evaluateObjectives(events);
         }
 
@@ -290,7 +290,7 @@ void Population::evolve(int generations) {
     // Final metrics calculation
     std::cout << "Calculating final metrics...\n";
 
-    Individual finalIndividual = findFittest();
+    IndividualNSGA finalIndividual = findFittest();
 
     std::cout << finalIndividual.getGenotype().size() << std::endl;
     finalIndividual.printChromosome();
@@ -299,7 +299,7 @@ void Population::evolve(int generations) {
     finalIndividual.evaluateObjectives(events, saveMetricsToFile);
 }
 
-int Population::countUnique(const std::vector<Individual>& population) {
+int PopulationNSGA::countUnique(const std::vector<IndividualNSGA>& population) {
     std::vector<std::vector<int>> genotypes;
     genotypes.reserve(population.size());
 
@@ -317,7 +317,7 @@ int Population::countUnique(const std::vector<Individual>& population) {
     return std::distance(genotypes.begin(), lastUnique);
 }
 
-const Individual& Population::findFittest() const {
+const IndividualNSGA& PopulationNSGA::findFittest() const {
     if (fronts.empty() || fronts.front().empty()) {
         throw std::runtime_error("No individuals in the population or the first front is empty.");
     }
@@ -325,18 +325,18 @@ const Individual& Population::findFittest() const {
     const auto& firstFront = fronts.front();
 
     auto fittest = std::max_element(firstFront.begin(), firstFront.end(),
-                                    [](const Individual* a, const Individual* b) {
+                                    [](const IndividualNSGA* a, const IndividualNSGA* b) {
                                         return a->getCrowdingDistance() > b->getCrowdingDistance();
                                     });
 
     return **fittest;
 }
 
-const Individual Population::findLeastFit() {
+const IndividualNSGA PopulationNSGA::findLeastFit() {
     const auto& lastFront = fronts.back(); // Assuming the last front contains the least fit individuals
 
     auto leastFit = std::min_element(lastFront.begin(), lastFront.end(),
-                                     [](const Individual* a, const Individual* b) {
+                                     [](const IndividualNSGA* a, const IndividualNSGA* b) {
                                          // Compare by crowding distance, assuming lower is less fit for the purpose of this method
                                          return a->getCrowdingDistance() < b->getCrowdingDistance();
                                      });
@@ -345,10 +345,10 @@ const Individual Population::findLeastFit() {
     return **leastFit;
 }
 
-void Population::checkEmptyGenotypes() {
+void PopulationNSGA::checkEmptyGenotypes() {
     std::cout << "Checking for empty genotypes in the entire population..." << std::endl;
     // Check entire population
-    for (const Individual& individual : individuals) {
+    for (const IndividualNSGA& individual : individuals) {
         if (individual.getGenotype().empty()) {
             std::cout << "Empty genotype found in the population!" << std::endl;
             throw std::runtime_error("Empty genotype encountered in the population. Terminating program.");
@@ -359,7 +359,7 @@ void Population::checkEmptyGenotypes() {
     // Now, check each front
     std::cout << "Checking for empty genotypes in each front..." << std::endl;
     for (const auto& front : fronts) {
-        for (const Individual* individual : front) {
+        for (const IndividualNSGA* individual : front) {
             if (individual->getGenotype().empty()) {
                 std::cout << "Empty genotype found in a front!" << std::endl;
                 throw std::runtime_error("Empty genotype encountered in a front. Terminating program.");
@@ -370,8 +370,8 @@ void Population::checkEmptyGenotypes() {
 }
 
 
-void Population::printPopulationInfo() {
-    std::cout << "Population information:" << std::endl;
+void PopulationNSGA::printPopulationInfo() {
+    std::cout << "PopulationNSGA information:" << std::endl;
     std::cout << "Number of individuals: " << individuals.size() << std::endl;
     std::cout << "Number of fronts: " << fronts.size() << std::endl;
 
@@ -380,7 +380,7 @@ void Population::printPopulationInfo() {
     }
 }
 
-void Population::printBestScoresForEachObjective() const {
+void PopulationNSGA::printBestScoresForEachObjective() const {
     if (fronts.empty() || fronts.front().empty()) {
         std::cerr << "No non-dominated individuals available." << std::endl;
         return;
@@ -402,7 +402,7 @@ void Population::printBestScoresForEachObjective() const {
 
     for (int objective = 0; objective < numObjectives; ++objective) {
         std::cout << "Objective " << objective << ": Best Score = "
-                  << bestScores[objective] << ", Individual Index = "
+                  << bestScores[objective] << ", IndividualNSGA Index = "
                   << bestIndividualIndices[objective] << std::endl;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * @file Individual.hpp
+ * @file IndividualNSGA.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -17,7 +17,7 @@
 #include "simulator/ODMatrix.hpp"
 #include "simulator/Event.hpp"
 
-class Individual {
+class IndividualNSGA {
  private:
     std::mt19937& rnd;
     Incidents& incidents;
@@ -30,13 +30,13 @@ class Individual {
     std::vector<double> objectives;
     double crowdingDistance;
     int dominationCount; // how many individuals dominate this one
-    std::vector<Individual*> dominatedIndividuals; 
+    std::vector<IndividualNSGA*> dominatedIndividuals; 
     int rank;
     double mutationProbability;
     bool child;
 
  public:
-    Individual(
+    IndividualNSGA(
         std::mt19937& rnd,
         Incidents& incidents,
         Stations& stations,
@@ -53,7 +53,7 @@ class Individual {
     void evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false);
     double calculateMinimizeMaxDepotObjective();
     double calculateUniformityObjective();
-    bool dominates(const Individual& other) const;
+    bool dominates(const IndividualNSGA& other) const;
     void mutate();
     void repair();
     void addAmbulances(int ambulancesToAdd = 1);
@@ -79,10 +79,10 @@ class Individual {
     void incrementDominationCount();
     void decrementDominationCount();
     void clearDominationCount();
-    const std::vector<Individual*>& getDominatedIndividuals() const;
-    void nowDominates(Individual* dominatedIndividual);
+    const std::vector<IndividualNSGA*>& getDominatedIndividuals() const;
+    void nowDominates(IndividualNSGA* dominatedIndividual);
     void clearDominatedIndividuals();
-    Individual& Individual::operator=(const Individual& other) {
+    IndividualNSGA& IndividualNSGA::operator=(const IndividualNSGA& other) {
         if (this != &other) {
             genotype = other.genotype;
             numDepots = other.numDepots;
