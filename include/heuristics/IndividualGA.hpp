@@ -1,5 +1,5 @@
 /**
- * @file Individual.hpp
+ * @file IndividualGA.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -15,7 +15,7 @@
 #include "file-reader/Incidents.hpp"
 #include "simulator/Event.hpp"
 
-class Individual {
+class IndividualGA {
  private:
     std::mt19937& rnd;
     std::vector<int> genotype;
@@ -27,7 +27,7 @@ class Individual {
     bool child;
 
  public:
-    Individual(
+    IndividualGA(
         std::mt19937& rnd,
         std::vector<Event> events,
         int numDepots,
@@ -54,7 +54,7 @@ class Individual {
     void setNumAmbulances(int newNumAmbulances);
     int getNumDepots() const;
     void setNumDepots(int newNumDepots);
-    Individual& Individual::operator=(const Individual& other) {
+    IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
             genotype = other.genotype;
             numDepots = other.numDepots;

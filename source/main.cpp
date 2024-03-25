@@ -16,8 +16,8 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
-#include "genetic-algorithm/Individual.hpp"
-#include "genetic-algorithm/Population.hpp"
+#include "heuristics/IndividualGA.hpp"
+#include "heuristics/PopulationGA.hpp"
 
 int main() {
     std::locale::global(std::locale("en_US.utf8"));
@@ -30,7 +30,7 @@ int main() {
     Traffic::getInstance();
 
     std::cout << "Starting GA..." << std::endl;
-    Population population(
+    PopulationGA population(
         rnd,
         Settings::get<int>("POPULATION_SIZE"),
         Settings::get<float>("MUTATION_PROBABILITY"),
@@ -47,8 +47,8 @@ int main() {
     std::cout << "\n[--- GA completed in " << duration / 1000 << " seconds ---]" << std::endl;
     std::cout << "Generations: " << Settings::get<int>("GENERATION_SIZE") << ", population size: "
         << Settings::get<int>("POPULATION_SIZE") << std::endl;
-    Individual fittest = population.findFittest();
-    std::cout << "Fittest Individual: " << fittest.getFitness();
+    IndividualGA fittest = population.findFittest();
+    std::cout << "Fittest IndividualGA: " << fittest.getFitness();
     std::cout << (fittest.isValid() ? " [valid]\n" : " [invalid]\n")  << std::endl;
 
     fittest.printChromosome();

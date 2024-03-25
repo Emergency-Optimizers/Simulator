@@ -1,16 +1,16 @@
 /**
- * @file Population.cpp
+ * @file PopulationGA.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
 /* internal libraries */
-#include "genetic-algorithm/Population.hpp"
+#include "heuristics/PopulationGA.hpp"
 #include "file-reader/Settings.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
-Population::Population(
+PopulationGA::PopulationGA(
     std::mt19937& rnd,
     int populationSize,
     double mutationProbability,
@@ -31,24 +31,24 @@ Population::Population(
     events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
-        Individual individual = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift, false);
+        IndividualGA individual = IndividualGA(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift, false);
         individuals.push_back(individual);
     }
 
     evaluateFitness();
 }
 
-void Population::evaluateFitness() {
-    for (Individual& individual : individuals) {
+void PopulationGA::evaluateFitness() {
+    for (IndividualGA& individual : individuals) {
         individual.evaluateFitness(events);
     }
 }
 
-std::vector<Individual> Population::parentSelection(int numParents, int tournamentSize) {
-    std::vector<Individual> selectedParents;
+std::vector<IndividualGA> PopulationGA::parentSelection(int numParents, int tournamentSize) {
+    std::vector<IndividualGA> selectedParents;
 
     for (int i = 0; i < numParents; i++) {
-        std::vector<Individual> tournament;
+        std::vector<IndividualGA> tournament;
         for (int j = 0; j < tournamentSize; j++) {
             tournament.push_back(getRandomElement(rnd, individuals));
         }
@@ -57,7 +57,7 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
         auto best = std::max_element(
             tournament.begin(),
             tournament.end(),
-            [](const Individual &a, const Individual &b) {
+            [](const IndividualGA &a, const IndividualGA &b) {
                 return a.getFitness() > b.getFitness();
             }
         );
@@ -68,15 +68,15 @@ std::vector<Individual> Population::parentSelection(int numParents, int tourname
     return selectedParents;
 }
 
-std::vector<Individual> Population::survivorSelection(int numSurvivors) {
+std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
     // sort the current population based on fitness in descending order
     std::sort(
         individuals.begin(),
         individuals.end(),
-        [](const Individual &a, const Individual &b) { return a.getFitness() < b.getFitness(); }
+        [](const IndividualGA &a, const IndividualGA &b) { return a.getFitness() < b.getFitness(); }
     );
 
-    std::vector<Individual> survivors;
+    std::vector<IndividualGA> survivors;
 
     // calculate the actual number of survivors to keep, which is the minimum
     // of numSurvivors and the current population size to avoid out-of-bounds access
@@ -90,11 +90,11 @@ std::vector<Individual> Population::survivorSelection(int numSurvivors) {
     return survivors;
 }
 
-void Population::addChildren(const std::vector<Individual>& children) {
+void PopulationGA::addChildren(const std::vector<IndividualGA>& children) {
     for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
 }
 
-Individual Population::crossover(const Individual& parent1, const Individual& parent2) {
+IndividualGA PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
     std::vector<int> offspringGenotype;
     offspringGenotype.reserve(parent1.getGenotype().size());
 
@@ -106,7 +106,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
         offspringGenotype.push_back(gene);
     }
 
-    Individual offspring = Individual(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift);
+    IndividualGA offspring = IndividualGA(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateFitness(events);
@@ -114,7 +114,7 @@ Individual Population::crossover(const Individual& parent1, const Individual& pa
     return offspring;
 }
 
-void Population::evolve(int generations) {
+void PopulationGA::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {
         int numParents = populationSize / 2;
 
@@ -123,14 +123,14 @@ void Population::evolve(int generations) {
         if (numParents > 1) {
             // step 1: parent selection
             int tournamentSize = 3;
-            std::vector<Individual> parents = parentSelection(numParents, tournamentSize);
+            std::vector<IndividualGA> parents = parentSelection(numParents, tournamentSize);
 
             // step 2: crossover to create offspring
-            std::vector<Individual> children;
+            std::vector<IndividualGA> children;
             children.reserve(populationSize);
 
             for (int i = 0; i < populationSize; i += 2) {
-                Individual offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
+                IndividualGA offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
                 offspring.mutate();
                 offspring.evaluateFitness(events);
                 children.push_back(offspring);
@@ -141,19 +141,19 @@ void Population::evolve(int generations) {
             individuals = survivorSelection(populationSize);
         }
 
-        Individual fittest = findFittest();
+        IndividualGA fittest = findFittest();
         std::cout << "Generation " << gen  << ": " << fittest.getFitness()
             << ", [" << countUnique(individuals) << "] unique individuals"
             << std::endl;
     }
 
     // run one last time to print metrics
-    Individual finalIndividual = findFittest();
+    IndividualGA finalIndividual = findFittest();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateFitness(events, saveMetricsToFile);
 }
 
-int Population::countUnique(const std::vector<Individual>& population) {
+int PopulationGA::countUnique(const std::vector<IndividualGA>& population) {
     std::vector<std::vector<int>> genotypes;
     genotypes.reserve(population.size());
 
@@ -171,11 +171,11 @@ int Population::countUnique(const std::vector<Individual>& population) {
     return std::distance(genotypes.begin(), lastUnique);
 }
 
-const Individual Population::findFittest() {
+const IndividualGA PopulationGA::findFittest() {
     auto fittest = std::max_element(
         individuals.begin(),
         individuals.end(),
-        [](const Individual &a, const Individual &b) {
+        [](const IndividualGA &a, const IndividualGA &b) {
             return a.getFitness() > b.getFitness();
         }
     );
@@ -183,11 +183,11 @@ const Individual Population::findFittest() {
     return *fittest;
 }
 
-const Individual Population::findLeastFit() {
+const IndividualGA PopulationGA::findLeastFit() {
     auto leastFit = std::min_element(
         individuals.begin(),
         individuals.end(),
-        [](const Individual &a, const Individual &b) {
+        [](const IndividualGA &a, const IndividualGA &b) {
             return a.getFitness() > b.getFitness();
         }
     );
@@ -195,7 +195,7 @@ const Individual Population::findLeastFit() {
     return *leastFit;
 }
 
-const double Population::averageFitness() {
+const double PopulationGA::averageFitness() {
     if (individuals.empty()) {
         return 0.0;
     }
@@ -204,7 +204,7 @@ const double Population::averageFitness() {
         individuals.begin(),
         individuals.end(),
         0.0,
-        [](double sum, const Individual& individual) {
+        [](double sum, const IndividualGA& individual) {
             return sum + individual.getFitness();
         }
     );

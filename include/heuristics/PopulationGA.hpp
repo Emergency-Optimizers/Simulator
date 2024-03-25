@@ -1,5 +1,5 @@
 /**
- * @file Population.hpp
+ * @file PopulationGA.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -12,17 +12,17 @@
 #include <numeric>
 #include <random>
 /* internal libraries */
-#include "genetic-algorithm/Individual.hpp"
+#include "heuristics/IndividualGA.hpp"
 #include "file-reader/Incidents.hpp"
 #include "file-reader/Stations.hpp"
 #include "file-reader/ODMatrix.hpp"
 #include "simulator/Event.hpp"
 
-class Population {
+class PopulationGA {
  private:
     std::mt19937& rnd;
     std::vector<Event> events = { };
-    std::vector<Individual> individuals;
+    std::vector<IndividualGA> individuals;
     int populationSize;
     int numDepots;
     int numAmbulances;
@@ -30,20 +30,20 @@ class Population {
     const bool dayShift;
 
  public:
-    Population::Population(
+    PopulationGA::PopulationGA(
         std::mt19937& rnd,
         int populationSize,
         double mutationProbability,
         const bool dayShift
     );
     void evaluateFitness();
-    std::vector<Individual> parentSelection(int numParents, int tournamentSize);
-    std::vector<Individual> survivorSelection(int numSurvivors);
-    void addChildren(const std::vector<Individual>& children);
-    Individual crossover(const Individual& parent1, const Individual& parent2);
+    std::vector<IndividualGA> parentSelection(int numParents, int tournamentSize);
+    std::vector<IndividualGA> survivorSelection(int numSurvivors);
+    void addChildren(const std::vector<IndividualGA>& children);
+    IndividualGA crossover(const IndividualGA& parent1, const IndividualGA& parent2);
     void evolve(int generations);
-    int Population::countUnique(const std::vector<Individual>& population);
-    const Individual findFittest();
-    const Individual findLeastFit();
+    int PopulationGA::countUnique(const std::vector<IndividualGA>& population);
+    const IndividualGA findFittest();
+    const IndividualGA findLeastFit();
     const double averageFitness();
 };
