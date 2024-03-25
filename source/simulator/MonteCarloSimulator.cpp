@@ -88,7 +88,7 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
     }
 
     hourlyIncidentProbabilityDistribution = newHourlyIncidentProbabilityDistribution;
-    save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "hourly_incident_probability_distribution");
+    // save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "hourly_incident_probability_distribution");
 }
 
 void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
@@ -118,7 +118,7 @@ void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
     }
 
     minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
-    save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "minute_incident_probability_distribution");
+    // save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "minute_incident_probability_distribution");
 }
 
 void MonteCarloSimulator::generateTriageProbabilityDistribution() {
@@ -162,7 +162,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
     }
 
     triageProbabilityDistribution = newTriageProbabilityDistribution;
-    saveDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
+    // saveDistributionToFile(triageProbabilityDistribution, "triage_probability_distribution");
 }
 
 void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
