@@ -11,11 +11,10 @@
 /* internal libraries */
 #include "file-reader/ODMatrix.hpp"
 #include "file-reader/Traffic.hpp"
+#include "ProgressBar.hpp"
 
 ODMatrix::ODMatrix() {
-    std::cout << "Loading OD Matrix..." << std::flush;
     loadFromFile("../../Data-Processing/data/oslo/od_matrix.txt");
-    std::cout << "\rLoading OD Matrix... " << "\tDONE" << std::endl;
 }
 
 void ODMatrix::loadFromFile(const std::string& filename) {
@@ -25,7 +24,24 @@ void ODMatrix::loadFromFile(const std::string& filename) {
         return;
     }
 
+    // count total lines
+    size_t totalLines = 0;
+    double progress = 0;
+    std::string tempLine;
+    while (std::getline(file, tempLine)) {
+        totalLines++;
+    }
+
+    // reset file to beginning
+    file.clear();
+    file.seekg(0, std::ios::beg);
+
+    // setup progressBar
+    ProgressBar progressBar(totalLines, "Loading origin/destination matrix");
+
     std::string line;
+    int linesRead = 0;
+
     // reading the first line for IDs
     if (std::getline(file, line)) {
         std::istringstream ss(line);
@@ -35,6 +51,8 @@ void ODMatrix::loadFromFile(const std::string& filename) {
         while (getline(ss, id, ',')) {
             idToIndexMap[std::stoll(id)] = index++;
         }
+
+        progressBar.update(++linesRead);
     }
 
     // initialize the matrix now that we know the size
@@ -51,6 +69,8 @@ void ODMatrix::loadFromFile(const std::string& filename) {
             matrix[i][j++] = std::stof(value);
         }
         i++;
+
+        progressBar.update(++linesRead);
     }
 
     file.close();

@@ -7,12 +7,12 @@
 /* external libraries */
 #include <unordered_set>
 /* internal libraries */
+#include "ProgressBar.hpp"
 #include "heuristics/PopulationNSGA.hpp"
 #include "file-reader/Settings.hpp"
 #include "file-reader/Stations.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
-#include "Progressbar.h"
 
 PopulationNSGA::PopulationNSGA(
     std::mt19937& rnd,
@@ -257,6 +257,8 @@ void PopulationNSGA::fastNonDominatedSort() {
 }
 
 void PopulationNSGA::evolve(int generations) {
+    ProgressBar progressBar(generations, "Running NSGA");
+
     for (int gen = 0; gen < generations; ++gen) {
         // step 1: sort the population into Pareto fronts
         fastNonDominatedSort();
@@ -289,9 +291,7 @@ void PopulationNSGA::evolve(int generations) {
         individuals = survivorSelection(populationSize);
         fastNonDominatedSort();
 
-        double progress = static_cast<double>(gen + 1) / static_cast<double>(generations);
-        std::string prefix = "Running NSGA";
-        printProgress(progress, prefix.c_str());
+        progressBar.update(gen + 1);
     }
 
     // Final metrics calculation

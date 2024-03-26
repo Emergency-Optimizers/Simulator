@@ -10,14 +10,31 @@
 #include <sstream>
 /* internal libraries */
 #include "file-reader/CSVReader.hpp"
+#include "ProgressBar.hpp"
 
-void CSVReader::loadFromFile(const std::string& filename) {
+void CSVReader::loadFromFile(const std::string& filename, const std::string& printPrefix) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
     }
 
+    // count total lines
+    size_t totalLines = 0;
+    double progress = 0;
+    std::string tempLine;
+    while (std::getline(file, tempLine)) {
+        totalLines++;
+    }
+
+    // reset file to beginning
+    file.clear();
+    file.seekg(0, std::ios::beg);
+
+    // setup progressBar
+    ProgressBar progressBar(totalLines, printPrefix);
+
     std::string line;
+    int linesRead = 0;
 
     if (std::getline(file, line)) {
         std::stringstream headerStream(line);
@@ -25,11 +42,17 @@ void CSVReader::loadFromFile(const std::string& filename) {
         while (std::getline(headerStream, column, ',')) {
             headers.push_back(column);
         }
+
+        progressBar.update(++linesRead);
     }
 
     while (std::getline(file, line)) {
         parseRow(line);
+
+        progressBar.update(++linesRead);
     }
+
+    file.close();
 }
 
 void CSVReader::parseRow(const std::string& line) {

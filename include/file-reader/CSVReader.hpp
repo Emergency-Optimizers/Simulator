@@ -22,7 +22,7 @@ class CSVReader {
 
  public:
     ~CSVReader() = default;
-    void loadFromFile(const std::string& filename);
+    void loadFromFile(const std::string& filename, const std::string& printPrefix);
     const std::vector<ValueType>& operator[](const int index) const;
     int size() const;
     void print();

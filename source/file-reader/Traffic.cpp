@@ -20,9 +20,7 @@ Traffic::Traffic() {
         {"Sunday", toDouble},
     };
 
-    std::cout << "Loading Traffic..." << std::flush;
-    loadFromFile("../../Data-Processing/data/oslo/traffic.csv");
-    std::cout << "\rLoading Traffic... " << "\tDONE" << std::endl;
+    loadFromFile("../../Data-Processing/data/oslo/traffic.csv", "Loading traffic data");
 }
 
 double Traffic::getTrafficFactor(const time_t& time) {

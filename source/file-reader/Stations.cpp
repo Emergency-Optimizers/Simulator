@@ -22,9 +22,7 @@ Stations::Stations() {
         {"urban_settlement", toBool},
     };
 
-    std::cout << "Loading Stations..." << std::flush;
-    loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv");
-    std::cout << "\rLoading Stations... " << "\tDONE" << std::endl;
+    loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv", "Loading stations data");
 }
 
 std::vector<unsigned> Stations::getDepotIndices(const bool useExtraDepots) {

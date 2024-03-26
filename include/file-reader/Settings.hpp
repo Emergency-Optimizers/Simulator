@@ -14,6 +14,7 @@
 #include <unordered_map>
 /* internal libraries */
 #include "Utils.hpp"
+#include "ProgressBar.hpp"
 
 class Settings {
  private:
@@ -36,13 +37,30 @@ class Settings {
 
  public:
     static void LoadSettings() {
-        std::cout << "Loading Settings..." << std::flush;
-
         const std::string& filename = "../settings.txt";
         std::ifstream file(filename);
+
+        // count total lines
+        size_t totalLines = 0;
+        double progress = 0;
+        std::string tempLine;
+        while (std::getline(file, tempLine)) {
+            totalLines++;
+        }
+
+        // reset file to beginning
+        file.clear();
+        file.seekg(0, std::ios::beg);
+
+        // setup progressBar
+        ProgressBar progressBar(totalLines, "Loading settings");
+
         std::string line;
+        int linesRead = 0;
 
         while (getline(file, line)) {
+            progressBar.update(++linesRead);
+
             if (line == "") {
                 continue;
             }
@@ -64,7 +82,7 @@ class Settings {
             }
         }
 
-        std::cout << "\rLoading Settings... " << "\tDONE" << std::endl;
+        file.close();
     }
 
     template<typename T>

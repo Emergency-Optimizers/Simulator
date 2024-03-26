@@ -5,6 +5,7 @@
  */
 
 /* internal libraries */
+#include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
 #include "file-reader/Settings.hpp"
 #include "Utils.hpp"
@@ -115,6 +116,8 @@ IndividualGA PopulationGA::crossover(const IndividualGA& parent1, const Individu
 }
 
 void PopulationGA::evolve(int generations) {
+    ProgressBar progressBar(generations, "Running GA");
+
     for (int gen = 0; gen < generations; gen++) {
         int numParents = populationSize / 2;
 
@@ -141,10 +144,7 @@ void PopulationGA::evolve(int generations) {
             individuals = survivorSelection(populationSize);
         }
 
-        IndividualGA fittest = findFittest();
-        std::cout << "Generation " << gen  << ": " << fittest.getFitness()
-            << ", [" << countUnique(individuals) << "] unique individuals"
-            << std::endl;
+        progressBar.update(gen + 1);
     }
 
     // run one last time to print metrics
