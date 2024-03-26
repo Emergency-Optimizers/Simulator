@@ -4,6 +4,9 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
+/* external libraries */
+#include <sstream>
+#include <iomanip>
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
@@ -144,7 +147,14 @@ void PopulationGA::evolve(int generations) {
             individuals = survivorSelection(populationSize);
         }
 
-        progressBar.update(gen + 1);
+        IndividualGA fittest = findFittest();
+
+        std::ostringstream postfix;
+        postfix
+            << "Best fitness: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
+            << ", Valid: " << (fittest.isValid() ? "true " : "false");
+
+        progressBar.update(gen + 1, postfix.str());
     }
 
     // run one last time to print metrics
