@@ -13,7 +13,6 @@
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
-    std::vector<Event> events,
     int numDepots,
     int numAmbulances,
     double mutationProbability,

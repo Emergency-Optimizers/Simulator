@@ -31,6 +31,7 @@ class Settings {
         {"SIMULATION_GENERATION_WINDOW_SIZE", &toInt},
         {"DAY_SHIFT_START", &toInt},
         {"DAY_SHIFT_END", &toInt},
+        {"HEURISTIC", &toString},
     };
 
  public:

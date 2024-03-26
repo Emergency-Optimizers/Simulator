@@ -31,7 +31,7 @@ PopulationGA::PopulationGA(
     events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
-        IndividualGA individual = IndividualGA(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift, false);
+        IndividualGA individual = IndividualGA(rnd, numDepots, numAmbulances, mutationProbability, dayShift, false);
         individuals.push_back(individual);
     }
 
@@ -106,7 +106,7 @@ IndividualGA PopulationGA::crossover(const IndividualGA& parent1, const Individu
         offspringGenotype.push_back(gene);
     }
 
-    IndividualGA offspring = IndividualGA(rnd, events, numDepots, numAmbulances, mutationProbability, dayShift);
+    IndividualGA offspring = IndividualGA(rnd, numDepots, numAmbulances, mutationProbability, dayShift);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateFitness(events);
@@ -151,6 +151,12 @@ void PopulationGA::evolve(int generations) {
     IndividualGA finalIndividual = findFittest();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateFitness(events, saveMetricsToFile);
+
+    std::cout
+        << "Fittest IndividualGA: " << finalIndividual.getFitness()
+        << (finalIndividual.isValid() ? " [valid]\n" : " [invalid]\n")
+        << std::endl;
+    finalIndividual.printChromosome();
 }
 
 int PopulationGA::countUnique(const std::vector<IndividualGA>& population) {
