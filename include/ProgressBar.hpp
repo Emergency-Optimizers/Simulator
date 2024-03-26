@@ -15,9 +15,10 @@
 class ProgressBar {
  private:
     const size_t maxProgress;
-    const std::string prefix;
-    const std::string postfix;
+    std::string prefix;
+    std::string postfix;
     double prevPercentage = -1.0;
+    const size_t prefixWidth = 30;
 
  public:
     ProgressBar(

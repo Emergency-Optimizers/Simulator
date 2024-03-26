@@ -37,7 +37,7 @@ void ODMatrix::loadFromFile(const std::string& filename) {
     file.seekg(0, std::ios::beg);
 
     // setup progressBar
-    ProgressBar progressBar(totalLines, "Loading origin/destination matrix");
+    ProgressBar progressBar(totalLines, "Loading O/D matrix");
 
     std::string line;
     int linesRead = 0;

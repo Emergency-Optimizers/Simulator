@@ -15,6 +15,12 @@ ProgressBar::ProgressBar(
     const std::string prefix,
     const std::string postfix
 ) : maxProgress(maxProgress), prefix(prefix), postfix(postfix) {
+    if (prefix.length() > prefixWidth) {
+        this->prefix = prefix.substr(0, prefixWidth);
+    } else {
+        this->prefix += std::string(prefixWidth - prefix.length(), ' ');
+    }
+
     update(0);
 }
 
@@ -40,7 +46,7 @@ void ProgressBar::update(size_t currentProgress) {
     int rpad = PBWIDTH - lpad;
 
     // print the progress bar
-    printf("\r%s %3d%% [%.*s%*s] %s", prefix.c_str(), val, lpad, PBSTR, rpad, "", postfix.c_str());
+    printf("\r%s%3d%% [%.*s%*s] %s", prefix.c_str(), val, lpad, PBSTR, rpad, "", postfix.c_str());
 
     if (percentage != 1.0) {
         fflush(stdout);
