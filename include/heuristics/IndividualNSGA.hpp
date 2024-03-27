@@ -42,7 +42,7 @@ class IndividualNSGA {
     );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false);
+    void evaluateObjectives(std::vector<Event> events, bool saveMetricsToFile = false);
     double calculateMinimizeMaxDepotObjective();
     double calculateUniformityObjective();
     bool dominates(const IndividualNSGA& other) const;

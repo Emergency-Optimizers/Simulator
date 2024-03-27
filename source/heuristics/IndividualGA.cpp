@@ -10,6 +10,7 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "file-reader/Stations.hpp"
+#include "file-reader/Settings.hpp"
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
@@ -43,13 +44,17 @@ bool IndividualGA::isValid() const {
 void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
     fitness = 0.0;
 
+    std::vector<std::vector<int>> allocations;
+    allocations.push_back(genotype);
+    allocations.push_back(genotype);
+
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(events, genotype, dayShift);
+    ambulanceAllocator.allocate(events, allocations, dayShift);
 
     Simulator simulator(
         rnd,
         ambulanceAllocator,
-        DispatchEngineStrategyType::CLOSEST,
+        Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
         events
     );
     simulator.run(saveMetricsToFile);

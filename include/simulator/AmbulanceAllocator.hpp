@@ -20,8 +20,8 @@ class AmbulanceAllocator {
     std::vector<Ambulance> ambulances;
 
     void allocate(
-        const std::vector<Event>& events,
-        const std::vector<int>& totalAllocatedAmbulancesAtDepots,
+        std::vector<Event>& events,
+        const std::vector<std::vector<int>>& allocations,
         const bool dayshift
     );
 };

@@ -36,3 +36,16 @@ void EventHandler::sortEvent(size_t eventIndex) {
         std::rotate(events.begin() + eventIndex, events.begin() + eventIndex + 1, newPosition);
     }
 }
+
+void EventHandler::sortEvents() {
+    std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
+        return a.timer < b.timer;
+    });
+
+    for (int i = 0; i < events.size(); i++) {
+        if (events[i].type != EventType::NONE) {
+            currentIndex = i;
+            break;
+        }
+    }
+}

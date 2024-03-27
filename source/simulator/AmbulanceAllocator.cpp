@@ -6,14 +6,16 @@
 
 /* external libraries */
 #include <map>
+#include <iomanip>
+#include <algorithm>
 /* internal libraries */
 #include "simulator/AmbulanceAllocator.hpp"
 #include "file-reader/Settings.hpp"
 #include "file-reader/Stations.hpp"
 
 void AmbulanceAllocator::allocate(
-    const std::vector<Event>& events,
-    const std::vector<int>& totalAllocatedAmbulancesAtDepots,
+    std::vector<Event>& events,
+    const std::vector<std::vector<int>>& allocations,
     const bool dayshift
 ) {
     ambulances.clear();
@@ -21,9 +23,9 @@ void AmbulanceAllocator::allocate(
     std::vector<unsigned> depotIndices = Stations::getInstance().getDepotIndices(dayshift);
 
     int ambulanceId = 0;
-    for (int depotId = 0; depotId < totalAllocatedAmbulancesAtDepots.size(); depotId++) {
+    for (int depotId = 0; depotId < allocations[0].size(); depotId++) {
         int depotIndex = depotIndices[depotId];
-        int numberOfAmbulancesInDepot = totalAllocatedAmbulancesAtDepots[depotId];
+        int numberOfAmbulancesInDepot = allocations[0][depotId];
         const int64_t depotGridId = Stations::getInstance().get<int64_t>("grid_id", depotIndex);
 
         for (int i = 0; i < numberOfAmbulancesInDepot; i++) {
@@ -42,17 +44,39 @@ void AmbulanceAllocator::allocate(
     shiftStartTm.tm_min = 0;
     shiftStartTm.tm_sec = 0;
 
-    int shiftLengthHours = (12 * 60) * 60;
+    int shiftLengthSeconds = (12 * 60) * 60;
 
     time_t shiftStart = std::mktime(&shiftStartTm);
-    time_t shiftEnd = shiftStart + shiftLengthHours;
+    time_t shiftEnd = shiftStart + shiftLengthSeconds;
 
     if (!dayshift) {
-        shiftStart -= shiftLengthHours;
-        shiftEnd -= shiftLengthHours;
+        shiftStart -= shiftLengthSeconds;
+        shiftEnd -= shiftLengthSeconds;
     }
 
     allocateAndScheduleBreaks(shiftStart, shiftEnd);
+
+    // add reallocation events
+    if (allocations.size() > 1) {
+        // calculate the interval between reallocations in seconds
+        int reallocationInterval = shiftLengthSeconds / allocations.size();
+
+        for (size_t reallocationIndex = 1; reallocationIndex < allocations.size(); reallocationIndex++) {
+            time_t reallocationTime = shiftStart + reallocationInterval * reallocationIndex;
+
+            Event event;
+            event.type = EventType::REALLOCATE;
+            event.timer = reallocationTime;
+            event.reallocation = allocations[reallocationIndex];
+            event.utility = true;
+
+            events.push_back(event);
+        }
+
+        std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
+            return a.timer < b.timer;
+        });
+    }
 }
 
 void AmbulanceAllocator::allocateAndScheduleBreaks(const time_t& shiftStart, const time_t& shiftEnd) {

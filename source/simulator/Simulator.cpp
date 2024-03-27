@@ -28,6 +28,8 @@ void Simulator::run(bool saveMetricsToFile) {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
+        EventType currentEventType = eventHandler.events[eventIndex].type;
+
         DispatchEngine::dispatch(
             dispatchStrategy,
             rng,
@@ -36,7 +38,11 @@ void Simulator::run(bool saveMetricsToFile) {
             eventIndex
         );
 
-        eventHandler.sortEvent(eventIndex);
+        if (currentEventType != EventType::REALLOCATE) {
+            eventHandler.sortEvent(eventIndex);
+        } else {
+            eventHandler.sortEvents();
+        }
 
         eventIndex = eventHandler.getNextEventIndex();
     }

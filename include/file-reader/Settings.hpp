@@ -33,6 +33,7 @@ class Settings {
         {"DAY_SHIFT_START", &toInt},
         {"DAY_SHIFT_END", &toInt},
         {"HEURISTIC", &toString},
+        {"DISPATCH_STRATEGY", &toDispatchEngineStrategyType},
     };
 
  public:

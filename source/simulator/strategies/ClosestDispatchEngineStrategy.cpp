@@ -6,10 +6,13 @@
 
 /* external libraries */
 #include <limits>
+#include <algorithm>
+#include <numeric>
 /* internal libraries */
 #include "simulator/strategies/ClosestDispatchEngineStrategy.hpp"
 #include "Utils.hpp"
 #include "file-reader/Stations.hpp"
+#include "file-reader/Settings.hpp"
 #include "file-reader/ODMatrix.hpp"
 
 void ClosestDispatchEngineStrategy::run(
@@ -33,6 +36,9 @@ void ClosestDispatchEngineStrategy::run(
             break;
         case EventType::DISPATCHING_TO_DEPOT:
             finishingEvent(rng, ambulances, events, eventIndex);
+            break;
+        case EventType::REALLOCATE:
+            reallocating(rng, ambulances, events, eventIndex);
             break;
     }
 }
@@ -180,4 +186,16 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
+}
+
+void ClosestDispatchEngineStrategy::reallocating(
+    std::mt19937& rng,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    // TODO
+
+    // set the type to none so it doesn't trigger again
+    events[eventIndex].type = EventType::NONE;
 }

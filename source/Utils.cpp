@@ -56,6 +56,17 @@ ValueType toDateTime(const std::string& str) {
     return tm;
 }
 
+ValueType toDispatchEngineStrategyType(const std::string& str) {
+    if (str == "RANDOM") {
+        return DispatchEngineStrategyType::RANDOM;
+    } else if (str == "CLOSEST") {
+        return DispatchEngineStrategyType::CLOSEST;
+    } else {
+        std::cout << "Unknown dispatch engine type, defaulting to random" << std::endl;
+        return DispatchEngineStrategyType::RANDOM;
+    }
+}
+
 std::string tmToString(const std::tm& time) {
     std::stringstream ss;
     ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
@@ -80,6 +91,14 @@ std::string valueTypeToString(const ValueType& cell) {
             return arg ? "true" : "false";
         } else if constexpr (std::is_same_v<T, std::optional<std::tm>>) {
             return arg ? tmToString(arg.value()) : "n/a";
+        } else if constexpr (std::is_same_v<T, DispatchEngineStrategyType>) {
+            if (arg == DispatchEngineStrategyType::RANDOM) {
+                return "RANDOM";
+            } else if (arg == DispatchEngineStrategyType::CLOSEST) {
+                return "CLOSEST";
+            } else {
+                return "UNKNOWN";
+            }
         }
     }, cell);
 }
@@ -270,6 +289,9 @@ void writeMetrics(std::vector<Event>& events) {
         << "duration_dispatching_to_depot" << std::endl;
 
     for (Event& event : events) {
+        if (event.utility) {
+            continue;
+        }
         // write each metric to the CSV
         outFile
             << tmToString(event.callReceived) << ","
@@ -459,4 +481,11 @@ int findEventIndexFromId(const std::vector<Event>& events, const int id) {
     }
 
     return -1;
+}
+
+bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd) {
+    std::tm* timeInfo = std::localtime(&eventTimer);
+    int hour = timeInfo->tm_hour;
+
+    return hour >= dayShiftStart && hour <= dayShiftEnd;
 }

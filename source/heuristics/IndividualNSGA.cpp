@@ -10,6 +10,7 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "file-reader/Stations.hpp"
+#include "file-reader/Settings.hpp"
 
 IndividualNSGA::IndividualNSGA(
     std::mt19937& rnd,
@@ -50,14 +51,18 @@ bool IndividualNSGA::isValid() const {
     return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
 }
 
-void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
+void IndividualNSGA::evaluateObjectives(std::vector<Event> events, bool saveMetricsToFile) {
+    std::vector<std::vector<int>> allocations;
+    allocations.push_back(genotype);
+    allocations.push_back(genotype);
+
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(events, genotype, dayShift);
+    ambulanceAllocator.allocate(events, allocations, dayShift);
 
     Simulator simulator(
         rnd,
         ambulanceAllocator,
-        DispatchEngineStrategyType::CLOSEST,
+        Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
         events
     );
 

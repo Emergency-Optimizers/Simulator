@@ -45,6 +45,12 @@ class DispatchEngineStrategy {
         std::vector<Event>& events,
         const int eventIndex
     );
+    static void reallocating(
+        std::mt19937& rng,
+        std::vector<Ambulance>& ambulances,
+        std::vector<Event>& events,
+        const int eventIndex
+    );
 
  public:
     static void run(
