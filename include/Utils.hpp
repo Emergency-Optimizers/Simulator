@@ -25,7 +25,8 @@ using ValueType = std::variant<
     double,
     std::string,
     bool,
-    std::optional<std::tm>
+    std::optional<std::tm>,
+    std::vector<float>
 >;
 using ToValueType = ValueType(*)(const std::string&);
 using SchemaMapping = std::unordered_map<std::string, ToValueType>;
@@ -37,6 +38,7 @@ ValueType toDouble(const std::string& str);
 ValueType toString(const std::string& str);
 ValueType toBool(const std::string& str);
 ValueType toDateTime(const std::string& str);
+ValueType toVectorFloat(const std::string& str);
 std::string tmToString(const std::tm& time);
 std::string valueTypeToString(const ValueType& cell);
 float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);

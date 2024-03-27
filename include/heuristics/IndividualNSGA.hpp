@@ -23,6 +23,7 @@ class IndividualNSGA {
     int numAmbulances;
     const bool dayShift;
     std::vector<double> objectives;
+    float fitness;
     double crowdingDistance;
     int dominationCount;  // how many individuals dominate this one
     std::vector<IndividualNSGA*> dominatedIndividuals;
@@ -42,7 +43,8 @@ class IndividualNSGA {
     );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile = false);
+    void evaluateObjectives(const std::vector<Event>& events, const std::vector<float> objectiveWeights, bool saveMetricsToFile = false);
+    void evaluateFitness();
     double calculateMinimizeMaxDepotObjective();
     double calculateUniformityObjective();
     bool dominates(const IndividualNSGA& other) const;
@@ -54,7 +56,6 @@ class IndividualNSGA {
 
     const std::vector<int>& getGenotype() const;
     void setGenotype(const std::vector<int>& newGenotype);
-    void setFitness(double fitness);
     void setAmbulancesAtDepot(int depotIndex, int count);
     int getAmbulancesAtDepot(int depotIndex) const;
     int getNumAmbulances() const;
@@ -67,6 +68,8 @@ class IndividualNSGA {
     void setRank(int newRank);
     const std::vector<double>& getObjectives() const;
     void setObjectives(const std::vector<double>& newObjectives);
+    double getFitness() const;
+    void setFitness(double newFitness);
     int getDominationCount();  // how many individuals
     void incrementDominationCount();
     void decrementDominationCount();

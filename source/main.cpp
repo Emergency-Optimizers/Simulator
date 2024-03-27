@@ -43,12 +43,15 @@ int main() {
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
     } else if (heuristic == "NSGA") {
-        PopulationNSGA population(
-            rnd,
-            Settings::get<int>("POPULATION_SIZE"),
-            Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<bool>("SIMULATE_DAY_SHIFT")
-        );
+        bool useFronts = Settings::get<bool>("USE_NSGA_FRONTS");
+            PopulationNSGA population(
+                rnd,
+                useFronts,
+                Settings::get<std::vector<float>>("NSGA_WEIGHTS"),
+                Settings::get<int>("POPULATION_SIZE"),
+                Settings::get<float>("MUTATION_PROBABILITY"),
+                Settings::get<bool>("SIMULATE_DAY_SHIFT")
+            );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
     } else {
         std::cout << "Unknown heuristic given." << std::endl;

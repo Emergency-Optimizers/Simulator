@@ -33,6 +33,8 @@ class Settings {
         {"DAY_SHIFT_START", &toInt},
         {"DAY_SHIFT_END", &toInt},
         {"HEURISTIC", &toString},
+        {"USE_NSGA_FRONTS", &toBool},
+        {"NSGA_WEIGHTS", &toVectorFloat}
     };
 
  public:

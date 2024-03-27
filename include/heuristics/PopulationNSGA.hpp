@@ -19,6 +19,8 @@ class PopulationNSGA {
  private:
     std::mt19937& rnd;
     std::vector<Event> events = { };
+    bool useFronts;
+    std::vector<float> objectiveWeights;
     std::vector<IndividualNSGA> individuals;
     int populationSize;
     int numDepots;
@@ -31,6 +33,8 @@ class PopulationNSGA {
  public:
     PopulationNSGA::PopulationNSGA(
         std::mt19937& rnd,
+        bool useFronts,
+        std::vector<float> objectiveWeights,
         int populationSize,
         double mutationProbability,
         const bool dayShift

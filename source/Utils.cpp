@@ -56,6 +56,29 @@ ValueType toDateTime(const std::string& str) {
     return tm;
 }
 
+ValueType toVectorFloat(const std::string& str) {
+    std::vector<float> result;
+    std::stringstream ss(str);
+
+    // Assuming your settings file has values separated by commas or another delimiter
+    std::string item;
+    while (getline(ss, item, ',')) { // Using comma as delimiter
+        // Trim spaces if necessary
+        item.erase(0, item.find_first_not_of(" \t"));
+        item.erase(item.find_last_not_of(" \t") + 1);
+
+        try {
+            float value = std::stof(item);
+            result.push_back(value);
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing float from settings: " << e.what() << std::endl;
+            // Handle or ignore parsing errors as appropriate
+        }
+    }
+
+    return result;
+}
+
 std::string tmToString(const std::tm& time) {
     std::stringstream ss;
     ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
@@ -80,6 +103,15 @@ std::string valueTypeToString(const ValueType& cell) {
             return arg ? "true" : "false";
         } else if constexpr (std::is_same_v<T, std::optional<std::tm>>) {
             return arg ? tmToString(arg.value()) : "n/a";
+        } else if constexpr (std::is_same_v<T, std::vector<float>>) {
+            std::string result;
+            for (size_t i = 0; i < arg.size(); ++i) {
+                result += std::to_string(arg[i]);
+                if (i < arg.size() - 1) {
+                    result += ", ";
+                }
+            }
+            return result;
         }
     }, cell);
 }

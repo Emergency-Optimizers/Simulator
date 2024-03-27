@@ -25,6 +25,7 @@ IndividualNSGA::IndividualNSGA(
     numDepots(numDepots),
     numAmbulances(numAmbulances),
     objectives(numObjectives, 0),
+    fitness(0.0),
     crowdingDistance(0),
     dominationCount(0),
     rank(-1),
@@ -50,7 +51,7 @@ bool IndividualNSGA::isValid() const {
     return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
 }
 
-void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, bool saveMetricsToFile) {
+void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, std::vector<float> objectiveWeights, bool saveMetricsToFile) {
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
@@ -70,6 +71,12 @@ void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, bool s
     objectives[4] = simulator.averageResponseTime("V1", true);
     objectives[5] = simulator.averageResponseTime("V1", false);
     objectives[6] = simulator.responseTimeViolations();
+
+    fitness = 0.0f;
+    for (size_t i = 0; i < objectives.size(); ++i) {
+        fitness += objectives[i] * objectiveWeights[i];
+    }
+
 }
 
 double IndividualNSGA::calculateUniformityObjective() {
@@ -233,6 +240,14 @@ const std::vector<double>& IndividualNSGA::getObjectives() const {
 
 void IndividualNSGA::setObjectives(const std::vector<double>& newObjectives) {
     objectives = newObjectives;
+}
+
+double IndividualNSGA::getFitness() const {
+    return fitness;
+}
+
+void IndividualNSGA::setFitness(double newFitness) {
+    fitness = newFitness;
 }
 
 int IndividualNSGA::getDominationCount() {
