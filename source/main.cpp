@@ -42,16 +42,26 @@ int main() {
             Settings::get<bool>("SIMULATE_DAY_SHIFT")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
-    } else if (heuristic == "NSGA") {
+    } else if (heuristic == "TSGA") {
+        PopulationGA population(
+            rnd,
+            Settings::get<int>("NUM_TIME_SEGMENTS"),
+            Settings::get<int>("POPULATION_SIZE"),
+            Settings::get<float>("MUTATION_PROBABILITY"),
+            Settings::get<bool>("SIMULATE_DAY_SHIFT")
+        );
+        population.evolve(Settings::get<int>("GENERATION_SIZE"));
+    }
+    else if (heuristic == "NSGA") {
         bool useFronts = Settings::get<bool>("USE_NSGA_FRONTS");
-            PopulationNSGA population(
-                rnd,
-                useFronts,
-                Settings::get<std::vector<float>>("NSGA_WEIGHTS"),
-                Settings::get<int>("POPULATION_SIZE"),
-                Settings::get<float>("MUTATION_PROBABILITY"),
-                Settings::get<bool>("SIMULATE_DAY_SHIFT")
-            );
+        PopulationNSGA population(
+            rnd,
+            useFronts,
+            Settings::get<std::vector<float>>("NSGA_WEIGHTS"),
+            Settings::get<int>("POPULATION_SIZE"),
+            Settings::get<float>("MUTATION_PROBABILITY"),
+            Settings::get<bool>("SIMULATE_DAY_SHIFT")
+        );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
     } else {
         std::cout << "Unknown heuristic given." << std::endl;
