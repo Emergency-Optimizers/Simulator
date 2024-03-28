@@ -155,6 +155,7 @@ void PopulationTSGA::evolve(int generations) {
             << ", Valid: " << (fittest.isValid() ? "true " : "false");
 
         progressBar.update(gen + 1, postfix.str());
+
     }
 
     // run one last time to print metrics
@@ -166,7 +167,7 @@ void PopulationTSGA::evolve(int generations) {
         << "Fittest IndividualGA: " << finalIndividual.getFitness()
         << (finalIndividual.isValid() ? " [valid]\n" : " [invalid]\n")
         << std::endl;
-    finalIndividual.printChromosome();
+    finalIndividual.printTimeSegmentedChromosome();
 }
 
 int PopulationTSGA::countUnique(const std::vector<IndividualTSGA>& population) {

@@ -55,6 +55,7 @@ class IndividualTSGA {
     void setNumAmbulances(int newNumAmbulances);
     int getNumDepots() const;
     void setNumDepots(int newNumDepots);
+    void printTimeSegmentedChromosome() const;
     IndividualTSGA& IndividualTSGA::operator=(const IndividualTSGA& other) {
         if (this != &other) {
             genotype = other.genotype;

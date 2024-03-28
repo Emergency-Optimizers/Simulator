@@ -11,6 +11,7 @@
 #include "simulator/Simulator.hpp"
 #include "file-reader/Stations.hpp"
 #include "file-reader/Settings.hpp"
+#include <iomanip>
 
 IndividualTSGA::IndividualTSGA(
     std::mt19937& rnd,
@@ -169,3 +170,33 @@ int IndividualTSGA::getNumDepots() const {
 void IndividualTSGA::setNumDepots(int newNumDepots) {
     numDepots = newNumDepots;
 }
+
+void IndividualTSGA::printTimeSegmentedChromosome() const {
+    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
+    // Placeholder for the calculateFitnessForSegment function
+    auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
+        return 33.0; // Assuming a uniform fitness for demonstration
+    };
+
+    // Print the header
+    std::cout << std::left << "Time Segment       | ";
+    for (int t = 0; t < numTimeSegments; ++t) {
+        std::cout << std::setw(3) << "T" << t + 1 << " ";
+    }
+    std::cout << "Fitness\n";
+    std::cout << std::string(100, '-') << "\n"; // Adjust based on the expected width
+
+    // Iterate over depots and print each row
+    for (size_t d = 0; d < depotIndices.size(); ++d) {
+        // Assuming depot names are short enough; adjust padding as needed
+        std::cout << std::setw(18) << Stations::getInstance().get<std::string>("name", depotIndices[d]) << " | ";
+        for (size_t t = 0; t < numTimeSegments; ++t) {
+            // Assuming allocations fit within 3 characters; adjust padding as needed
+            std::cout << std::setw(3) << genotype[t][d] << " ";
+        }
+        // Print the fitness value at the end of each row
+        std::cout << " | " << std::setw(4) << calculateFitnessForSegment(d) << "\n";
+    }
+}
+
+
