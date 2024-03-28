@@ -18,7 +18,7 @@
 class IndividualTSGA {
  private:
     std::mt19937& rnd;
-    std::vector<int> genotype;
+    std::vector<std::vector<int>> genotype;
     int numDepots;
     int numAmbulances;
     int numTimeSegments;
@@ -45,8 +45,8 @@ class IndividualTSGA {
     void addAmbulances(int ambulancesToAdd = 1);
     void removeAmbulances(int ambulancesToRemove = 1);
     void printChromosome() const;
-    const std::vector<int>& getGenotype() const;
-    void setGenotype(const std::vector<int>& newGenotype);
+    const std::vector<std::vector<int>>& getGenotype() const;
+    void setGenotype(const std::vector<std::vector<int>> newGenotype);
     double getFitness() const;
     void setFitness(double fitness);
     void setAmbulancesAtDepot(int depotIndex, int count);

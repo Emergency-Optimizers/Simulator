@@ -20,37 +20,37 @@ IndividualTSGA::IndividualTSGA(
     double mutationProbability,
     const bool dayShift,
     bool child
-) : rnd(rnd), genotype(numDepots, 0), numDepots(numDepots), numAmbulances(numAmbulances), numTimeSegments(numTimeSegments), fitness(0.0), mutationProbability(mutationProbability), dayShift(dayShift), child(child) {
+) : rnd(rnd), genotype(numTimeSegments, std::vector<int>(numDepots, 0)), numDepots(numDepots), numAmbulances(numAmbulances), numTimeSegments(numTimeSegments), fitness(0.0), mutationProbability(mutationProbability), dayShift(dayShift), child(child) {
     if (!child) {
         randomizeAmbulances();
     }
 }
 
 void IndividualTSGA::randomizeAmbulances() {
-    // reset all depots to 0 ambulances
-    std::fill(genotype.begin(), genotype.end(), 0);
-
-    for (int i = 0; i < numAmbulances; i++) {
-        int depotIndex = getRandomInt(rnd, 0, genotype.size() - 1);
-        genotype[depotIndex]++;
+    for (auto& segment : genotype) {
+        std::fill(segment.begin(), segment.end(), 0);
+    }
+    for (int t = 0; t < numTimeSegments; ++t) {
+        for (int i = 0; i < numAmbulances; ++i) {
+            int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
+            genotype[t][depotIndex]++;
+        }
     }
 }
 
 bool IndividualTSGA::isValid() const {
-    int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
-
-    return totalAmbulances == numAmbulances;
+    for (const auto& segment : genotype) {
+        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
+        if (totalAmbulances != numAmbulances) return false;
+    }
+    return true;
 }
 
 void IndividualTSGA::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
     fitness = 0.0;
 
-    std::vector<std::vector<int>> allocations;
-    allocations.push_back(genotype);
-    allocations.push_back(genotype);
-
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(events, allocations, dayShift);
+    ambulanceAllocator.allocate(events, genotype, dayShift);
 
     Simulator simulator(
         rnd,
@@ -60,7 +60,7 @@ void IndividualTSGA::evaluateFitness(std::vector<Event> events, bool saveMetrics
     );
     simulator.run(saveMetricsToFile);
 
-    fitness = simulator.responseTimeViolations();
+    fitness = simulator.averageResponseTime("A", true);
 
     if (saveMetricsToFile) {
         int totalHours = 0;
@@ -84,86 +84,65 @@ void IndividualTSGA::evaluateFitness(std::vector<Event> events, bool saveMetrics
 
 void IndividualTSGA::mutate() {
     std::uniform_real_distribution<> probDist(0.0, 1.0);
-    std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
+    std::uniform_int_distribution<> depotDist(0, numDepots - 1);
 
-    for (int depot = 0; depot < genotype.size(); ++depot) {
-        // only mutate if depot has at least one ambulance
-        if (probDist(rnd) < mutationProbability && genotype[depot] > 0) {
-            int otherDepot = depotDist(rnd);
-            while (otherDepot == depot) {
-                otherDepot = depotDist(rnd);
+    for (auto& segment : genotype) {
+        for (int depot = 0; depot < segment.size(); ++depot) {
+            if (probDist(rnd) < mutationProbability && segment[depot] > 0) {
+                int otherDepot = depotDist(rnd);
+                while (otherDepot == depot) {
+                    otherDepot = depotDist(rnd);
+                }
+
+                segment[depot]--;
+                segment[otherDepot]++;
             }
-
-            // transfer an ambulance from current depot to another depot
-            genotype[depot]--;
-            genotype[otherDepot]++;
         }
     }
 
-    // ensure total number of ambulances remains constant
     if (!isValid()) {
         throw std::runtime_error("Total number of ambulances changed during mutation.");
     }
 }
 
 void IndividualTSGA::repair() {
-    int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
+    for (auto& segment : genotype) {
+        int totalAmbulancesInSegment = std::accumulate(segment.begin(), segment.end(), 0);
 
-    while (totalAmbulances != numAmbulances) {
-        if (totalAmbulances < numAmbulances) {
-            addAmbulances(numAmbulances - totalAmbulances);
-        } else {
-            removeAmbulances(totalAmbulances - numAmbulances);
-        }
+        while (totalAmbulancesInSegment != numAmbulances) {
+            int depotIndex = std::uniform_int_distribution<>(0, numDepots - 1)(rnd);
 
-        totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
-    }
-
-    // ensure total number of ambulances remains constant
-    if (!isValid()) {
-        throw std::runtime_error("Total number of ambulances changed during mutation.");
-    }
-}
-
-void IndividualTSGA::addAmbulances(int ambulancesToAdd) {
-    std::uniform_int_distribution<> dist(0, genotype.size() - 1);
-
-    for (int i = 0; i < ambulancesToAdd; i++) {
-        int depotIndex = dist(rnd);
-
-        genotype[depotIndex]++;
-    }
-}
-
-void IndividualTSGA::removeAmbulances(int ambulancesToRemove) {
-    std::uniform_int_distribution<> dist(0, genotype.size() - 1);
-
-    for (int i = 0; i < ambulancesToRemove; i++) {
-        bool ambulanceRemoved = false;
-
-        while (!ambulanceRemoved) {
-            int depotIndex = dist(rnd);
-
-            if (genotype[depotIndex] > 0) {
-                genotype[depotIndex]--;
-                ambulanceRemoved = true;
+            if (totalAmbulancesInSegment < numAmbulances) {
+                segment[depotIndex]++;
+                totalAmbulancesInSegment++;
+            } else if (totalAmbulancesInSegment > numAmbulances && segment[depotIndex] > 0) {
+                segment[depotIndex]--;
+                totalAmbulancesInSegment--;
             }
         }
+    }
+
+    if (!isValid()) {
+        throw std::runtime_error("Repair operation failed to produce a valid solution.");
     }
 }
 
 void IndividualTSGA::printChromosome() const {
-    std::vector<unsigned int> depotIndicies = Stations::getInstance().getDepotIndices(true);
-    for (int i = 0; i < genotype.size(); i++) {
-        std::cout << "Depot " << Stations::getInstance().get<std::string>("name", depotIndicies[i]) << ": " << genotype[i] << " ambulances" << std::endl;
+    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
+    for (int t = 0; t < genotype.size(); ++t) {
+        std::cout << "Time Segment " << (t + 1) << ":\n";
+        for (int d = 0; d < genotype[t].size(); ++d) {
+            std::cout << "  Depot " << Stations::getInstance().get<std::string>("name", depotIndices[d])
+                      << ": " << genotype[t][d] << " ambulances\n";
+        }
     }
 }
 
-const std::vector<int>& IndividualTSGA::getGenotype() const {
+const std::vector<std::vector<int>>& IndividualTSGA::getGenotype() const {
     return genotype;
 }
 
-void IndividualTSGA::setGenotype(const std::vector<int>& newGenotype) {
+void IndividualTSGA::setGenotype(const std::vector<std::vector<int>> newGenotype) {
     genotype = newGenotype;
 }
 
@@ -173,16 +152,6 @@ double IndividualTSGA::getFitness() const {
 
 void IndividualTSGA::setFitness(double newFitness) {
     fitness = newFitness;
-}
-
-void IndividualTSGA::setAmbulancesAtDepot(int depotIndex, int count) {
-    if (depotIndex >= 0 && depotIndex < genotype.size()) {
-        genotype[depotIndex] = count;
-    }
-}
-
-int IndividualTSGA::getAmbulancesAtDepot(int depotIndex) const {
-    return (depotIndex >= 0 && depotIndex < genotype.size()) ? genotype[depotIndex] : -1;
 }
 
 int IndividualTSGA::getNumAmbulances() const {

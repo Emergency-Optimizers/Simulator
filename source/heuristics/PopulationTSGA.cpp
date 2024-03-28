@@ -100,21 +100,20 @@ void PopulationTSGA::addChildren(const std::vector<IndividualTSGA>& children) {
 }
 
 IndividualTSGA PopulationTSGA::crossover(const IndividualTSGA& parent1, const IndividualTSGA& parent2) {
-    std::vector<int> offspringGenotype;
-    offspringGenotype.reserve(parent1.getGenotype().size());
+    std::vector<std::vector<int>> offspringGenotype = parent2.getGenotype();
+    
+    std::uniform_int_distribution<> dist(0, 1);
 
-    std::uniform_real_distribution<> dist(0, 1);
-
-    for (size_t i = 0; i < parent1.getGenotype().size(); i++) {
-        double alpha = dist(rnd);
-        int gene = static_cast<int>(alpha * parent1.getGenotype()[i] + (1 - alpha) * parent2.getGenotype()[i]);
-        offspringGenotype.push_back(gene);
+    for (size_t t = 0; t < numTimeSegments; ++t) {
+        if (dist(rnd) == 1) {
+            offspringGenotype[t] = parent1.getGenotype()[t];
+        }
     }
 
-    IndividualTSGA offspring = IndividualTSGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift);
+    IndividualTSGA offspring(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
     offspring.setGenotype(offspringGenotype);
-    offspring.repair();
-    offspring.evaluateFitness(events, numTimeSegments);
+    // offspring.repair();
+    offspring.evaluateFitness(events);
 
     return offspring;
 }
@@ -122,7 +121,6 @@ IndividualTSGA PopulationTSGA::crossover(const IndividualTSGA& parent1, const In
 void PopulationTSGA::evolve(int generations) {
     ProgressBar progressBar(generations, "Running TSGA");
 
-    std::cout << "HERE" << std::endl;
     for (int gen = 0; gen < generations; gen++) {
         int numParents = populationSize / 2;
 
@@ -172,21 +170,25 @@ void PopulationTSGA::evolve(int generations) {
 }
 
 int PopulationTSGA::countUnique(const std::vector<IndividualTSGA>& population) {
-    std::vector<std::vector<int>> genotypes;
-    genotypes.reserve(population.size());
+    std::vector<std::string> genotypeStrings;
+    genotypeStrings.reserve(population.size());
 
     for (const auto& individual : population) {
-        genotypes.push_back(individual.getGenotype());
+        std::ostringstream genotypeStream;
+        for (const auto& segment : individual.getGenotype()) {
+            for (const auto& depotAllocation : segment) {
+                genotypeStream << depotAllocation << ",";
+            }
+            genotypeStream << ";";
+        }
+        genotypeStrings.push_back(genotypeStream.str());
     }
 
-    // sort genotypes to bring identical ones together
-    std::sort(genotypes.begin(), genotypes.end());
+    std::sort(genotypeStrings.begin(), genotypeStrings.end());
 
-    // remove consecutive duplicates
-    auto lastUnique = std::unique(genotypes.begin(), genotypes.end());
+    auto lastUnique = std::unique(genotypeStrings.begin(), genotypeStrings.end());
 
-    // calculate the distance between the beginning and the point of last unique element
-    return std::distance(genotypes.begin(), lastUnique);
+    return std::distance(genotypeStrings.begin(), lastUnique);
 }
 
 const IndividualTSGA PopulationTSGA::findFittest() {
