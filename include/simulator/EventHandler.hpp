@@ -23,4 +23,5 @@ class EventHandler {
     void populate(std::vector<Event> newEvents);
     int getNextEventIndex();
     void sortEvent(size_t eventIndex);
+    void sortEvents();
 };

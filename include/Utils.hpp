@@ -17,6 +17,7 @@
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
+#include "simulator/strategies/DispatchEngineStrategyType.hpp"
 
 using ValueType = std::variant<
     int,
@@ -26,7 +27,8 @@ using ValueType = std::variant<
     std::string,
     bool,
     std::optional<std::tm>,
-    std::vector<float>
+    std::vector<float>,
+    DispatchEngineStrategyType
 >;
 using ToValueType = ValueType(*)(const std::string&);
 using SchemaMapping = std::unordered_map<std::string, ToValueType>;
@@ -39,6 +41,7 @@ ValueType toString(const std::string& str);
 ValueType toBool(const std::string& str);
 ValueType toDateTime(const std::string& str);
 ValueType toVectorFloat(const std::string& str);
+ValueType toDispatchEngineStrategyType(const std::string& str);
 std::string tmToString(const std::tm& time);
 std::string valueTypeToString(const ValueType& cell);
 float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
@@ -72,6 +75,7 @@ void writeMetrics(std::vector<Event>& events);
 void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
 void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
+bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd);
 
 template <typename T>
 int findIndex(const std::vector<T>& vec, const T& value) {

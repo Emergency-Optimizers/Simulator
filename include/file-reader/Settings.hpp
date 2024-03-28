@@ -34,7 +34,8 @@ class Settings {
         {"DAY_SHIFT_END", &toInt},
         {"HEURISTIC", &toString},
         {"USE_NSGA_FRONTS", &toBool},
-        {"NSGA_WEIGHTS", &toVectorFloat}
+        {"NSGA_WEIGHTS", &toVectorFloat},
+        {"DISPATCH_STRATEGY", &toDispatchEngineStrategyType},
     };
 
  public:

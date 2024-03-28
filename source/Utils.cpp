@@ -60,10 +60,9 @@ ValueType toVectorFloat(const std::string& str) {
     std::vector<float> result;
     std::stringstream ss(str);
 
-    // Assuming your settings file has values separated by commas or another delimiter
     std::string item;
-    while (getline(ss, item, ',')) { // Using comma as delimiter
-        // Trim spaces if necessary
+    while (getline(ss, item, ',')) {
+        // trim spaces
         item.erase(0, item.find_first_not_of(" \t"));
         item.erase(item.find_last_not_of(" \t") + 1);
 
@@ -72,11 +71,21 @@ ValueType toVectorFloat(const std::string& str) {
             result.push_back(value);
         } catch (const std::exception& e) {
             std::cerr << "Error parsing float from settings: " << e.what() << std::endl;
-            // Handle or ignore parsing errors as appropriate
         }
     }
 
     return result;
+}
+
+ValueType toDispatchEngineStrategyType(const std::string& str) {
+    if (str == "RANDOM") {
+        return DispatchEngineStrategyType::RANDOM;
+    } else if (str == "CLOSEST") {
+        return DispatchEngineStrategyType::CLOSEST;
+    } else {
+        std::cout << "Unknown dispatch engine type, defaulting to random" << std::endl;
+        return DispatchEngineStrategyType::RANDOM;
+    }
 }
 
 std::string tmToString(const std::tm& time) {
@@ -112,6 +121,14 @@ std::string valueTypeToString(const ValueType& cell) {
                 }
             }
             return result;
+        } else if constexpr (std::is_same_v<T, DispatchEngineStrategyType>) {
+            if (arg == DispatchEngineStrategyType::RANDOM) {
+                return "RANDOM";
+            } else if (arg == DispatchEngineStrategyType::CLOSEST) {
+                return "CLOSEST";
+            } else {
+                return "UNKNOWN";
+            }
         }
     }, cell);
 }
@@ -302,6 +319,9 @@ void writeMetrics(std::vector<Event>& events) {
         << "duration_dispatching_to_depot" << std::endl;
 
     for (Event& event : events) {
+        if (event.utility) {
+            continue;
+        }
         // write each metric to the CSV
         outFile
             << tmToString(event.callReceived) << ","
@@ -491,4 +511,11 @@ int findEventIndexFromId(const std::vector<Event>& events, const int id) {
     }
 
     return -1;
+}
+
+bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd) {
+    std::tm* timeInfo = std::localtime(&eventTimer);
+    int hour = timeInfo->tm_hour;
+
+    return hour >= dayShiftStart && hour <= dayShiftEnd;
 }

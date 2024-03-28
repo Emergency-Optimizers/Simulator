@@ -98,11 +98,31 @@ void DispatchEngineStrategy::finishingEvent(
     );
     events[eventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
-
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
+
+    // check if ambulance has been reallocated and send it to new depot
+    int64_t assignedDepotGridId = Stations::getInstance().get<int64_t>(
+        "grid_id",
+        ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
+    );
+    if (ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId != assignedDepotGridId) {
+        events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
+
+        return;
+    }
+
     ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = -1;
     ambulances[events[eventIndex].assignedAmbulanceIndex].checkScheduledBreak(events[eventIndex].timer);
     events[eventIndex].assignedAmbulanceIndex = -1;
 
     events[eventIndex].type = EventType::NONE;
+}
+
+void DispatchEngineStrategy::reallocating(
+    std::mt19937& rng,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    /// TODO: code here
 }

@@ -10,6 +10,7 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "file-reader/Stations.hpp"
+#include "file-reader/Settings.hpp"
 
 IndividualNSGA::IndividualNSGA(
     std::mt19937& rnd,
@@ -51,14 +52,18 @@ bool IndividualNSGA::isValid() const {
     return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
 }
 
-void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, std::vector<float> objectiveWeights, bool saveMetricsToFile) {
+void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<float> objectiveWeights, bool saveMetricsToFile) {
+    std::vector<std::vector<int>> allocations;
+    allocations.push_back(genotype);
+    allocations.push_back(genotype);
+
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(events, genotype, dayShift);
+    ambulanceAllocator.allocate(events, allocations, dayShift);
 
     Simulator simulator(
         rnd,
         ambulanceAllocator,
-        DispatchEngineStrategyType::CLOSEST,
+        Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
         events
     );
 
@@ -76,7 +81,6 @@ void IndividualNSGA::evaluateObjectives(const std::vector<Event>& events, std::v
     for (size_t i = 0; i < objectives.size(); ++i) {
         fitness += objectives[i] * objectiveWeights[i];
     }
-
 }
 
 double IndividualNSGA::calculateUniformityObjective() {
