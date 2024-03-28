@@ -20,6 +20,8 @@
 #include "heuristics/PopulationGA.hpp"
 #include "heuristics/IndividualNSGA.hpp"
 #include "heuristics/PopulationNSGA.hpp"
+#include "heuristics/IndividualTSGA.hpp"
+#include "heuristics/PopulationTSGA.hpp"
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
@@ -43,16 +45,15 @@ int main() {
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
     } else if (heuristic == "TSGA") {
-        PopulationGA population(
+        PopulationTSGA population(
             rnd,
-            Settings::get<int>("NUM_TIME_SEGMENTS"),
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<bool>("SIMULATE_DAY_SHIFT")
+            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
+            Settings::get<int>("NUM_TIME_SEGMENTS")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
-    }
-    else if (heuristic == "NSGA") {
+    } else if (heuristic == "NSGA") {
         bool useFronts = Settings::get<bool>("USE_NSGA_FRONTS");
         PopulationNSGA population(
             rnd,
