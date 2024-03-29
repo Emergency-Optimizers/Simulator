@@ -154,16 +154,17 @@ void RandomDispatchEngineStrategy::reallocating(
     );
     std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
 
-    // create a vector of ambulance indices and shuffle it
-    std::vector<int> ambulanceIndices(ambulances.size());
-    std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
-
-    std::shuffle(ambulanceIndices.begin(), ambulanceIndices.end(), rng);
-
     // get the new allocation
     std::vector<int> allocation = events[eventIndex].reallocation;
 
-    // loop through
+    // create a vector of ambulance indices
+    std::vector<int> ambulanceIndices(ambulances.size());
+    std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
+
+    // shuffle the indicies to adhere to the random strategy
+    std::shuffle(ambulanceIndices.begin(), ambulanceIndices.end(), rng);
+
+    // reallocate by assigning the ambulance indicies to the depot according to allocation vector
     size_t currentAmbulanceIndex = 0;
     for (size_t depotIndex = 0; depotIndex < depotIndices.size() && currentAmbulanceIndex < ambulanceIndices.size(); depotIndex++) {
         unsigned int allocatedToDepot = allocation[depotIndex];
