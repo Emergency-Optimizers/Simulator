@@ -18,9 +18,10 @@ PopulationTSGA::PopulationTSGA(
     std::mt19937& rnd,
     int populationSize,
     double mutationProbability,
+    double crossoverProbability,
     const bool dayShift,
     int numTimeSegments
-) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), dayShift(dayShift), numTimeSegments(numTimeSegments) {
+) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), crossoverProbability(crossoverProbability), dayShift(dayShift), numTimeSegments(numTimeSegments) {
     MonteCarloSimulator monteCarloSim(
         rnd,
         Settings::get<int>("SIMULATE_YEAR"),
@@ -49,10 +50,10 @@ void PopulationTSGA::evaluateFitness() {
         }
 }
 
-std::vector<IndividualTSGA> PopulationTSGA::parentSelection(int numParents, int tournamentSize) {
+std::vector<IndividualTSGA> PopulationTSGA::parentSelection(int tournamentSize) {
     std::vector<IndividualTSGA> selectedParents;
 
-    for (int i = 0; i < numParents; i++) {
+    for (int i = 0; i < 2; i++) {
         std::vector<IndividualTSGA> tournament;
         for (int j = 0; j < tournamentSize; j++) {
             tournament.push_back(getRandomElement(rnd, individuals));
@@ -103,13 +104,13 @@ IndividualTSGA PopulationTSGA::crossover(const IndividualTSGA& parent1, const In
     std::vector<std::vector<int>> offspringGenotype = parent2.getGenotype();
 
     std::uniform_int_distribution<> dist(0, 1);
-
-    for (size_t t = 0; t < numTimeSegments; ++t) {
-        if (dist(rnd) == 1) {
-            offspringGenotype[t] = parent1.getGenotype()[t];
+    if(dist(rnd) > crossoverProbability) {
+        for (size_t t = 0; t < numTimeSegments; ++t) {
+            if (dist(rnd) == 1) {
+                offspringGenotype[t] = parent1.getGenotype()[t];
+            }
         }
     }
-
     IndividualTSGA offspring(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
     offspring.setGenotype(offspringGenotype);
     // offspring.repair();
@@ -128,22 +129,22 @@ void PopulationTSGA::evolve(int generations) {
         // this is for debugging when we only want to simulate once
         if (numParents > 1) {
             // step 1: parent selection
+            std::vector<IndividualTSGA> offspring;
             int tournamentSize = 3;
-            std::vector<IndividualTSGA> parents = parentSelection(numParents, tournamentSize);
+            std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
-            // step 2: crossover to create offspring
-            std::vector<IndividualTSGA> children;
-            children.reserve(populationSize);
-
-            for (int i = 0; i < populationSize; i += 2) {
-                IndividualTSGA offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
-                offspring.mutate();
-                offspring.evaluateFitness(events);
-                children.push_back(offspring);
+            while (offspring.size() < populationSize) {
+                if (shouldCrossover(rnd) < crossoverProbability) {           
+                    std::vector<IndividualTSGA> parents = parentSelection(tournamentSize);
+                    IndividualTSGA child = crossover(parents[0], parents[1]);
+                    child.mutate();
+                    child.evaluateFitness(events);
+                    offspring.push_back(child);
+                }
             }
             // step 3: survivor selection
             // combining existing population with children
-            addChildren(children);
+            addChildren(offspring);
             individuals = survivorSelection(populationSize);
         }
 

@@ -18,8 +18,9 @@ PopulationGA::PopulationGA(
     std::mt19937& rnd,
     int populationSize,
     double mutationProbability,
+    double crossoverProbability,
     const bool dayShift
-) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), dayShift(dayShift) {
+) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), crossoverProbability(crossoverProbability), dayShift(dayShift) {
     MonteCarloSimulator monteCarloSim(
         rnd,
         Settings::get<int>("SIMULATE_YEAR"),
@@ -48,10 +49,10 @@ void PopulationGA::evaluateFitness() {
     }
 }
 
-std::vector<IndividualGA> PopulationGA::parentSelection(int numParents, int tournamentSize) {
+std::vector<IndividualGA> PopulationGA::parentSelection(int tournamentSize) {
     std::vector<IndividualGA> selectedParents;
 
-    for (int i = 0; i < numParents; i++) {
+    for (int i = 0; i < 2; i++) {
         std::vector<IndividualGA> tournament;
         for (int j = 0; j < tournamentSize; j++) {
             tournament.push_back(getRandomElement(rnd, individuals));
@@ -65,10 +66,8 @@ std::vector<IndividualGA> PopulationGA::parentSelection(int numParents, int tour
                 return a.getFitness() > b.getFitness();
             }
         );
-
         selectedParents.push_back(*best);
     }
-
     return selectedParents;
 }
 
@@ -99,18 +98,30 @@ void PopulationGA::addChildren(const std::vector<IndividualGA>& children) {
 }
 
 IndividualGA PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
-    std::vector<int> offspringGenotype;
-    offspringGenotype.reserve(parent1.getGenotype().size());
+    // Initialize the offspring genotype with the same size as the parents
+    std::vector<int> offspringGenotype(parent1.getGenotype().size());
 
-    std::uniform_real_distribution<> dist(0, 1);
+    std::uniform_real_distribution<> alphaDist(0.0, 1.0); // For deciding on crossover action
+    std::uniform_int_distribution<> geneDist(0, 1); // For deciding from which parent the gene is taken
 
-    for (size_t i = 0; i < parent1.getGenotype().size(); i++) {
-        double alpha = dist(rnd);
-        int gene = static_cast<int>(alpha * parent1.getGenotype()[i] + (1 - alpha) * parent2.getGenotype()[i]);
-        offspringGenotype.push_back(gene);
+    // Decide if crossover should happen based on crossoverProbability
+    if (alphaDist(rnd) <= crossoverProbability) {
+        for (size_t i = 0; i < parent1.getGenotype().size(); i++) {
+            // Decide from which parent to take the gene
+            if (geneDist(rnd) == 1) {
+                offspringGenotype[i] = parent1.getGenotype()[i];
+            } else {
+                offspringGenotype[i] = parent2.getGenotype()[i];
+            }
+        }
+    } else {
+        // If no crossover is to happen, offspring inherits genotype directly from one of the parents
+        // This example uses parent2's genotype, but you could also choose randomly
+        offspringGenotype = parent2.getGenotype();
     }
 
-    IndividualGA offspring = IndividualGA(rnd, numDepots, numAmbulances, mutationProbability, dayShift);
+    // Create the offspring IndividualGA with the combined or inherited genotype
+    IndividualGA offspring(rnd, numDepots, numAmbulances, mutationProbability, dayShift);
     offspring.setGenotype(offspringGenotype);
     offspring.repair();
     offspring.evaluateFitness(events);
@@ -128,22 +139,23 @@ void PopulationGA::evolve(int generations) {
         // this is for debugging when we only want to simulate once
         if (numParents > 1) {
             // step 1: parent selection
+            std::vector<IndividualGA> offspring;
             int tournamentSize = 3;
-            std::vector<IndividualGA> parents = parentSelection(numParents, tournamentSize);
+            std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
-            // step 2: crossover to create offspring
-            std::vector<IndividualGA> children;
-            children.reserve(populationSize);
-
-            for (int i = 0; i < populationSize; i += 2) {
-                IndividualGA offspring = crossover(parents[i % numParents], parents[(i + 1) % numParents]);
-                offspring.mutate();
-                offspring.evaluateFitness(events);
-                children.push_back(offspring);
+            while (offspring.size() < populationSize) {
+                if (shouldCrossover(rnd) < crossoverProbability) {           
+                    std::vector<IndividualGA> parents = parentSelection(tournamentSize);
+                    IndividualGA child = crossover(parents[0], parents[1]);
+                    child.mutate();
+                    child.evaluateFitness(events);
+                    offspring.push_back(child);
+                }
             }
             // step 3: survivor selection
             // combining existing population with children
-            addChildren(children);
+            addChildren(offspring);
+
             individuals = survivorSelection(populationSize);
         }
 

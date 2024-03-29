@@ -28,6 +28,7 @@ class PopulationNSGA {
     int numObjectives;
     std::vector<std::vector<IndividualNSGA*>> fronts;
     double mutationProbability;
+    double crossoverProbability;
     const bool dayShift;
 
  public:
@@ -37,6 +38,7 @@ class PopulationNSGA {
         std::vector<float> objectiveWeights,
         int populationSize,
         double mutationProbability,
+        double crossoverProbability,
         const bool dayShift
     );
     void evaluateObjectives();

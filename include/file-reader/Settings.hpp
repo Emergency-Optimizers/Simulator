@@ -36,7 +36,8 @@ class Settings {
         {"USE_NSGA_FRONTS", &toBool},
         {"NSGA_WEIGHTS", &toVectorFloat},
         {"DISPATCH_STRATEGY", &toDispatchEngineStrategyType},
-        {"NUM_TIME_SEGMENTS", &toInt}
+        {"NUM_TIME_SEGMENTS", &toInt},
+        {"CROSSOVER_PROBABILITY", &toFloat}
     };
 
  public:

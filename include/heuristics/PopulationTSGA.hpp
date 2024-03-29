@@ -27,6 +27,7 @@ class PopulationTSGA {
     int numDepots;
     int numAmbulances;
     double mutationProbability;
+    double crossoverProbability;
     const bool dayShift;
     int numTimeSegments;
 
@@ -35,11 +36,12 @@ class PopulationTSGA {
         std::mt19937& rnd,
         int populationSize,
         double mutationProbability,
+        double crossoverProbability,
         const bool dayShift,
         int numTimeSegments
     );
     void evaluateFitness();
-    std::vector<IndividualTSGA> parentSelection(int numParents, int tournamentSize);
+    std::vector<IndividualTSGA> parentSelection(int tournamentSize);
     std::vector<IndividualTSGA> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<IndividualTSGA>& children);
     IndividualTSGA crossover(const IndividualTSGA& parent1, const IndividualTSGA& parent2);

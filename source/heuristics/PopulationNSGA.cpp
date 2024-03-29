@@ -20,13 +20,15 @@ PopulationNSGA::PopulationNSGA(
     std::vector<float> objectiveWeights,
     int populationSize,
     double mutationProbability,
+    double crossoverProbability,
     const bool dayShift
 ) : rnd(rnd),
     useFronts(useFronts),
     objectiveWeights(objectiveWeights),
     populationSize(populationSize),
     dayShift(dayShift),
-    mutationProbability(mutationProbability) {
+    mutationProbability(mutationProbability),
+    crossoverProbability(crossoverProbability) {
     MonteCarloSimulator monteCarloSim(
         rnd,
         Settings::get<int>("SIMULATE_YEAR"),
@@ -285,6 +287,7 @@ void PopulationNSGA::evolve(int generations) {
         // step 1: sort the population into Pareto fronts
         if (useFronts) {
             fastNonDominatedSort();
+
         // step 2: calculate crowding distance within each front
             for (auto& front : fronts) {
                 calculateCrowdingDistance(front);
@@ -293,23 +296,22 @@ void PopulationNSGA::evolve(int generations) {
         // step 3: selection, crossover and mutation to create a new offspring pool
         std::vector<IndividualNSGA> offspring;
         int tournamentSize = 3;
+        std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
         while (offspring.size() < populationSize) {
-            std::vector<IndividualNSGA> parents = parentSelection(tournamentSize);
-            IndividualNSGA child = crossover(parents[0], parents[1]);
-            child.mutate();
-            offspring.push_back(child);
+            if (shouldCrossover(rnd) < crossoverProbability) {           
+                std::vector<IndividualNSGA> parents = parentSelection(tournamentSize);
+                IndividualNSGA child = crossover(parents[0], parents[1]);
+                child.mutate();
+                child.evaluateObjectives(events, objectiveWeights);
+                offspring.push_back(child);
+            }
         }
 
-        // step 4: evaluate objectives for offspring
-        for (IndividualNSGA& child : offspring) {
-            child.evaluateObjectives(events, objectiveWeights);
-        }
-
-        // step 5: combine, sort, and select the next generation from parents and offspring
+        // step 4: combine, sort, and select the next generation from parents and offspring
         individuals.insert(individuals.end(), offspring.begin(), offspring.end());
         if (useFronts) {
-            fastNonDominatedSort();  // Re-sort combined population
+            fastNonDominatedSort();
         }
         individuals = survivorSelection(populationSize);
         progressBar.update(gen + 1);

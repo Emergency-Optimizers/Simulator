@@ -41,6 +41,7 @@ int main() {
             rnd,
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
+            Settings::get<float>("CROSSOVER_PROBABILITY"),
             Settings::get<bool>("SIMULATE_DAY_SHIFT")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
@@ -49,6 +50,7 @@ int main() {
             rnd,
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
+            Settings::get<float>("CROSSOVER_PROBABILITY"),
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
@@ -61,6 +63,7 @@ int main() {
             Settings::get<std::vector<float>>("NSGA_WEIGHTS"),
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
+            Settings::get<float>("CROSSOVER_PROBABILITY"),
             Settings::get<bool>("SIMULATE_DAY_SHIFT")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
