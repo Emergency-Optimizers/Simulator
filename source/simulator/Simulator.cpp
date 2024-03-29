@@ -58,6 +58,10 @@ double Simulator::averageResponseTime(const std::string& triageImpression, bool 
     for (int i = 0; i < eventHandler.events.size(); i++) {
         Event event = eventHandler.events[i];
 
+        if (event.utility) {
+            continue;
+        }
+
         if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) {
             continue;
         }
