@@ -519,3 +519,16 @@ bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int day
 
     return hour >= dayShiftStart && hour <= dayShiftEnd;
 }
+
+std::string eventTypeToString(EventType eventType) {
+    switch (eventType) {
+        case EventType::NONE: return "NONE";
+        case EventType::RESOURCE_APPOINTMENT: return "RESOURCE_APPOINTMENT";
+        case EventType::DISPATCHING_TO_SCENE: return "DISPATCHING_TO_SCENE";
+        case EventType::DISPATCHING_TO_HOSPITAL: return "DISPATCHING_TO_HOSPITAL";
+        case EventType::PREPARING_DISPATCH_TO_DEPOT: return "PREPARING_DISPATCH_TO_DEPOT";
+        case EventType::DISPATCHING_TO_DEPOT: return "DISPATCHING_TO_DEPOT";
+        case EventType::REALLOCATE: return "REALLOCATE";
+        default: return "UNKNOWN";
+    }
+}

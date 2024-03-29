@@ -76,6 +76,7 @@ void saveDistributionToFile(const std::vector<std::vector<double>>& distribution
 void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
 void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd);
+std::string eventTypeToString(EventType eventType);
 
 template <typename T>
 int findIndex(const std::vector<T>& vec, const T& value) {
