@@ -29,7 +29,7 @@ PopulationTSGA::PopulationTSGA(
         dayShift,
         Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
     );
-    
+
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
     numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
 
@@ -101,7 +101,7 @@ void PopulationTSGA::addChildren(const std::vector<IndividualTSGA>& children) {
 
 IndividualTSGA PopulationTSGA::crossover(const IndividualTSGA& parent1, const IndividualTSGA& parent2) {
     std::vector<std::vector<int>> offspringGenotype = parent2.getGenotype();
-    
+
     std::uniform_int_distribution<> dist(0, 1);
 
     for (size_t t = 0; t < numTimeSegments; ++t) {
@@ -155,7 +155,6 @@ void PopulationTSGA::evolve(int generations) {
             << ", Valid: " << (fittest.isValid() ? "true " : "false");
 
         progressBar.update(gen + 1, postfix.str());
-
     }
 
     // run one last time to print metrics

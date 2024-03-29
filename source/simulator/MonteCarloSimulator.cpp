@@ -494,9 +494,5 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         events.push_back(event);
     }
 
-    std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
-        return a.timer < b.timer;
-    });
-
     return events;
 }

@@ -4,6 +4,8 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
+/* external libraries */
+#include <iomanip>
 /* internal libraries */
 #include "heuristics/IndividualTSGA.hpp"
 #include "Utils.hpp"
@@ -11,7 +13,6 @@
 #include "simulator/Simulator.hpp"
 #include "file-reader/Stations.hpp"
 #include "file-reader/Settings.hpp"
-#include <iomanip>
 
 IndividualTSGA::IndividualTSGA(
     std::mt19937& rnd,
@@ -175,7 +176,7 @@ void IndividualTSGA::printTimeSegmentedChromosome() const {
     std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
     // Placeholder for the calculateFitnessForSegment function
     auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
-        return 33.0; // Assuming a uniform fitness for demonstration
+        return 33.0;  // Assuming a uniform fitness for demonstration
     };
 
     // Print the header
@@ -184,7 +185,7 @@ void IndividualTSGA::printTimeSegmentedChromosome() const {
         std::cout << std::setw(3) << "T" << t + 1 << " ";
     }
     std::cout << "Fitness\n";
-    std::cout << std::string(100, '-') << "\n"; // Adjust based on the expected width
+    std::cout << std::string(100, '-') << "\n";  // Adjust based on the expected width
 
     // Iterate over depots and print each row
     for (size_t d = 0; d < depotIndices.size(); ++d) {

@@ -181,8 +181,8 @@ void RandomDispatchEngineStrategy::reallocating(
                 Event newEvent;
                 newEvent.id = events.size();
                 newEvent.type = EventType::PREPARING_DISPATCH_TO_DEPOT;
-                newEvent.timer = events[eventIndex].timer + 1;
-                newEvent.prevTimer = events[eventIndex].timer + 1;
+                newEvent.timer = events[eventIndex].timer;
+                newEvent.prevTimer = events[eventIndex].timer;
                 newEvent.assignedAmbulanceIndex = ambulanceIndices[currentAmbulanceIndex];
                 newEvent.triageImpression = "V1";
                 newEvent.gridId = ambulances[ambulanceIndices[currentAmbulanceIndex]].currentGridId;
@@ -190,7 +190,7 @@ void RandomDispatchEngineStrategy::reallocating(
 
                 ambulances[ambulanceIndices[currentAmbulanceIndex]].assignedEventId = newEvent.id;
 
-                events.push_back(newEvent);
+                events.insert(events.begin() + eventIndex + 1, newEvent);
             }
 
             currentAmbulanceIndex++;

@@ -19,6 +19,8 @@ Simulator::Simulator(
     std::vector<Event> events
 ) : rng(rng), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
     eventHandler.populate(events);
+
+    eventHandler.sortEvents();
 }
 
 void Simulator::run(bool saveMetricsToFile) {
@@ -28,8 +30,6 @@ void Simulator::run(bool saveMetricsToFile) {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
-        EventType currentEventType = eventHandler.events[eventIndex].type;
-
         DispatchEngine::dispatch(
             dispatchStrategy,
             rng,
@@ -38,11 +38,7 @@ void Simulator::run(bool saveMetricsToFile) {
             eventIndex
         );
 
-        if (currentEventType != EventType::REALLOCATE) {
-            eventHandler.sortEvent(eventIndex);
-        } else {
-            eventHandler.sortEvents();
-        }
+        eventHandler.sortEvent(eventIndex);
 
         eventIndex = eventHandler.getNextEventIndex();
     }
