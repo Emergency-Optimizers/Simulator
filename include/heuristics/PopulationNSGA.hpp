@@ -26,6 +26,7 @@ class PopulationNSGA {
     int numDepots;
     int numAmbulances;
     int numObjectives;
+    int numTimeSegments;
     std::vector<std::vector<IndividualNSGA*>> fronts;
     double mutationProbability;
     double crossoverProbability;
@@ -39,20 +40,22 @@ class PopulationNSGA {
         int populationSize,
         double mutationProbability,
         double crossoverProbability,
-        const bool dayShift
+        const bool dayShift,
+        int numTimeSegments
     );
     void evaluateObjectives();
     std::vector<IndividualNSGA> parentSelection(int tournamentSize);
     std::vector<IndividualNSGA> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<IndividualNSGA>& children);
-    IndividualNSGA crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2);
+    std::vector<IndividualNSGA> crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2);
     void calculateCrowdingDistance(std::vector<IndividualNSGA*>& front);
     void fastNonDominatedSort();
     void evolve(int generations);
-    int countUnique(const std::vector<IndividualNSGA>& population);
+    int countUnique();
     const IndividualNSGA& findFittest() const;
     const IndividualNSGA findLeastFit();
     void checkEmptyGenotypes();
     void printPopulationInfo();
+    void printTimeSegmentedChromosome() const;
     void printBestScoresForEachObjective() const;
 };

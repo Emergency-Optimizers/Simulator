@@ -17,10 +17,11 @@
 class IndividualNSGA {
  private:
     std::mt19937& rnd;
-    std::vector<int> genotype;
+    std::vector<std::vector<int>> genotype;
     int numObjectives;
     int numDepots;
     int numAmbulances;
+    int numTimeSegments;
     const bool dayShift;
     std::vector<double> objectives;
     float fitness;
@@ -37,6 +38,7 @@ class IndividualNSGA {
         int numObjectives,
         int numDepots,
         int numAmbulances,
+        int numTimeSegments,
         double mutationProbability,
         const bool dayShift,
         bool child = true
@@ -53,9 +55,9 @@ class IndividualNSGA {
     void addAmbulances(int ambulancesToAdd = 1);
     void removeAmbulances(int ambulancesToRemove = 1);
     void printChromosome() const;
-
-    const std::vector<int>& getGenotype() const;
-    void setGenotype(const std::vector<int>& newGenotype);
+    void printTimeSegmentedChromosome() const;
+    const std::vector<std::vector<int>>& getGenotype() const;
+    void setGenotype(const std::vector<std::vector<int>>& newGenotype);
     void setAmbulancesAtDepot(int depotIndex, int count);
     int getAmbulancesAtDepot(int depotIndex) const;
     int getNumAmbulances() const;

@@ -22,7 +22,16 @@ IndividualGA::IndividualGA(
     double mutationProbability,
     const bool dayShift,
     bool child
-) : rnd(rnd), genotype(numTimeSegments, std::vector<int>(numDepots, 0)), numDepots(numDepots), numAmbulances(numAmbulances), numTimeSegments(numTimeSegments), fitness(0.0), mutationProbability(mutationProbability), dayShift(dayShift), child(child) {
+) : rnd(rnd),
+    genotype(numTimeSegments,
+    std::vector<int>(numDepots, 0)),
+    numDepots(numDepots),
+    numAmbulances(numAmbulances),
+    numTimeSegments(numTimeSegments),
+    fitness(0.0),
+    mutationProbability(mutationProbability),
+    dayShift(dayShift),
+    child(child) {
     if (!child) {
         randomizeAmbulances();
     }
