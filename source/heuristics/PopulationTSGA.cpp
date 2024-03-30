@@ -100,21 +100,40 @@ void PopulationTSGA::addChildren(const std::vector<IndividualTSGA>& children) {
     for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
 }
 
-IndividualTSGA PopulationTSGA::crossover(const IndividualTSGA& parent1, const IndividualTSGA& parent2) {
-    std::vector<std::vector<int>> offspringGenotype = parent2.getGenotype();
+std::vector<IndividualTSGA> PopulationTSGA::crossover(const IndividualTSGA& parent1, const IndividualTSGA& parent2) {
+    // initialize offspring genotypes to respective parents
+    std::vector<std::vector<int>> offspring1Genotype = parent1.getGenotype();
+    std::vector<std::vector<int>> offspring2Genotype = parent2.getGenotype();
 
-    std::uniform_int_distribution<> dist(0, 1);
-    if(dist(rnd) > crossoverProbability) {
-        for (size_t t = 0; t < numTimeSegments; ++t) {
-            if (dist(rnd) == 1) {
-                offspringGenotype[t] = parent1.getGenotype()[t];
+    // iterate over each time segment
+    for (size_t t = 0; t < offspring1Genotype.size(); ++t) {
+        // generate random midpoint for the current time segment's allocation
+        std::uniform_int_distribution<> midpointDist(1, offspring1Genotype[t].size() - 2);
+        size_t midpoint = midpointDist(rnd);
+
+        // perform crossover around this randomly chosen midpoint for the current time segment
+        for (size_t i = 0; i < offspring1Genotype[t].size(); ++i) {
+            if (i <= midpoint) {
+                offspring2Genotype[t][i] = parent1.getGenotype()[t][i];
+            } else {
+                offspring1Genotype[t][i] = parent2.getGenotype()[t][i];
             }
         }
     }
-    IndividualTSGA offspring(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
-    offspring.setGenotype(offspringGenotype);
-    // offspring.repair();
-    offspring.evaluateFitness(events);
+
+    IndividualTSGA offspring1 = IndividualTSGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
+    IndividualTSGA offspring2 = IndividualTSGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
+
+    offspring1.setGenotype(offspring1Genotype);
+    offspring2.setGenotype(offspring2Genotype);
+
+    // repair, mutate, and evaluate fitness for each offspring
+    std::vector<IndividualTSGA> offspring = {offspring1, offspring2};
+    for (auto& child : offspring) {
+        child.repair();
+        child.mutate();
+        child.evaluateFitness(events);
+    }
 
     return offspring;
 }
@@ -134,12 +153,16 @@ void PopulationTSGA::evolve(int generations) {
             std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
             while (offspring.size() < populationSize) {
-                if (shouldCrossover(rnd) < crossoverProbability) {           
+                if (shouldCrossover(rnd) < crossoverProbability) {
                     std::vector<IndividualTSGA> parents = parentSelection(tournamentSize);
-                    IndividualTSGA child = crossover(parents[0], parents[1]);
-                    child.mutate();
-                    child.evaluateFitness(events);
-                    offspring.push_back(child);
+                    std::vector<IndividualTSGA> children = crossover(parents[0], parents[1]);
+                    
+                    // calculate how many children can be added without exceeding populationSize
+                    size_t spaceLeft = populationSize - offspring.size();
+                    size_t childrenToAdd = std::min(children.size(), spaceLeft);
+                    
+                    // add children directly to offspring, ensuring not to exceed populationSize
+                    offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
                 }
             }
             // step 3: survivor selection
@@ -153,7 +176,7 @@ void PopulationTSGA::evolve(int generations) {
         std::ostringstream postfix;
         postfix
             << "Best fitness: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
-            << ", Valid: " << (fittest.isValid() ? "true " : "false");
+            << ", Valid: " << (fittest.isValid() ? "true" : "false") << ", Unique: " << countUnique();
 
         progressBar.update(gen + 1, postfix.str());
     }
@@ -170,11 +193,11 @@ void PopulationTSGA::evolve(int generations) {
     finalIndividual.printTimeSegmentedChromosome();
 }
 
-int PopulationTSGA::countUnique(const std::vector<IndividualTSGA>& population) {
+int PopulationTSGA::countUnique() {
     std::vector<std::string> genotypeStrings;
-    genotypeStrings.reserve(population.size());
+    genotypeStrings.reserve(individuals.size());
 
-    for (const auto& individual : population) {
+    for (const auto& individual : individuals) {
         std::ostringstream genotypeStream;
         for (const auto& segment : individual.getGenotype()) {
             for (const auto& depotAllocation : segment) {
@@ -202,33 +225,4 @@ const IndividualTSGA PopulationTSGA::findFittest() {
     );
 
     return *fittest;
-}
-
-const IndividualTSGA PopulationTSGA::findLeastFit() {
-    auto leastFit = std::min_element(
-        individuals.begin(),
-        individuals.end(),
-        [](const IndividualTSGA &a, const IndividualTSGA &b) {
-            return a.getFitness() > b.getFitness();
-        }
-    );
-
-    return *leastFit;
-}
-
-const double PopulationTSGA::averageFitness() {
-    if (individuals.empty()) {
-        return 0.0;
-    }
-
-    double totalFitness = std::accumulate(
-        individuals.begin(),
-        individuals.end(),
-        0.0,
-        [](double sum, const IndividualTSGA& individual) {
-            return sum + individual.getFitness();
-        }
-    );
-
-    return totalFitness / individuals.size();
 }

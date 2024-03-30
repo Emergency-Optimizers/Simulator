@@ -27,7 +27,7 @@ int main() {
     auto start = std::chrono::high_resolution_clock::now();
 
     std::locale::global(std::locale("en_US.utf8"));
-    std::mt19937 rnd(0);
+    std::mt19937 rnd(11);
 
     Settings::LoadSettings();
     Traffic::getInstance();

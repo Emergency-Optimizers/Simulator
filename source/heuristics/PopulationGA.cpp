@@ -115,8 +115,6 @@ IndividualGA PopulationGA::crossover(const IndividualGA& parent1, const Individu
             }
         }
     } else {
-        // If no crossover is to happen, offspring inherits genotype directly from one of the parents
-        // This example uses parent2's genotype, but you could also choose randomly
         offspringGenotype = parent2.getGenotype();
     }
 

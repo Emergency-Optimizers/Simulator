@@ -283,6 +283,10 @@ void PopulationNSGA::fastNonDominatedSort() {
 void PopulationNSGA::evolve(int generations) {
     ProgressBar progressBar(generations, "Running NSGA");
 
+    if (!useFronts) {
+        std::fill(objectiveWeights.begin(), objectiveWeights.end(), 1.0f);
+    }
+    
     for (int gen = 0; gen < generations; ++gen) {
         // step 1: sort the population into Pareto fronts
         if (useFronts) {
@@ -468,7 +472,7 @@ void PopulationNSGA::printBestScoresForEachObjective() const {
         // Print the best scores for each objective
         for (int objective = 0; objective < numObjectives; ++objective) {
             std::cout << "Objective " << objective << ": Best Score = "
-                      << bestScores[objective] << ", IndividualNSGA Index = "
+                      << bestScores[objective]/objectiveWeights[objective] << ", IndividualNSGA Index = "
                       << bestIndividualIndices[objective] << std::endl;
         }
 
@@ -483,4 +487,6 @@ void PopulationNSGA::printBestScoresForEachObjective() const {
         }
     }
 }
+
+
 

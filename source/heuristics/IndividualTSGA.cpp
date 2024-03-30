@@ -173,30 +173,33 @@ void IndividualTSGA::setNumDepots(int newNumDepots) {
 }
 
 void IndividualTSGA::printTimeSegmentedChromosome() const {
-    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
-    // Placeholder for the calculateFitnessForSegment function
+    std::vector<std::string> depotNames = {"Eidsvoll", "Ullensaker", "Nes", "Aurskog-Holand", "Nittedal", "Lorenskog", "Asker", "Barum", "Smestad", "Ulleval", "Brobekk", "Sentrum", "Prinsdal", "Nordre Follo", "Sondre Follo", "Bekkestua", "Grorud", "Skedsmokorset", "Ryen"};
+    // Placeholder for genotype and numTimeSegments, ensure they're correctly defined in your class
+
     auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
-        return 33.0;  // Assuming a uniform fitness for demonstration
+        return 33.0;  // Assuming uniform fitness for demonstration purposes
     };
 
     // Print the header
-    std::cout << std::left << "Time Segment       | ";
+    std::cout << std::left << std::setw(20) << "Time Segment" << "|";
     for (int t = 0; t < numTimeSegments; ++t) {
-        std::cout << std::setw(3) << "T" << t + 1 << " ";
+        std::cout << " T" << t + 1;
+        if (t + 1 < 10) { // One-digit time segment number
+            std::cout << "  "; // Three spaces
+        } else { // Two-digit time segment number
+            std::cout << " "; // Two spaces
+        }
     }
-    std::cout << "Fitness\n";
-    std::cout << std::string(100, '-') << "\n";  // Adjust based on the expected width
+    std::cout << " Fitness\n";
+    std::cout << std::string(100, '-') << "\n"; // Adjust based on the actual width needed
 
     // Iterate over depots and print each row
-    for (size_t d = 0; d < depotIndices.size(); ++d) {
-        // Assuming depot names are short enough; adjust padding as needed
-        std::cout << std::setw(18) << Stations::getInstance().get<std::string>("name", depotIndices[d]) << " | ";
+    for (size_t d = 0; d < depotNames.size(); ++d) {
+        std::cout << std::setw(20) << depotNames[d] << "|";
         for (size_t t = 0; t < numTimeSegments; ++t) {
-            // Assuming allocations fit within 3 characters; adjust padding as needed
-            std::cout << std::setw(3) << genotype[t][d] << " ";
+            std::cout << std::right << std::setw(2) << genotype[t][d] << "   "; // Adjusted for right alignment and spacing
         }
-        // Print the fitness value at the end of each row
-        std::cout << " | " << std::setw(4) << calculateFitnessForSegment(d) << "\n";
+        std::cout << "| " << std::setw(6) << calculateFitnessForSegment(d) << "\n";
     }
 }
 
