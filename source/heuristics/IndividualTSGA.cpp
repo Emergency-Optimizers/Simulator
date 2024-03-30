@@ -174,10 +174,10 @@ void IndividualTSGA::setNumDepots(int newNumDepots) {
 
 void IndividualTSGA::printTimeSegmentedChromosome() const {
     std::vector<std::string> depotNames = {"Eidsvoll", "Ullensaker", "Nes", "Aurskog-Holand", "Nittedal", "Lorenskog", "Asker", "Barum", "Smestad", "Ulleval", "Brobekk", "Sentrum", "Prinsdal", "Nordre Follo", "Sondre Follo", "Bekkestua", "Grorud", "Skedsmokorset", "Ryen"};
-    // Placeholder for genotype and numTimeSegments, ensure they're correctly defined in your class
 
+    // TODO: Placeholder
     auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
-        return 33.0;  // Assuming uniform fitness for demonstration purposes
+        return 33.0;
     };
 
     // Print the header
@@ -190,16 +190,16 @@ void IndividualTSGA::printTimeSegmentedChromosome() const {
             std::cout << " "; // Two spaces
         }
     }
-    std::cout << " Fitness\n";
-    std::cout << std::string(100, '-') << "\n"; // Adjust based on the actual width needed
+    std::cout << "   Fitness\n";
+    std::cout << std::string(100, '-') << "\n";
 
-    // Iterate over depots and print each row
+    // iterate over depots and print each row
     for (size_t d = 0; d < depotNames.size(); ++d) {
         std::cout << std::setw(20) << depotNames[d] << "|";
         for (size_t t = 0; t < numTimeSegments; ++t) {
-            std::cout << std::right << std::setw(2) << genotype[t][d] << "   "; // Adjusted for right alignment and spacing
+            std::cout << std::right << std::setw(2) << genotype[t][d] << "   ";
         }
-        std::cout << "| " << std::setw(6) << calculateFitnessForSegment(d) << "\n";
+        std::cout << "|" << std::setw(4) << calculateFitnessForSegment(d) << "\n";
     }
 }
 
