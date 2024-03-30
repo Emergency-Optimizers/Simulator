@@ -20,8 +20,6 @@
 #include "heuristics/PopulationGA.hpp"
 #include "heuristics/IndividualNSGA.hpp"
 #include "heuristics/PopulationNSGA.hpp"
-#include "heuristics/IndividualTSGA.hpp"
-#include "heuristics/PopulationTSGA.hpp"
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
@@ -38,15 +36,6 @@ int main() {
     std::string heuristic = Settings::get<std::string>("HEURISTIC");
     if (heuristic == "GA") {
         PopulationGA population(
-            rnd,
-            Settings::get<int>("POPULATION_SIZE"),
-            Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<bool>("SIMULATE_DAY_SHIFT")
-        );
-        population.evolve(Settings::get<int>("GENERATION_SIZE"));
-    } else if (heuristic == "TSGA") {
-        PopulationTSGA population(
             rnd,
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),

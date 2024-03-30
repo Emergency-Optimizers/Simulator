@@ -18,9 +18,10 @@
 class IndividualGA {
  private:
     std::mt19937& rnd;
-    std::vector<int> genotype;
+    std::vector<std::vector<int>> genotype;
     int numDepots;
     int numAmbulances;
+    int numTimeSegments;
     mutable double fitness = 0;
     double mutationProbability;
     const bool dayShift;
@@ -31,6 +32,7 @@ class IndividualGA {
         std::mt19937& rnd,
         int numDepots,
         int numAmbulances,
+        int numTimeSegments,
         double mutationProbability,
         const bool dayShift,
         bool child = true
@@ -43,8 +45,8 @@ class IndividualGA {
     void addAmbulances(int ambulancesToAdd = 1);
     void removeAmbulances(int ambulancesToRemove = 1);
     void printChromosome() const;
-    const std::vector<int>& getGenotype() const;
-    void setGenotype(const std::vector<int>& newGenotype);
+    const std::vector<std::vector<int>>& getGenotype() const;
+    void setGenotype(const std::vector<std::vector<int>> newGenotype);
     double getFitness() const;
     void setFitness(double fitness);
     void setAmbulancesAtDepot(int depotIndex, int count);
@@ -53,6 +55,7 @@ class IndividualGA {
     void setNumAmbulances(int newNumAmbulances);
     int getNumDepots() const;
     void setNumDepots(int newNumDepots);
+    void printTimeSegmentedChromosome() const;
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
             genotype = other.genotype;
