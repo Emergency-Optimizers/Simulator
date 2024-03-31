@@ -139,7 +139,7 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
 }
 
 void PopulationGA::evolve(int generations) {
-    ProgressBar progressBar(generations, "Running TSGA");
+    ProgressBar progressBar(generations, "Running GA");
 
     for (int gen = 0; gen < generations; gen++) {
         int numParents = populationSize / 2;

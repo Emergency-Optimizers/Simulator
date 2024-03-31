@@ -37,7 +37,8 @@ class Settings {
         {"NSGA_WEIGHTS", &toVectorFloat},
         {"DISPATCH_STRATEGY", &toDispatchEngineStrategyType},
         {"NUM_TIME_SEGMENTS", &toInt},
-        {"CROSSOVER_PROBABILITY", &toFloat}
+        {"CROSSOVER_PROBABILITY", &toFloat},
+        {"SEED", &toInt},
     };
 
  public:
