@@ -304,6 +304,17 @@ void writeMetrics(std::vector<Event>& events) {
         return;
     }
 
+    // sort events
+    std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
+        std::tm aTimeStruct = a.callReceived;
+        std::tm bTimeStruct = b.callReceived;
+
+        time_t aTime = std::mktime(&aTimeStruct);
+        time_t bTime = std::mktime(&bTimeStruct);
+
+        return aTime < bTime;
+    });
+
     // write CSV header
     outFile
         << "time_call_received" << ","
