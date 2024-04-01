@@ -423,11 +423,18 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
     std::vector<Event> events;
 
     int totalEvents = getTotalIncidentsToGenerate();
+    if (Settings::get<bool>("SIMULATE_1_HOUR_BEFORE")) {
+        // increase by 8% to account for the extra hour
+        totalEvents *= 1.08;
+    }
+
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
     int indexShift = dayShift ? 0 : 1;
+
+    int warmupHour = static_cast<int>(Settings::get<bool>("SIMULATE_1_HOUR_BEFORE"));
     std::vector<std::pair<int, int>> indexRangesHour = dayShift ?
-        std::vector<std::pair<int, int>>{{Settings::get<int>("DAY_SHIFT_START"), Settings::get<int>("DAY_SHIFT_END")}} :
-        std::vector<std::pair<int, int>>{{0, Settings::get<int>("DAY_SHIFT_START") - 1}, {Settings::get<int>("DAY_SHIFT_END") + 1, 23}};
+        std::vector<std::pair<int, int>>{{Settings::get<int>("DAY_SHIFT_START") - warmupHour, Settings::get<int>("DAY_SHIFT_END")}} :
+        std::vector<std::pair<int, int>>{{0, Settings::get<int>("DAY_SHIFT_START") - 1}, {Settings::get<int>("DAY_SHIFT_END") + 1 - warmupHour, 23}};
 
     for (int i = 0; i < totalEvents; i++) {
         Event event;
@@ -447,6 +454,15 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.callReceived.tm_min = callReceivedMin;
         event.callReceived.tm_sec = callReceivedSec;
         mktime(&event.callReceived);
+
+        if (Settings::get<bool>("SIMULATE_1_HOUR_BEFORE")) {
+            bool eventHappensDuringDayShiftWarmup = dayShift && callReceivedHour == Settings::get<int>("DAY_SHIFT_START") - warmupHour;
+            bool eventHappensDuringNightShiftWarmup = !dayShift && callReceivedHour == Settings::get<int>("DAY_SHIFT_END") + 1 - warmupHour;
+
+            if (eventHappensDuringDayShiftWarmup || eventHappensDuringNightShiftWarmup) {
+                event.utility = true;
+            }
+        }
 
         // get triage impression
         int indexTriage = weightedLottery(rnd, triageProbabilityDistribution[callReceivedHour]);

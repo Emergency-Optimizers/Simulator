@@ -39,6 +39,7 @@ class Settings {
         {"NUM_TIME_SEGMENTS", &toInt},
         {"CROSSOVER_PROBABILITY", &toFloat},
         {"SEED", &toInt},
+        {"SIMULATE_1_HOUR_BEFORE", &toBool},
     };
 
  public:
