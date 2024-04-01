@@ -38,7 +38,7 @@ void AmbulanceAllocator::allocate(
         }
     }
 
-    std::tm shiftStartTm = *std::localtime(&events[0].timer);
+    std::tm shiftStartTm = *std::localtime(&events[events.size() - 1].timer);
 
     shiftStartTm.tm_hour = Settings::get<int>("DAY_SHIFT_START");
     shiftStartTm.tm_min = 0;
