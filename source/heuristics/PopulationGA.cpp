@@ -47,7 +47,7 @@ PopulationGA::PopulationGA(
 void PopulationGA::evaluateFitness() {
     for (IndividualGA& individual : individuals) {
         individual.evaluateFitness(events);
-        }
+    }
 }
 
 std::vector<IndividualGA> PopulationGA::parentSelection(int tournamentSize) {
