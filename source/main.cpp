@@ -87,7 +87,7 @@ int main() {
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
             events
         );
-        simulator.run();
+        simulator.run(true);
 
         // print metrics
         double avgResponseTimeAUrban = simulator.averageResponseTime("A", true);
