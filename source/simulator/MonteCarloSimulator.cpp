@@ -403,15 +403,48 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
     int totalNight = -1;
 
     for (int i = 0; i < Incidents::getInstance().size(); i++) {
+
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
         mktime(&timeCallReceived);
 
+        // limit us to year 2018 (latest in dataset)
+        if (timeCallReceived.tm_year != 118) {
+            continue;
+        }
+
         if (timeCallReceived.tm_yday == date.tm_yday - 1 && totalNight == -1) {
-            totalNight = Incidents::getInstance().get<int>("total_night", i);
+            int hour = Settings::get<int>("DAY_SHIFT_END") + 1 - static_cast<int>(Settings::get<bool>("SIMULATE_1_HOUR_BEFORE"));
+            totalNight = 0;
+
+            for (; hour < 24; hour++) {
+                totalNight += Incidents::getInstance().get<int>(
+                    "total_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+            }
         }
         if (timeCallReceived.tm_yday == date.tm_yday) {
-            totalMorning = Incidents::getInstance().get<int>("total_morning", i);
-            totalDay = Incidents::getInstance().get<int>("total_day", i);
+            int nightShiftEnds = Settings::get<int>("DAY_SHIFT_START") - 1;
+            totalMorning = 0;
+
+            for (int hour = 0; hour < nightShiftEnds + 1; hour++) {
+                totalMorning += Incidents::getInstance().get<int>(
+                    "total_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+            }
+
+            int hour = Settings::get<int>("DAY_SHIFT_START") - static_cast<int>(Settings::get<bool>("SIMULATE_1_HOUR_BEFORE"));
+            int dayShiftEnds = Settings::get<int>("DAY_SHIFT_END");
+            totalDay = 0;
+
+            for (; hour < dayShiftEnds + 1; hour++) {
+                totalDay += Incidents::getInstance().get<int>(
+                    "total_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+            }
+
             break;
         }
     }
@@ -423,10 +456,6 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
     std::vector<Event> events;
 
     int totalEvents = getTotalIncidentsToGenerate();
-    if (Settings::get<bool>("SIMULATE_1_HOUR_BEFORE")) {
-        // increase by 8% to account for the extra hour
-        totalEvents *= 1.08;
-    }
 
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
     int indexShift = dayShift ? 0 : 1;
