@@ -169,7 +169,7 @@ void PopulationGA::evolve(int generations) {
 
         std::ostringstream postfix;
         postfix
-            << "Best fitness: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
+            << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
             << ", Valid: " << (fittest.isValid() ? "true" : "false") << ", Unique: " << countUnique();
 
         progressBar.update(gen + 1, postfix.str());
