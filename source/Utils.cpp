@@ -89,6 +89,15 @@ ValueType toDispatchEngineStrategyType(const std::string& str) {
     }
 }
 
+ValueType toCrossoverType(const std::string& str) {
+    if (str == "SINGLE_POINT") {
+        return CrossoverType::SINGLE_POINT;
+    } else {
+        std::cout << "Unknown crossover type, defaulting to single point" << std::endl;
+        return CrossoverType::SINGLE_POINT;
+    }
+}
+
 std::string tmToString(const std::tm& time) {
     std::stringstream ss;
     ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
@@ -127,6 +136,12 @@ std::string valueTypeToString(const ValueType& cell) {
                 return "RANDOM";
             } else if (arg == DispatchEngineStrategyType::CLOSEST) {
                 return "CLOSEST";
+            } else {
+                return "UNKNOWN";
+            }
+        } else if constexpr(std::is_same_v<T, CrossoverType>) {
+            if (arg == CrossoverType::SINGLE_POINT) {
+                return "SINGLE_POINT";
             } else {
                 return "UNKNOWN";
             }

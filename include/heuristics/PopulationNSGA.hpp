@@ -48,6 +48,7 @@ class PopulationNSGA {
     std::vector<IndividualNSGA> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<IndividualNSGA>& children);
     std::vector<IndividualNSGA> crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2);
+    std::vector<IndividualNSGA> singlePointCrossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2);
     void calculateCrowdingDistance(std::vector<IndividualNSGA*>& front);
     void fastNonDominatedSort();
     void evolve(int generations);
