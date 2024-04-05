@@ -57,7 +57,7 @@ bool IndividualGA::isValid() const {
     return true;
 }
 
-void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) const {
+void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) {
     fitness = 0.0;
 
     AmbulanceAllocator ambulanceAllocator;
@@ -69,9 +69,10 @@ void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsTo
         Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
         events
     );
-    simulator.run(saveMetricsToFile);
 
-    fitness = simulator.averageResponseTime("A", true);
+    simulatedEvents = simulator.run(saveMetricsToFile);
+
+    fitness = averageResponseTime(simulatedEvents, "A", true);
 
     if (saveMetricsToFile) {
         int totalHours = 0;
@@ -193,8 +194,8 @@ void IndividualGA::printTimeSegmentedChromosome() const {
     std::cout << std::left << std::setw(20) << "Time Segment" << "|";
     for (int t = 0; t < numTimeSegments; ++t) {
         std::cout << " T" << t + 1;
-        if (t + 1 < 10) { // One-digit time segment number
-            std::cout << " "; // Three spaces
+        if (t + 1 < 10) {  // One-digit time segment number
+            std::cout << " ";  // Three spaces
         }
     }
 

@@ -15,6 +15,7 @@
 /* internal libraries */
 #include "Utils.hpp"
 #include "file-reader/ODMatrix.hpp"
+#include "file-reader/Incidents.hpp"
 
 ValueType toInt(const std::string& str) {
     return std::stoi(str);
@@ -557,4 +558,56 @@ std::string eventTypeToString(EventType eventType) {
         case EventType::REALLOCATE: return "REALLOCATE";
         default: return "UNKNOWN";
     }
+}
+
+double averageResponseTime(std::vector<Event>& simulatedEvents, const std::string& triageImpression, const bool urban) {
+    int totalEvents = 0;
+    float totalResponseTime = 0;
+    for (int i = 0; i < simulatedEvents.size(); i++) {
+        Event event = simulatedEvents[i];
+
+        if (event.utility) {
+            continue;
+        }
+
+        if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) {
+            continue;
+        }
+
+        totalResponseTime += event.getResponseTime();
+        totalEvents++;
+    }
+
+    if (totalEvents == 0) {
+        return 0;
+    }
+
+    return static_cast<double>(totalResponseTime) / static_cast<double>(totalEvents);
+}
+
+double responseTimeViolations(std::vector<Event>& simulatedEvents) {
+    int totalViolations = 0;
+
+    for (int i = 0; i < simulatedEvents.size(); i++) {
+        int responseTime = simulatedEvents[i].getResponseTime();
+
+        bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[i].incidentGridId];
+        std::string triage = simulatedEvents[i].triageImpression;
+
+        if (triage == "A") {
+            if (urban && responseTime > 720) {
+                totalViolations++;
+            } else if (!urban && responseTime > 1500) {
+                totalViolations++;
+            }
+        } else if (triage == "H") {
+            if (urban && responseTime > 1800) {
+                totalViolations++;
+            } else if (!urban && responseTime > 2400) {
+                totalViolations++;
+            }
+        }
+    }
+
+    return static_cast<double>(totalViolations);
 }

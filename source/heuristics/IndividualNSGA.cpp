@@ -73,15 +73,15 @@ void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<f
         events
     );
 
-    simulator.run(saveMetricsToFile);
+    simulatedEvents = simulator.run(saveMetricsToFile);
 
-    objectives[0] = objectiveWeights[0] * simulator.averageResponseTime("A", true);
-    objectives[1] = objectiveWeights[1] * simulator.averageResponseTime("A", false);
-    objectives[2] = objectiveWeights[2] * simulator.averageResponseTime("H", true);
-    objectives[3] = objectiveWeights[3] * simulator.averageResponseTime("H", false);
-    objectives[4] = objectiveWeights[4] * simulator.averageResponseTime("V1", true);
-    objectives[5] = objectiveWeights[5] * simulator.averageResponseTime("V1", false);
-    objectives[6] = objectiveWeights[6] * simulator.responseTimeViolations();
+    objectives[0] = objectiveWeights[0] * averageResponseTime(simulatedEvents, "A", true);
+    objectives[1] = objectiveWeights[1] * averageResponseTime(simulatedEvents, "A", false);
+    objectives[2] = objectiveWeights[2] * averageResponseTime(simulatedEvents, "H", true);
+    objectives[3] = objectiveWeights[3] * averageResponseTime(simulatedEvents, "H", false);
+    objectives[4] = objectiveWeights[4] * averageResponseTime(simulatedEvents, "V1", true);
+    objectives[5] = objectiveWeights[5] * averageResponseTime(simulatedEvents, "V1", false);
+    objectives[6] = objectiveWeights[6] * responseTimeViolations(simulatedEvents);
 
     fitness = 0.0f;
     for (size_t i = 0; i < objectives.size(); ++i) {
