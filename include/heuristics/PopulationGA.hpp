@@ -44,7 +44,8 @@ class PopulationGA {
     std::vector<IndividualGA> parentSelection(int tournamentSize);
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
     void addChildren(const std::vector<IndividualGA>& children);
-    std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
+    std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2);
+    std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA& parent1, const IndividualGA& parent2);
     void evolve(int generations);
     int PopulationGA::countUnique();
     const IndividualGA findFittest();
