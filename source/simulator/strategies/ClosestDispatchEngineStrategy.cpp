@@ -106,6 +106,12 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
         }
     }
 
+    if (closestAmbulanceIndex == -1) {
+        events[eventIndex].updateTimer(60, "duration_resource_appointment");
+
+        return;
+    }
+
     if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
         int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
 
