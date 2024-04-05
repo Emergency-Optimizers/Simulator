@@ -4,6 +4,8 @@
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
 
+/* external libraries */
+#include <iomanip>
 /* internal libraries */
 #include "heuristics/IndividualNSGA.hpp"
 #include "Utils.hpp"
@@ -17,14 +19,16 @@ IndividualNSGA::IndividualNSGA(
     int numObjectives,
     int numDepots,
     int numAmbulances,
+    int numTimeSegments,
     double mutationProbability,
     const bool dayShift,
     bool child
 ) : rnd(rnd),
-    genotype(numDepots, 0),
+    genotype(numTimeSegments, std::vector<int>(numDepots, 0)),
     numObjectives(numObjectives),
     numDepots(numDepots),
     numAmbulances(numAmbulances),
+    numTimeSegments(numTimeSegments),
     objectives(numObjectives, 0),
     fitness(0.0),
     crowdingDistance(0),
@@ -39,26 +43,28 @@ IndividualNSGA::IndividualNSGA(
     }
 
 void IndividualNSGA::randomizeAmbulances() {
-    // reset all depots to 0 ambulances
-    std::fill(genotype.begin(), genotype.end(), 0);
-
-    for (int i = 0; i < numAmbulances; i++) {
-        int depotIndex = getRandomInt(rnd, 0, genotype.size() - 1);
-        genotype[depotIndex]++;
+    for (auto& segment : genotype) {
+        std::fill(segment.begin(), segment.end(), 0);
+    }
+    for (int t = 0; t < numTimeSegments; ++t) {
+        for (int i = 0; i < numAmbulances; ++i) {
+            int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
+            genotype[t][depotIndex]++;
+        }
     }
 }
 
 bool IndividualNSGA::isValid() const {
-    return numAmbulances == std::accumulate(genotype.begin(), genotype.end(), 0);
+    for (const auto& segment : genotype) {
+        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
+        if (totalAmbulances != numAmbulances) return false;
+    }
+    return true;
 }
 
 void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<float> objectiveWeights, bool saveMetricsToFile) {
-    std::vector<std::vector<int>> allocations;
-    allocations.push_back(genotype);
-    allocations.push_back(genotype);
-
     AmbulanceAllocator ambulanceAllocator;
-    ambulanceAllocator.allocate(events, allocations, dayShift);
+    ambulanceAllocator.allocate(events, genotype, dayShift);
 
     Simulator simulator(
         rnd,
@@ -83,21 +89,6 @@ void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<f
     }
 }
 
-double IndividualNSGA::calculateUniformityObjective() {
-    // mock objective, can be removed
-    double mean = std::accumulate(genotype.begin(), genotype.end(), 0.0) / genotype.size();
-    double variance = std::accumulate(genotype.begin(), genotype.end(), 0.0, [mean](double acc, int val) {
-        return acc + (val - mean) * (val - mean);
-    }) / genotype.size();
-
-    return variance;
-}
-
-double IndividualNSGA::calculateMinimizeMaxDepotObjective() {
-    // mock objective, can be removed
-    return *std::max_element(genotype.begin(), genotype.end());
-}
-
 bool IndividualNSGA::dominates(const IndividualNSGA& other) const {
     // an individual dominates another if it is better in at least one objective, and no worse in all other objectives
     bool better = false;
@@ -113,97 +104,124 @@ bool IndividualNSGA::dominates(const IndividualNSGA& other) const {
 
 void IndividualNSGA::mutate() {
     std::uniform_real_distribution<> probDist(0.0, 1.0);
-    std::uniform_int_distribution<> depotDist(0, genotype.size() - 1);
+    std::uniform_int_distribution<> depotDist(0, numDepots - 1);
 
-    for (int depot = 0; depot < genotype.size(); ++depot) {
-        // only mutate if depot has at least one ambulance
-        if (probDist(rnd) < mutationProbability && genotype[depot] > 0) {
-            int otherDepot = depotDist(rnd);
-            while (otherDepot == depot) {
-                otherDepot = depotDist(rnd);
+    for (auto& segment : genotype) {
+        for (int depot = 0; depot < segment.size(); ++depot) {
+            if (probDist(rnd) < mutationProbability && segment[depot] > 0) {
+                int otherDepot = depotDist(rnd);
+                while (otherDepot == depot) {
+                    otherDepot = depotDist(rnd);
+                }
+                segment[depot]--;
+                segment[otherDepot]++;
             }
-
-            // transfer an ambulance from current depot to another depot
-            genotype[depot]--;
-            genotype[otherDepot]++;
         }
     }
 
-    // ensure total number of ambulances remains constant
     if (!isValid()) {
         throw std::runtime_error("Total number of ambulances changed during mutation.");
     }
 }
 
 void IndividualNSGA::repair() {
-    int totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
+    for (auto& segment : genotype) {
+        int totalAmbulancesInSegment = std::accumulate(segment.begin(), segment.end(), 0);
 
-    while (totalAmbulances != numAmbulances) {
-        if (totalAmbulances < numAmbulances) {
-            addAmbulances(numAmbulances - totalAmbulances);
-        } else {
-            removeAmbulances(totalAmbulances - numAmbulances);
-        }
+        while (totalAmbulancesInSegment != numAmbulances) {
+            int depotIndex = std::uniform_int_distribution<>(0, numDepots - 1)(rnd);
 
-        totalAmbulances = std::accumulate(genotype.begin(), genotype.end(), 0);
-    }
-
-    // ensure total number of ambulances remains constant
-    if (!isValid()) {
-        throw std::runtime_error("Total number of ambulances changed during mutation.");
-    }
-}
-
-void IndividualNSGA::addAmbulances(int ambulancesToAdd) {
-    std::uniform_int_distribution<> dist(0, genotype.size() - 1);
-
-
-    for (int i = 0; i < ambulancesToAdd; i++) {
-        int depotIndex = dist(rnd);
-
-        genotype[depotIndex]++;
-    }
-}
-
-void IndividualNSGA::removeAmbulances(int ambulancesToRemove) {
-    std::uniform_int_distribution<> dist(0, genotype.size() - 1);
-
-    for (int i = 0; i < ambulancesToRemove; i++) {
-        bool ambulanceRemoved = false;
-
-        while (!ambulanceRemoved) {
-            int depotIndex = dist(rnd);
-
-            if (genotype[depotIndex] > 0) {
-                genotype[depotIndex]--;
-                ambulanceRemoved = true;
+            if (totalAmbulancesInSegment < numAmbulances) {
+                segment[depotIndex]++;
+                totalAmbulancesInSegment++;
+            } else if (totalAmbulancesInSegment > numAmbulances && segment[depotIndex] > 0) {
+                segment[depotIndex]--;
+                totalAmbulancesInSegment--;
             }
         }
+    }
+
+    if (!isValid()) {
+        throw std::runtime_error("Repair operation failed to produce a valid solution.");
     }
 }
 
 void IndividualNSGA::printChromosome() const {
-    for (int i = 0; i < genotype.size(); i++) {
-        std::cout << "Depot " << i << ": " << genotype[i] << " ambulances" << std::endl;
+    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
+    for (int t = 0; t < genotype.size(); ++t) {
+        std::cout << "Time Segment " << (t + 1) << ":\n";
+        for (int d = 0; d < genotype[t].size(); ++d) {
+            std::cout << "  Depot " << Stations::getInstance().get<std::string>("name", depotIndices[d])
+                      << ": " << genotype[t][d] << " ambulances\n";
+        }
     }
 }
 
-const std::vector<int>& IndividualNSGA::getGenotype() const {
+void IndividualNSGA::printTimeSegmentedChromosome() const {
+    std::cout << "\n";
+    std::vector<std::string> depotNames;
+
+    std::vector<unsigned int> depotIndicies = Stations::getInstance().getDepotIndices(dayShift);
+    for (int i = 0; i < depotIndicies.size(); i++) {
+        std::string depotName;
+
+        // hard coded due to norwegian characters
+        if (depotIndicies[i] == 3) {
+            depotName = "Aurskog-Holand";
+        } else if (depotIndicies[i] == 5) {
+            depotName = "Lorenskog";
+        } else if (depotIndicies[i] == 7) {
+            depotName = "Baerum";
+        } else if (depotIndicies[i] == 9) {
+            depotName = "Ullevaal";
+        } else if (depotIndicies[i] == 14) {
+            depotName = "Sondre Follo";
+        } else {
+            depotName = Stations::getInstance().get<std::string>("name", depotIndicies[i]);
+        }
+
+        depotNames.push_back(depotName);
+    }
+
+    // TODO: Placeholder
+    auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
+        return 33.0;
+    };
+
+    // Print the header
+    std::cout << std::left << std::setw(20) << "Time Segment" << "|";
+    for (int t = 0; t < numTimeSegments; ++t) {
+        std::cout << std::setw(1) << "T" << t + 1;
+        if (t + 1 < 10) {  // One-digit time segment number
+            std::cout << " ";  // Three spaces
+        }
+    }
+
+    int headerStart = 24;
+    int timeSegmentWidth = 5;
+    int headerEnd = 12;
+    int totalWidth = headerStart + (numTimeSegments * timeSegmentWidth) - 1 + headerEnd;
+
+
+    std::cout << "|" << std::setw(2) << "Fitness\n";
+    std::cout << std::string(totalWidth, '-') << "\n";
+
+    // iterate over depots and print each row
+    for (size_t d = 0; d < depotNames.size(); ++d) {
+        std::cout << std::right << std::setw(19) << depotNames[d] << std::setw(1) << "|";
+        for (size_t t = 0; t < numTimeSegments; ++t) {
+            std::cout << std::right << std::setw(2) << genotype[t][d] << std::setw(2);
+        }
+        std::cout << "|" << std::setw(6) << calculateFitnessForSegment(d) << "\n";
+    }
+}
+
+const std::vector<std::vector<int>>& IndividualNSGA::getGenotype() const {
     return genotype;
 }
 
-void IndividualNSGA::setGenotype(const std::vector<int>& newGenotype) {
+void IndividualNSGA::setGenotype(const std::vector<std::vector<int>>& newGenotype) {
     genotype = newGenotype;
-}
-
-void IndividualNSGA::setAmbulancesAtDepot(int depotIndex, int count) {
-    if (depotIndex >= 0 && depotIndex < genotype.size()) {
-        genotype[depotIndex] = count;
-    }
-}
-
-int IndividualNSGA::getAmbulancesAtDepot(int depotIndex) const {
-    return (depotIndex >= 0 && depotIndex < genotype.size()) ? genotype[depotIndex] : -1;
 }
 
 int IndividualNSGA::getNumAmbulances() const {

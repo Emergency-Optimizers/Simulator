@@ -21,14 +21,16 @@ PopulationNSGA::PopulationNSGA(
     int populationSize,
     double mutationProbability,
     double crossoverProbability,
-    const bool dayShift
+    const bool dayShift,
+    int numTimeSegments
 ) : rnd(rnd),
     useFronts(useFronts),
     objectiveWeights(objectiveWeights),
     populationSize(populationSize),
     dayShift(dayShift),
     mutationProbability(mutationProbability),
-    crossoverProbability(crossoverProbability) {
+    crossoverProbability(crossoverProbability),
+    numTimeSegments(numTimeSegments) {
     MonteCarloSimulator monteCarloSim(
         rnd,
         Settings::get<int>("SIMULATE_YEAR"),
@@ -37,15 +39,14 @@ PopulationNSGA::PopulationNSGA(
         dayShift,
         Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
     );
-
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
     numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
-    numObjectives = 7;
+    numObjectives = 7; // TODO: Fix magic number
 
     events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
-        IndividualNSGA individual = IndividualNSGA(rnd, numObjectives, numDepots, numAmbulances, mutationProbability, dayShift, false);
+        IndividualNSGA individual = IndividualNSGA(rnd, numObjectives, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, false);
         individuals.push_back(individual);
     }
 
@@ -149,28 +150,40 @@ void PopulationNSGA::addChildren(const std::vector<IndividualNSGA>& children) {
     for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
 }
 
-IndividualNSGA PopulationNSGA::crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2) {
-    std::vector<int> offspringGenotype;
-    offspringGenotype.reserve(parent1.getGenotype().size());
+std::vector<IndividualNSGA> PopulationNSGA::crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2) {
+    // initialize offspring genotypes to respective parents
+    std::vector<std::vector<int>> offspring1Genotype = parent1.getGenotype();
+    std::vector<std::vector<int>> offspring2Genotype = parent2.getGenotype();
 
-    std::uniform_real_distribution<> dist(0, 1);
+    // iterate over each time segment
+    for (size_t t = 0; t < offspring1Genotype.size(); ++t) {
+        // generate random midpoint for the current time segment's allocation
+        std::uniform_int_distribution<> midpointDist(1, offspring1Genotype[t].size() - 2);
+        size_t midpoint = midpointDist(rnd);
 
-    if (parent1.getGenotype().size() == 0 || parent2.getGenotype().size() == 0) {
-        std::cerr << "Crossover error: One of the parents has an empty genotype." << std::endl;
-
-        return parent1;
+        // perform crossover around this randomly chosen midpoint for the current time segment
+        for (size_t i = 0; i < offspring1Genotype[t].size(); ++i) {
+            if (i <= midpoint) {
+                offspring2Genotype[t][i] = parent1.getGenotype()[t][i];
+            } else {
+                offspring1Genotype[t][i] = parent2.getGenotype()[t][i];
+            }
+        }
     }
 
-    for (size_t i = 0; i < parent1.getGenotype().size(); i++) {
-        double alpha = dist(rnd);
-        int gene = static_cast<int>(alpha * parent1.getGenotype()[i] + (1 - alpha) * parent2.getGenotype()[i]);
-        offspringGenotype.push_back(gene);
-    }
+    IndividualNSGA offspring1 = IndividualNSGA(rnd, numObjectives, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
+    IndividualNSGA offspring2 = IndividualNSGA(rnd, numObjectives, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
 
-    IndividualNSGA offspring = IndividualNSGA(rnd, numObjectives, numDepots, numAmbulances, mutationProbability, dayShift);
-    offspring.setGenotype(offspringGenotype);
-    offspring.repair();
-    offspring.evaluateObjectives(events, objectiveWeights);
+    offspring1.setGenotype(offspring1Genotype);
+    offspring2.setGenotype(offspring2Genotype);
+
+    // repair, mutate, and evaluate fitness for each offspring
+    std::vector<IndividualNSGA> offspring = {offspring1, offspring2};
+    for (auto& child : offspring) {
+        child.repair();
+        child.mutate();
+        child.evaluateObjectives(events, objectiveWeights);
+    }
 
     return offspring;
 }
@@ -204,7 +217,6 @@ void PopulationNSGA::calculateCrowdingDistance(std::vector<IndividualNSGA*>& fro
         }
     }
 }
-
 
 void PopulationNSGA::fastNonDominatedSort() {
     // clear domination values
@@ -305,15 +317,19 @@ void PopulationNSGA::evolve(int generations) {
         while (offspring.size() < populationSize) {
             if (shouldCrossover(rnd) < crossoverProbability) {           
                 std::vector<IndividualNSGA> parents = parentSelection(tournamentSize);
-                IndividualNSGA child = crossover(parents[0], parents[1]);
-                child.mutate();
-                child.evaluateObjectives(events, objectiveWeights);
-                offspring.push_back(child);
+                std::vector<IndividualNSGA> children = crossover(parents[0], parents[1]);
+                
+                // calculate how many children can be added without exceeding populationSize
+                size_t spaceLeft = populationSize - offspring.size();
+                size_t childrenToAdd = std::min(children.size(), spaceLeft);
+                
+                // add children directly to offspring, ensuring not to exceed populationSize
+                offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
             }
         }
 
         // step 4: combine, sort, and select the next generation from parents and offspring
-        individuals.insert(individuals.end(), offspring.begin(), offspring.end());
+        addChildren(offspring);
         if (useFronts) {
             fastNonDominatedSort();
         }
@@ -326,28 +342,32 @@ void PopulationNSGA::evolve(int generations) {
     }
     IndividualNSGA finalIndividual = findFittest();
 
-    finalIndividual.printChromosome();
-    printBestScoresForEachObjective();
     bool saveMetricsToFile = true;
     finalIndividual.evaluateObjectives(events, objectiveWeights, saveMetricsToFile);
+ 
+    finalIndividual.printTimeSegmentedChromosome();
+
+    printBestScoresForEachObjective();
 }
 
-int PopulationNSGA::countUnique(const std::vector<IndividualNSGA>& population) {
-    std::vector<std::vector<int>> genotypes;
-    genotypes.reserve(population.size());
+int PopulationNSGA::countUnique() {
+    std::vector<std::string> genotypeStrings;
+    genotypeStrings.reserve(individuals.size());
 
-    for (const auto& individual : population) {
-        genotypes.push_back(individual.getGenotype());
+    for (const auto& individual : individuals) {
+        std::ostringstream genotypeStream;
+        for (const auto& segment : individual.getGenotype()) {
+            for (const auto& depotAllocation : segment) {
+                genotypeStream << depotAllocation << ",";
+            }
+            genotypeStream << ";";
+        }
+        genotypeStrings.push_back(genotypeStream.str());
     }
 
-    // sort genotypes to bring identical ones together
-    std::sort(genotypes.begin(), genotypes.end());
-
-    // remove consecutive duplicates
-    auto lastUnique = std::unique(genotypes.begin(), genotypes.end());
-
-    // calculate the distance between the beginning and the point of last unique element
-    return std::distance(genotypes.begin(), lastUnique);
+    std::sort(genotypeStrings.begin(), genotypeStrings.end());
+    auto lastUnique = std::unique(genotypeStrings.begin(), genotypeStrings.end());
+    return std::distance(genotypeStrings.begin(), lastUnique);
 }
 
 const IndividualNSGA& PopulationNSGA::findFittest() const {
@@ -423,8 +443,9 @@ void PopulationNSGA::printPopulationInfo() {
         std::cout << "Front " << i << " has " << fronts[i].size() << " members." << std::endl;
     }
 }
-
 void PopulationNSGA::printBestScoresForEachObjective() const {
+    std::cout << "\n";
+
     if (useFronts) {
         if (fronts.empty() || fronts.front().empty()) {
             std::cerr << "No non-dominated individuals available in fronts." << std::endl;
@@ -447,7 +468,7 @@ void PopulationNSGA::printBestScoresForEachObjective() const {
 
         for (int objective = 0; objective < numObjectives; ++objective) {
             std::cout << "Front Objective " << objective << ": Best Score = "
-                      << bestScores[objective] << ", IndividualNSGA Index = "
+                      << bestScores[objective]/objectiveWeights[objective] << ", IndividualNSGA Index = "
                       << bestIndividualIndices[objective] << std::endl;
         }
     } else {
@@ -487,6 +508,4 @@ void PopulationNSGA::printBestScoresForEachObjective() const {
         }
     }
 }
-
-
 

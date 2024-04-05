@@ -142,40 +142,34 @@ void PopulationGA::evolve(int generations) {
     ProgressBar progressBar(generations, "Running GA");
 
     for (int gen = 0; gen < generations; gen++) {
-        int numParents = populationSize / 2;
+        // step 1: parent selection
+        std::vector<IndividualGA> offspring;
+        int tournamentSize = 3;
+        std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
-        // don't branch if population size is set to 1
-        // this is for debugging when we only want to simulate once
-        if (numParents > 1) {
-            // step 1: parent selection
-            std::vector<IndividualGA> offspring;
-            int tournamentSize = 3;
-            std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
-
-            while (offspring.size() < populationSize) {
-                if (shouldCrossover(rnd) < crossoverProbability) {
-                    std::vector<IndividualGA> parents = parentSelection(tournamentSize);
-                    std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
-                    
-                    // calculate how many children can be added without exceeding populationSize
-                    size_t spaceLeft = populationSize - offspring.size();
-                    size_t childrenToAdd = std::min(children.size(), spaceLeft);
-                    
-                    // add children directly to offspring, ensuring not to exceed populationSize
-                    offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
-                }
+        while (offspring.size() < populationSize) {
+            if (shouldCrossover(rnd) < crossoverProbability) {
+                std::vector<IndividualGA> parents = parentSelection(tournamentSize);
+                std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
+                
+                // calculate how many children can be added without exceeding populationSize
+                size_t spaceLeft = populationSize - offspring.size();
+                size_t childrenToAdd = std::min(children.size(), spaceLeft);
+                
+                // add children directly to offspring, ensuring not to exceed populationSize
+                offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
             }
-            // step 3: survivor selection
-            // combining existing population with children
-            addChildren(offspring);
-            individuals = survivorSelection(populationSize);
         }
+        // step 3: survivor selection
+        // combining existing population with children
+        addChildren(offspring);
+        individuals = survivorSelection(populationSize);
 
         IndividualGA fittest = findFittest();
 
         std::ostringstream postfix;
         postfix
-            << "Best fitness: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
+            << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
             << ", Valid: " << (fittest.isValid() ? "true" : "false") << ", Unique: " << countUnique();
 
         progressBar.update(gen + 1, postfix.str());

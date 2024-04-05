@@ -54,7 +54,8 @@ int main() {
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
             Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<bool>("SIMULATE_DAY_SHIFT")
+            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
+            Settings::get<int>("NUM_TIME_SEGMENTS")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
     } else if (heuristic == "NONE") {
