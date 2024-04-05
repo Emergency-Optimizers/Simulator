@@ -18,6 +18,7 @@ class IndividualNSGA {
  private:
     std::mt19937& rnd;
     std::vector<std::vector<int>> genotype;
+    std::vector<Event> simulatedEvents;
     int numObjectives;
     int numDepots;
     int numAmbulances;

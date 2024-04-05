@@ -19,6 +19,7 @@ class IndividualGA {
  private:
     std::mt19937& rnd;
     std::vector<std::vector<int>> genotype;
+    std::vector<Event> simulatedEvents;
     int numDepots;
     int numAmbulances;
     int numTimeSegments;
@@ -39,7 +40,7 @@ class IndividualGA {
     );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateFitness(std::vector<Event> events, bool saveMetricsToFile = false) const;
+    void evaluateFitness(std::vector<Event> events, bool saveMetricsToFile = false);
     void mutate();
     void repair();
     void printChromosome() const;

@@ -9,7 +9,6 @@
 /* external libraries */
 #include <random>
 #include <vector>
-#include <string>
 /* internal libraries */
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/EventHandler.hpp"
@@ -28,10 +27,6 @@ class Simulator {
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event> events
-
     );
-    void run(bool saveMetricsToFile = false);
-    double averageResponseTime(const std::string& triageImpression, bool urban);
-    double responseTimeViolations();
-    void printAverageEventPerformanceMetrics();
+    std::vector<Event> run(bool saveMetricsToFile = false);
 };

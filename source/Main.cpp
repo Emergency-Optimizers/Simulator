@@ -8,6 +8,7 @@
 #include <iostream>
 #include <chrono>
 /* internal libraries */
+#include "Utils.hpp"
 #include "file-reader/Settings.hpp"
 #include "file-reader/Incidents.hpp"
 #include "file-reader/Stations.hpp"
@@ -95,15 +96,15 @@ int main() {
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
             events
         );
-        simulator.run(true);
+        std::vector<Event> simulatedEvents = simulator.run(true);
 
         // print metrics
-        double avgResponseTimeAUrban = simulator.averageResponseTime("A", true);
-        double avgResponseTimeANonurban = simulator.averageResponseTime("A", false);
-        double avgResponseTimeHUrban = simulator.averageResponseTime("H", true);
-        double avgResponseTimeHNonurban = simulator.averageResponseTime("H", false);
-        double avgResponseTimeV1Urban = simulator.averageResponseTime("V1", true);
-        double avgResponseTimeV1Nonurban = simulator.averageResponseTime("V1", false);
+        double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);
+        double avgResponseTimeANonurban = averageResponseTime(simulatedEvents, "A", false);
+        double avgResponseTimeHUrban = averageResponseTime(simulatedEvents, "H", true);
+        double avgResponseTimeHNonurban = averageResponseTime(simulatedEvents, "H", false);
+        double avgResponseTimeV1Urban = averageResponseTime(simulatedEvents, "V1", true);
+        double avgResponseTimeV1Nonurban = averageResponseTime(simulatedEvents, "V1", false);
 
         std::cout
             << "Goal:" << std::endl
@@ -118,7 +119,7 @@ int main() {
             << "Avg. response time (H, non-urban): \t" << avgResponseTimeHNonurban << "s (" << avgResponseTimeHNonurban / 60 << "m)" << std::endl
             << "Avg. response time (V1, urban): \t" << avgResponseTimeV1Urban << "s (" << avgResponseTimeV1Urban / 60 << "m)" << std::endl
             << "Avg. response time (V1, non-urban): \t" << avgResponseTimeV1Nonurban << "s (" << avgResponseTimeV1Nonurban / 60 << "m)" << std::endl
-            << "Total violations: \t\t\t" << simulator.responseTimeViolations() << std::endl;
+            << "Total violations: \t\t\t" << responseTimeViolations(simulatedEvents) << std::endl;
     } else {
         std::cout << "Unknown heuristic given." << std::endl;
     }
