@@ -71,7 +71,7 @@ int main() {
 
         // set allocation
         std::vector<std::vector<int>> allocations;
-        allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 4, 4, 6, 4, 3, 3});
+        allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
 
         if (Settings::get<bool>("SIMULATE_DAY_SHIFT")) {
             allocations[0].push_back(0);
