@@ -151,6 +151,16 @@ void PopulationNSGA::addChildren(const std::vector<IndividualNSGA>& children) {
 }
 
 std::vector<IndividualNSGA> PopulationNSGA::crossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2) {
+    CrossoverType crossoverType = Settings::get<CrossoverType>("CROSSOVER");
+    switch(crossoverType) {
+        case CrossoverType::SINGLE_POINT:
+          return singlePointCrossover(parent1, parent2);
+        default:
+           return singlePointCrossover(parent1, parent2);
+    }
+}
+
+std::vector<IndividualNSGA> PopulationNSGA::singlePointCrossover(const IndividualNSGA& parent1, const IndividualNSGA& parent2) {
     // initialize offspring genotypes to respective parents
     std::vector<std::vector<int>> offspring1Genotype = parent1.getGenotype();
     std::vector<std::vector<int>> offspring2Genotype = parent2.getGenotype();

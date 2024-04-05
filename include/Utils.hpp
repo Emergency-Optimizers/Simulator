@@ -18,6 +18,7 @@
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
+#include "heuristics/CrossoverType.hpp"
 
 using ValueType = std::variant<
     int,
@@ -28,7 +29,8 @@ using ValueType = std::variant<
     bool,
     std::optional<std::tm>,
     std::vector<float>,
-    DispatchEngineStrategyType
+    DispatchEngineStrategyType,
+    CrossoverType
 >;
 using ToValueType = ValueType(*)(const std::string&);
 using SchemaMapping = std::unordered_map<std::string, ToValueType>;
@@ -42,6 +44,7 @@ ValueType toBool(const std::string& str);
 ValueType toDateTime(const std::string& str);
 ValueType toVectorFloat(const std::string& str);
 ValueType toDispatchEngineStrategyType(const std::string& str);
+ValueType toCrossoverType(const std::string& str);
 std::string tmToString(const std::tm& time);
 std::string valueTypeToString(const ValueType& cell);
 float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);

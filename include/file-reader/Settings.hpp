@@ -40,6 +40,7 @@ class Settings {
         {"CROSSOVER_PROBABILITY", &toFloat},
         {"SEED", &toInt},
         {"SIMULATE_1_HOUR_BEFORE", &toBool},
+        {"CROSSOVER", &toCrossoverType}
     };
 
  public:
