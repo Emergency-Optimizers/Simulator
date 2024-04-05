@@ -11,19 +11,13 @@
 #include <vector>
 #include <string>
 /* internal libraries */
-#include "simulator/Incidents.hpp"
-#include "simulator/Stations.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/EventHandler.hpp"
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
-#include "simulator/ODMatrix.hpp"
 
 class Simulator {
  private:
     std::mt19937& rng;
-    Incidents& incidents;
-    Stations& stations;
-    ODMatrix& odMatrix;
     AmbulanceAllocator& ambulanceAllocator;
     EventHandler eventHandler;
     DispatchEngineStrategyType dispatchStrategy;
@@ -31,9 +25,6 @@ class Simulator {
  public:
     Simulator(
         std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event> events

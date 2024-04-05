@@ -9,15 +9,19 @@
 /* external libraries */
 #include <vector>
 /* internal libraries */
-#include "simulator/Stations.hpp"
 #include "simulator/Ambulance.hpp"
+#include "simulator/Event.hpp"
 
 class AmbulanceAllocator {
  private:
-    Stations& stations;
+    void allocateAndScheduleBreaks(const time_t& shiftStart, const time_t& shiftEnd);
 
  public:
     std::vector<Ambulance> ambulances;
-    explicit AmbulanceAllocator(Stations& stations);
-    void allocate(const std::vector<int>& totalAllocatedAmbulancesAtDepots);
+
+    void allocate(
+        std::vector<Event>& events,
+        const std::vector<std::vector<int>>& allocations,
+        const bool dayshift
+    );
 };

@@ -7,42 +7,41 @@
 #pragma once
 
 /* external libraries */
-#include <ctime>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <string>
-
+#include <map>
+#include <vector>
+#include <ctime>
 /* internal libraries */
-#include "simulator/EventPerformanceMetrics.hpp"
 #include "simulator/EventType.hpp"
 
 struct Event {
     int id = -1;
-    EventType type = EventType::ASSIGNING_AMBULANCE;
+    EventType type = EventType::RESOURCE_APPOINTMENT;
     std::time_t timer;
+    std::time_t prevTimer = 0;
     int assignedAmbulanceIndex = -1;
-    EventPerformanceMetrics metrics;
+    std::map<std::string, int> metrics = {
+        {"duration_incident_creation", 0},
+        {"duration_resource_appointment", 0},
+        {"duration_resource_preparing_departure", 0},
+        {"duration_dispatching_to_scene", 0},
+        {"duration_at_scene", 0},
+        {"duration_dispatching_to_hospital", 0},
+        {"duration_at_hospital", 0},
+        {"duration_dispatching_to_depot", 0},
+    };
     std::string triageImpression;
     std::tm callReceived;
-    float secondsWaitCallAnswered = -1;
-    float secondsWaitAppointingResource = -1;
-    float secondsWaitDepartureScene = -1;
-    float secondsWaitAvailable = -1;
-    int64_t gridId = -1;
+    float secondsWaitCallAnswered = -1.0f;
+    float secondsWaitAppointingResource = -1.0f;
+    float secondsWaitResourcePreparingDeparture = -1.0f;
+    float secondsWaitDepartureScene = -1.0f;
+    float secondsWaitAvailable = -1.0f;
+    int64_t gridId = -1i64;
+    int64_t incidentGridId = -1i64;
+    std::vector<int> reallocation;
+    bool utility = false;
 
-    void print() {
-        std::cout << "triageImpression: " << triageImpression << std::endl;
-        std::cout << "callReceived: " << tmToString(callReceived) << std::endl;
-        std::cout << "secondsWaitCallAnswered: " << secondsWaitCallAnswered << std::endl;
-        std::cout << "secondsWaitDepartureScene: " << secondsWaitDepartureScene << std::endl;
-        std::cout << "secondsWaitAvailable: " << secondsWaitAvailable << std::endl;
-        std::cout << "gridId: " << gridId << std::endl;
-    }
-
-    std::string tmToString(const std::tm& time) const {
-        std::stringstream ss;
-        ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
-        return ss.str();
-    }
+    void updateTimer(const int increment, const std::string& metric = "");
+    float getResponseTime();
 };

@@ -6,52 +6,58 @@
 
 /* external libraries */
 #include <limits>
+#include <algorithm>
+#include <numeric>
 /* internal libraries */
 #include "simulator/strategies/ClosestDispatchEngineStrategy.hpp"
+#include "Utils.hpp"
+#include "file-reader/Stations.hpp"
+#include "file-reader/Settings.hpp"
+#include "file-reader/ODMatrix.hpp"
 
 void ClosestDispatchEngineStrategy::run(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
     switch (events[eventIndex].type) {
-        case EventType::ASSIGNING_AMBULANCE:
-            assigningAmbulance(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::RESOURCE_APPOINTMENT:
+            assigningAmbulance(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
-            dispatchingToScene(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            dispatchingToScene(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_HOSPITAL:
-            dispatchingToHospital(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            dispatchingToHospital(rng, ambulances, events, eventIndex);
+            break;
+        case EventType::PREPARING_DISPATCH_TO_DEPOT:
+            dispatchingToDepot(rng, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_DEPOT:
-            dispatchingToDepot(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+            finishingEvent(rng, ambulances, events, eventIndex);
             break;
-        case EventType::FINISHED:
-            finishingEvent(rng, incidents, stations, odMatrix, ambulances, events, eventIndex);
+        case EventType::REALLOCATE:
+            reallocating(rng, ambulances, events, eventIndex);
             break;
     }
 }
 
 void ClosestDispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    std::vector<unsigned> availableAmbulanceIndicies = Utils::getAvailableAmbulanceIndicies(ambulances, events);
+    std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
+        ambulances,
+        events,
+        events[eventIndex].timer
+    );
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
-        events[eventIndex].timer += 60;
-        events[eventIndex].metrics.waitingForAmbulanceTime += 60;
+        events[eventIndex].updateTimer(60, "duration_resource_appointment");
 
         return;
     }
@@ -61,36 +67,37 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     int64_t closestAmbulanceGridId = -1;
     int closestAmbulanceTravelTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
-    // std::pair<int, int> utm1 = Utils::idToUtm(eventGridId);
+    // std::pair<int, int> utm1 = idToUtm(eventGridId);
     for (int i = 0; i < availableAmbulanceIndicies.size(); i++) {
         int64_t ambulanceGridId;
 
         if (ambulances[availableAmbulanceIndicies[i]].assignedEventId != -1) {
-            int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
+            int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
 
-            int totalTravelTime = odMatrix.getTravelTime(
-                ambulances[availableAmbulanceIndicies[i]].currentGridId,
-                events[currentAmbulanceEventIndex].gridId
-            );
-
-            ambulanceGridId = Utils::approximateLocation(
+            ambulanceGridId = approximateLocation(
                 ambulances[availableAmbulanceIndicies[i]].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
-                events[currentAmbulanceEventIndex].timer - totalTravelTime,
+                events[currentAmbulanceEventIndex].prevTimer,
                 events[eventIndex].timer,
-                odMatrix
+                events[currentAmbulanceEventIndex].triageImpression
             );
 
-            if (!odMatrix.gridIdExists(ambulanceGridId)) {
+            if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
                 continue;
             }
         } else {
             ambulanceGridId = ambulances[availableAmbulanceIndicies[i]].currentGridId;
         }
 
-        // std::pair<int, int> utm2 = Utils::idToUtm(ambulanceGridId);
-        // int travelTime = Utils::calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
-        int travelTime = odMatrix.getTravelTime(ambulanceGridId, eventGridId);
+        // std::pair<int, int> utm2 = idToUtm(ambulanceGridId);
+        // int travelTime = calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
+        int travelTime = ODMatrix::getInstance().getTravelTime(
+            ambulanceGridId,
+            eventGridId,
+            false,
+            events[eventIndex].triageImpression,
+            events[eventIndex].timer
+        );
 
         if (travelTime < closestAmbulanceTravelTime) {
             closestAmbulanceIndex = availableAmbulanceIndicies[i];
@@ -100,12 +107,17 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     }
 
     if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
-        int currentAmbulanceEventIndex = Utils::findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
+        int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
 
-        events[currentAmbulanceEventIndex].metrics.dispatchToDepotTime += odMatrix.getTravelTime(
+        int incrementSeconds = ODMatrix::getInstance().getTravelTime(
             ambulances[closestAmbulanceIndex].currentGridId,
-            closestAmbulanceGridId
+            closestAmbulanceGridId,
+            true,
+            events[currentAmbulanceEventIndex].triageImpression,
+            events[currentAmbulanceEventIndex].prevTimer
         );
+        events[currentAmbulanceEventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
+        ambulances[closestAmbulanceIndex].timeUnavailable += incrementSeconds;
 
         events[currentAmbulanceEventIndex].gridId = closestAmbulanceGridId;
         events[currentAmbulanceEventIndex].assignedAmbulanceIndex = -1;
@@ -117,13 +129,15 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     events[eventIndex].assignedAmbulanceIndex = closestAmbulanceIndex;
     ambulances[closestAmbulanceIndex].assignedEventId = events[eventIndex].id;
     events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
+    events[eventIndex].updateTimer(
+        events[eventIndex].secondsWaitResourcePreparingDeparture,
+        "duration_resource_preparing_departure"
+    );
+    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitResourcePreparingDeparture;
 }
 
 void ClosestDispatchEngineStrategy::dispatchingToHospital(
     std::mt19937& rng,
-    Incidents& incidents,
-    Stations& stations,
-    ODMatrix& odMatrix,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -132,37 +146,143 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
     int closestHospitalIndex = -1;
     int closestHospitalTravelTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
-    std::vector<unsigned int> hospitals = stations.getHospitalIndices();
+    std::vector<unsigned int> hospitals = Stations::getInstance().getHospitalIndices();
     for (int i = 0; i < hospitals.size(); i++) {
-        int64_t hospitalGridId = stations.get<int64_t>(
+        int64_t hospitalGridId = Stations::getInstance().get<int64_t>(
             "grid_id",
             hospitals[i]
         );
-        int travelTime = odMatrix.getTravelTime(hospitalGridId, eventGridId);
+        int travelTime = ODMatrix::getInstance().getTravelTime(
+            hospitalGridId,
+            eventGridId,
+            false,
+            events[eventIndex].triageImpression,
+            events[eventIndex].timer
+        );
         if (travelTime < closestHospitalTravelTime) {
             closestHospitalIndex = i;
             closestHospitalTravelTime = travelTime;
         }
     }
 
-    events[eventIndex].gridId = stations.get<int64_t>(
+    events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
         hospitals[closestHospitalIndex]
     );
 
-    int incrementSeconds = odMatrix.getTravelTime(
+    int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
-        events[eventIndex].gridId
+        events[eventIndex].gridId,
+        false,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
     );
-    events[eventIndex].timer += incrementSeconds;
-    events[eventIndex].metrics.dispatchToHospitalTime += incrementSeconds;
+    events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_hospital");
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
 
-    events[eventIndex].timer += events[eventIndex].secondsWaitAvailable;
-    events[eventIndex].metrics.arrivalAtHospitalTime += events[eventIndex].secondsWaitAvailable;
+    events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable, "duration_at_hospital");
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
-    events[eventIndex].type = EventType::DISPATCHING_TO_DEPOT;
+    events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
+}
+
+void ClosestDispatchEngineStrategy::reallocating(
+    std::mt19937& rng,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    // get depot indices
+    bool dayShift = isDayShift(
+        events[eventIndex].timer,
+        Settings::get<int>("DAY_SHIFT_START"),
+        Settings::get<int>("DAY_SHIFT_END")
+    );
+    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
+
+    // get the new allocation
+    std::vector<int> allocation = events[eventIndex].reallocation;
+
+    int sumTest = 0;
+    for (int i = 0; i < allocation.size(); i++) {
+        sumTest += allocation[i];
+    }
+
+    // create a vector of ambulance indices
+    std::vector<int> ambulanceIndices(ambulances.size());
+    std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
+
+    // sort the indicies to adhere to the closest strategy
+    std::vector<int> sortedAmbulanceIndices;
+    for (size_t depotIndex = 0; depotIndex < depotIndices.size(); depotIndex++) {
+        unsigned int allocatedToDepot = allocation[depotIndex];
+        for (unsigned int i = 0; i < allocatedToDepot; i++) {
+            int closestAmbulanceIndex = 0;
+            int closestTravelTime = std::numeric_limits<int>::max();
+            for (int ambulanceIndex = 0; ambulanceIndex < ambulanceIndices.size(); ambulanceIndex++) {
+                int64_t depotGridId = Stations::getInstance().get<int64_t>(
+                    "grid_id",
+                    depotIndices[depotIndex]
+                );
+
+                int travelTime = ODMatrix::getInstance().getTravelTime(
+                    ambulances[ambulanceIndices[ambulanceIndex]].currentGridId,
+                    depotGridId,
+                    true,
+                    "V1",
+                    events[eventIndex].timer
+                );
+
+                if (travelTime < closestTravelTime) {
+                    closestAmbulanceIndex = ambulanceIndex;
+                    closestTravelTime = travelTime;
+
+                    if (closestTravelTime == 0) {
+                        break;
+                    }
+                }
+            }
+
+            sortedAmbulanceIndices.push_back(ambulanceIndices[closestAmbulanceIndex]);
+            ambulanceIndices.erase(ambulanceIndices.begin() + closestAmbulanceIndex);
+        }
+    }
+
+    // reallocate by assigning the ambulance indicies to the depot according to allocation vector
+    size_t currentAmbulanceIndex = 0;
+    for (size_t depotIndex = 0; depotIndex < depotIndices.size() && currentAmbulanceIndex < sortedAmbulanceIndices.size(); depotIndex++) {
+        unsigned int allocatedToDepot = allocation[depotIndex];
+        for (unsigned int i = 0; i < allocatedToDepot && currentAmbulanceIndex < sortedAmbulanceIndices.size(); i++) {
+            /*std::cout << "Ambulance " << ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].id << ": "
+                << ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].allocatedDepotIndex
+                << " -> " << depotIndices[depotIndex] << std::endl;*/
+
+            // allocate ambulance to new depot
+            ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].allocatedDepotIndex = depotIndices[depotIndex];
+
+            // branch if it isn't responding to an incident and create an event that transfers the ambulance to the new depot
+            if (ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].assignedEventId == -1) {
+                Event newEvent;
+                newEvent.id = events.size();
+                newEvent.type = EventType::PREPARING_DISPATCH_TO_DEPOT;
+                newEvent.timer = events[eventIndex].timer;
+                newEvent.prevTimer = events[eventIndex].timer;
+                newEvent.assignedAmbulanceIndex = sortedAmbulanceIndices[currentAmbulanceIndex];
+                newEvent.triageImpression = "V1";
+                newEvent.gridId = ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].currentGridId;
+                newEvent.utility = true;
+
+                ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].assignedEventId = newEvent.id;
+
+                events.insert(events.begin() + eventIndex + 1, newEvent);
+            }
+
+            currentAmbulanceIndex++;
+        }
+    }
+
+    // set the type to none so it doesn't trigger again
+    events[eventIndex].type = EventType::NONE;
 }

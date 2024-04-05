@@ -11,23 +11,25 @@
 #include <random>
 /* internal libraries */
 #include "simulator/strategies/DispatchEngineStrategy.hpp"
+#include "simulator/Ambulance.hpp"
+#include "simulator/Event.hpp"
 
 class ClosestDispatchEngineStrategy : public DispatchEngineStrategy {
  protected:
     static void assigningAmbulance(
         std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,
         const int eventIndex
     );
     static void dispatchingToHospital(
         std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
+        std::vector<Ambulance>& ambulances,
+        std::vector<Event>& events,
+        const int eventIndex
+    );
+    static void reallocating(
+        std::mt19937& rng,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,
         const int eventIndex
@@ -36,9 +38,6 @@ class ClosestDispatchEngineStrategy : public DispatchEngineStrategy {
  public:
     static void run(
         std::mt19937& rng,
-        Incidents& incidents,
-        Stations& stations,
-        ODMatrix& odMatrix,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,
         const int eventIndex

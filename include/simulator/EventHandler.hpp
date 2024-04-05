@@ -7,10 +7,8 @@
 #pragma once
 
 /* external libraries */
-#include <string>
 #include <vector>
 /* internal libraries */
-#include "simulator/Incidents.hpp"
 #include "simulator/Event.hpp"
 
 class EventHandler {
@@ -25,4 +23,5 @@ class EventHandler {
     void populate(std::vector<Event> newEvents);
     int getNextEventIndex();
     void sortEvent(size_t eventIndex);
+    void sortEvents();
 };
