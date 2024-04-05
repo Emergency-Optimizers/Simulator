@@ -194,20 +194,24 @@ void IndividualGA::printTimeSegmentedChromosome() const {
     for (int t = 0; t < numTimeSegments; ++t) {
         std::cout << " T" << t + 1;
         if (t + 1 < 10) { // One-digit time segment number
-            std::cout << "  "; // Three spaces
-        } else { // Two-digit time segment number
-            std::cout << " "; // Two spaces
+            std::cout << " "; // Three spaces
         }
     }
-    std::cout << "   Fitness\n";
-    std::cout << std::string(100, '-') << "\n";
+
+    int headerStart = 24;
+    int timeSegmentWidth = 4;
+    int headerEnd = 9;
+    int totalWidth = headerStart + (numTimeSegments * timeSegmentWidth) - 1 + headerEnd;
+
+    std::cout << " | Fitness\n";
+    std::cout << std::string(totalWidth, '-') << "\n";
 
     // iterate over depots and print each row
     for (size_t d = 0; d < depotNames.size(); ++d) {
-        std::cout << std::right << std::setw(19) << depotNames[d] << " |";
+        std::cout << std::right << std::setw(19) << depotNames[d] << " | ";
         for (size_t t = 0; t < numTimeSegments; ++t) {
-            std::cout << std::right << std::setw(2) << genotype[t][d] << "   ";
+            std::cout << std::right << std::setw(1) << genotype[t][d] << "   ";
         }
-        std::cout << "|" << std::setw(4) << calculateFitnessForSegment(d) << "\n";
+        std::cout << "|" << std::setw(5) << calculateFitnessForSegment(d) << "\n";
     }
 }

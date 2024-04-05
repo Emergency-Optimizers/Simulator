@@ -169,23 +169,28 @@ void IndividualNSGA::printTimeSegmentedChromosome() const {
     // Print the header
     std::cout << std::left << std::setw(20) << "Time Segment" << "|";
     for (int t = 0; t < numTimeSegments; ++t) {
-        std::cout << " T" << t + 1;
+        std::cout << std::setw(1) << "T" << t + 1;
         if (t + 1 < 10) { // One-digit time segment number
-            std::cout << "  "; // Three spaces
-        } else { // Two-digit time segment number
-            std::cout << " "; // Two spaces
+            std::cout << " "; // Three spaces
         }
     }
-    std::cout << "   Fitness\n";
-    std::cout << std::string(100, '-') << "\n";
+
+    int headerStart = 24;
+    int timeSegmentWidth = 5;
+    int headerEnd = 12;
+    int totalWidth = headerStart + (numTimeSegments * timeSegmentWidth) - 1 + headerEnd;
+
+
+    std::cout << "|" << std::setw(2) << "Fitness\n";
+    std::cout << std::string(totalWidth, '-') << "\n";
 
     // iterate over depots and print each row
     for (size_t d = 0; d < depotNames.size(); ++d) {
-        std::cout << std::right << std::setw(19) << depotNames[d] << " |";
+        std::cout << std::right << std::setw(19) << depotNames[d] << std::setw(1) << "|";
         for (size_t t = 0; t < numTimeSegments; ++t) {
-            std::cout << std::right << std::setw(2) << genotype[t][d] << "   ";
+            std::cout << std::right << std::setw(2) << genotype[t][d] << std::setw(2);
         }
-        std::cout << "|" << std::setw(4) << calculateFitnessForSegment(d) << "\n";
+        std::cout << "|" << std::setw(6) << calculateFitnessForSegment(d) << "\n";
     }
 }
 
