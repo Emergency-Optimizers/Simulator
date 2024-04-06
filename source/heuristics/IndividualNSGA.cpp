@@ -157,65 +157,6 @@ void IndividualNSGA::printChromosome() const {
     }
 }
 
-void IndividualNSGA::printTimeSegmentedChromosome() const {
-    std::cout << "\n";
-    std::vector<std::string> depotNames;
-
-    std::vector<unsigned int> depotIndicies = Stations::getInstance().getDepotIndices(dayShift);
-    for (int i = 0; i < depotIndicies.size(); i++) {
-        std::string depotName;
-
-        // hard coded due to norwegian characters
-        if (depotIndicies[i] == 3) {
-            depotName = "Aurskog-Holand";
-        } else if (depotIndicies[i] == 5) {
-            depotName = "Lorenskog";
-        } else if (depotIndicies[i] == 7) {
-            depotName = "Baerum";
-        } else if (depotIndicies[i] == 9) {
-            depotName = "Ullevaal";
-        } else if (depotIndicies[i] == 14) {
-            depotName = "Sondre Follo";
-        } else {
-            depotName = Stations::getInstance().get<std::string>("name", depotIndicies[i]);
-        }
-
-        depotNames.push_back(depotName);
-    }
-
-    // TODO: Placeholder
-    auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
-        return 33.0;
-    };
-
-    // Print the header
-    std::cout << std::left << std::setw(20) << "Time Segment" << "|";
-    for (int t = 0; t < numTimeSegments; ++t) {
-        std::cout << std::setw(1) << "T" << t + 1;
-        if (t + 1 < 10) {  // One-digit time segment number
-            std::cout << " ";  // Three spaces
-        }
-    }
-
-    int headerStart = 24;
-    int timeSegmentWidth = 5;
-    int headerEnd = 12;
-    int totalWidth = headerStart + (numTimeSegments * timeSegmentWidth) - 1 + headerEnd;
-
-
-    std::cout << "|" << std::setw(2) << "Fitness\n";
-    std::cout << std::string(totalWidth, '-') << "\n";
-
-    // iterate over depots and print each row
-    for (size_t d = 0; d < depotNames.size(); ++d) {
-        std::cout << std::right << std::setw(19) << depotNames[d] << std::setw(1) << "|";
-        for (size_t t = 0; t < numTimeSegments; ++t) {
-            std::cout << std::right << std::setw(2) << genotype[t][d] << std::setw(2);
-        }
-        std::cout << "|" << std::setw(6) << calculateFitnessForSegment(d) << "\n";
-    }
-}
-
 const std::vector<std::vector<int>>& IndividualNSGA::getGenotype() const {
     return genotype;
 }

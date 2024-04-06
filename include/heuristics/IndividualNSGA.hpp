@@ -56,7 +56,6 @@ class IndividualNSGA {
     void addAmbulances(int ambulancesToAdd = 1);
     void removeAmbulances(int ambulancesToRemove = 1);
     void printChromosome() const;
-    void printTimeSegmentedChromosome() const;
     const std::vector<std::vector<int>>& getGenotype() const;
     void setGenotype(const std::vector<std::vector<int>>& newGenotype);
     void setAmbulancesAtDepot(int depotIndex, int count);

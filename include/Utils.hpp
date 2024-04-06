@@ -82,6 +82,11 @@ bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int day
 std::string eventTypeToString(EventType eventType);
 double averageResponseTime(std::vector<Event>& simulatedEvents, const std::string& triageImpression, const bool urban);
 double responseTimeViolations(std::vector<Event>& simulatedEvents);
+void printTimeSegmentedAllocationTable(
+    const bool dayShift,
+    const int numTimeSegments,
+    const std::vector<std::vector<int>>& allocations
+);
 
 template <typename T>
 int findIndex(const std::vector<T>& vec, const T& value) {

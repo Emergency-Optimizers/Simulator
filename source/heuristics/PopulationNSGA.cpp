@@ -354,8 +354,8 @@ void PopulationNSGA::evolve(int generations) {
 
     bool saveMetricsToFile = true;
     finalIndividual.evaluateObjectives(events, objectiveWeights, saveMetricsToFile);
- 
-    finalIndividual.printTimeSegmentedChromosome();
+
+    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype());
 
     printBestScoresForEachObjective();
 }

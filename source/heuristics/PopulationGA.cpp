@@ -7,6 +7,7 @@
 /* external libraries */
 #include <sstream>
 #include <iomanip>
+#include <string>
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
@@ -161,11 +162,11 @@ void PopulationGA::evolve(int generations) {
             if (shouldCrossover(rnd) < crossoverProbability) {
                 std::vector<IndividualGA> parents = parentSelection(tournamentSize);
                 std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
-                
+
                 // calculate how many children can be added without exceeding populationSize
                 size_t spaceLeft = populationSize - offspring.size();
                 size_t childrenToAdd = std::min(children.size(), spaceLeft);
-                
+
                 // add children directly to offspring, ensuring not to exceed populationSize
                 offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
             }
@@ -180,7 +181,8 @@ void PopulationGA::evolve(int generations) {
         std::ostringstream postfix;
         postfix
             << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
-            << ", Valid: " << (fittest.isValid() ? "true" : "false") << ", Unique: " << countUnique();
+            << ", Valid: " << std::setw(5) << (fittest.isValid() ? "true" : "false")
+            << ", Unique: " << std::setw(std::to_string(populationSize).size()) << countUnique();
 
         progressBar.update(gen + 1, postfix.str());
     }
@@ -194,7 +196,8 @@ void PopulationGA::evolve(int generations) {
         << "Fittest IndividualGA: " << finalIndividual.getFitness()
         << (finalIndividual.isValid() ? " [valid]\n" : " [invalid]\n")
         << std::endl;
-    finalIndividual.printTimeSegmentedChromosome();
+
+    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype());
 }
 
 int PopulationGA::countUnique() {

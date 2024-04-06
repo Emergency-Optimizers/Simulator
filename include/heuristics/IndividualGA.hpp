@@ -47,14 +47,6 @@ class IndividualGA {
     const std::vector<std::vector<int>>& getGenotype() const;
     void setGenotype(const std::vector<std::vector<int>> newGenotype);
     double getFitness() const;
-    void setFitness(double fitness);
-    void setAmbulancesAtDepot(int depotIndex, int count);
-    int getAmbulancesAtDepot(int depotIndex) const;
-    int getNumAmbulances() const;
-    void setNumAmbulances(int newNumAmbulances);
-    int getNumDepots() const;
-    void setNumDepots(int newNumDepots);
-    void printTimeSegmentedChromosome() const;
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
             genotype = other.genotype;
