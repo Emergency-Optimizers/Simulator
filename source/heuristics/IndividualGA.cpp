@@ -108,9 +108,11 @@ void IndividualGA::evenGenotype() {
 }
 
 void IndividualGA::evaluateFitness(std::vector<Event> events) {
+    // allocate ambulances based on genotype
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
+    // run simulator and store results
     Simulator simulator(
         rnd,
         ambulanceAllocator,
@@ -121,6 +123,10 @@ void IndividualGA::evaluateFitness(std::vector<Event> events) {
     simulatedEvents = simulator.run();
     simulatedAmbulances = ambulanceAllocator.ambulances;
 
+    updateFitness();
+}
+
+void IndividualGA::updateFitness() {
     fitness = averageResponseTime(simulatedEvents, "A", true);
 }
 

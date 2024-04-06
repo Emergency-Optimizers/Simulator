@@ -34,6 +34,9 @@ class IndividualGA {
     void randomGenotype();
     void evenGenotype();
 
+ protected:
+    virtual void updateFitness();
+
  public:
     IndividualGA(
         std::mt19937& rnd,
