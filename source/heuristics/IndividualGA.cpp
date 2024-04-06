@@ -197,24 +197,16 @@ void IndividualGA::repair() {
     }
 }
 
-void IndividualGA::printChromosome() const {
-    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
-    for (int t = 0; t < genotype.size(); ++t) {
-        std::cout << "Time Segment " << (t + 1) << ":\n";
-        for (int d = 0; d < genotype[t].size(); ++d) {
-            std::cout << "  Depot " << Stations::getInstance().get<std::string>("name", depotIndices[d])
-                      << ": " << genotype[t][d] << " ambulances\n";
-        }
-    }
-}
-
 void IndividualGA::printGenotype() const {
-    std::cout << "Genotype allocation:" << std::endl;
-    for (int timeSegment = 0; timeSegment < numTimeSegments; ++timeSegment) {
-        std::cout << "Time Segment " << timeSegment << ": ";
-        for (int depot = 0; depot < numDepots; ++depot) {
+    std::cout << "Genotype: " << std::endl;
+
+    for (int timeSegment = 0; timeSegment < numTimeSegments; timeSegment++) {
+        std::cout << "    TS " << timeSegment + 1 << ": ";
+
+        for (int depot = 0; depot < numDepots; depot++) {
             std::cout << genotype[timeSegment][depot] << " ";
         }
+
         std::cout << std::endl;
     }
 }

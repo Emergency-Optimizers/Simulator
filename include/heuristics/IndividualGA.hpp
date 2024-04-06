@@ -47,7 +47,6 @@ class IndividualGA {
     void evaluateFitness(std::vector<Event> events, bool saveMetricsToFile = false);
     void mutate();
     void repair();
-    void printChromosome() const;
     void printGenotype() const;
     const std::vector<std::vector<int>>& getGenotype() const;
     void setGenotype(const std::vector<std::vector<int>> newGenotype);
