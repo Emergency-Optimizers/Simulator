@@ -18,15 +18,19 @@
 class IndividualGA {
  private:
     std::mt19937& rnd;
-    std::vector<std::vector<int>> genotype;
-    std::vector<Event> simulatedEvents;
+    mutable std::vector<std::vector<int>> genotype;
+    mutable std::vector<Event> simulatedEvents;
+    mutable double fitness = 0.0;
     int numDepots;
     int numAmbulances;
     int numTimeSegments;
-    mutable double fitness = 0;
     double mutationProbability;
-    const bool dayShift;
+    bool dayShift;
     bool child;
+
+    void generateGenotype();
+    void emptyGenotype();
+    void randomGenotype();
 
  public:
     IndividualGA(
@@ -38,7 +42,6 @@ class IndividualGA {
         const bool dayShift,
         bool child = true
     );
-    void randomizeAmbulances();
     bool isValid() const;
     void evaluateFitness(std::vector<Event> events, bool saveMetricsToFile = false);
     void mutate();
@@ -49,11 +52,15 @@ class IndividualGA {
     double getFitness() const;
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
+            rnd = other.rnd;
             genotype = other.genotype;
+            simulatedEvents = other.simulatedEvents;
+            fitness = other.fitness;
             numDepots = other.numDepots;
             numAmbulances = other.numAmbulances;
-            fitness = other.fitness;
+            numTimeSegments = other.numTimeSegments;
             mutationProbability = other.mutationProbability;
+            dayShift = other.dayShift;
             child = other.child;
         }
         return *this;

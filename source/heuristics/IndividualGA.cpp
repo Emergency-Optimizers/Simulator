@@ -13,6 +13,7 @@
 #include "simulator/Simulator.hpp"
 #include "file-reader/Stations.hpp"
 #include "file-reader/Settings.hpp"
+#include "heuristics/GenotypeInitType.hpp"
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
@@ -23,28 +24,54 @@ IndividualGA::IndividualGA(
     const bool dayShift,
     bool child
 ) : rnd(rnd),
-    genotype(numTimeSegments,
-    std::vector<int>(numDepots, 0)),
     numDepots(numDepots),
     numAmbulances(numAmbulances),
     numTimeSegments(numTimeSegments),
-    fitness(0.0),
     mutationProbability(mutationProbability),
     dayShift(dayShift),
     child(child) {
+    // generate genotype
     if (!child) {
-        randomizeAmbulances();
+        generateGenotype();
+    } else {
+        emptyGenotype();
     }
 }
 
-void IndividualGA::randomizeAmbulances() {
-    for (auto& segment : genotype) {
-        std::fill(segment.begin(), segment.end(), 0);
+void IndividualGA::generateGenotype() {
+    // reset genotype
+    emptyGenotype();
+
+    // contains the init types and their weights, add new ones here
+    std::vector<GenotypeInitType> initTypes = {
+        GenotypeInitType::RANDOM,
+    };
+
+    std::vector<double> initTypeWeights = {
+        Settings::get<double>("GENOTYPE_INIT_RANDOM"),
+    };
+
+    // get random init from weights
+    int initTypeIndex = weightedLottery(rnd, initTypeWeights, {});
+
+    std::cout << "\nINDEX: " << initTypeIndex << " ";
+
+    switch (initTypes[initTypeIndex]) {
+        case GenotypeInitType::RANDOM:
+            randomGenotype();
+            break;
     }
-    for (int t = 0; t < numTimeSegments; ++t) {
-        for (int i = 0; i < numAmbulances; ++i) {
+}
+
+void IndividualGA::emptyGenotype() {
+    genotype = std::vector<std::vector<int>>(numTimeSegments, std::vector<int>(numDepots, 0));
+}
+
+void IndividualGA::randomGenotype() {
+    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
+        for (int i = 0; i < numAmbulances; i++) {
             int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
-            genotype[t][depotIndex]++;
+            genotype[allocationIndex][depotIndex]++;
         }
     }
 }

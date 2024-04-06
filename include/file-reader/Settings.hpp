@@ -40,7 +40,8 @@ class Settings {
         {"CROSSOVER_PROBABILITY", &toFloat},
         {"SEED", &toInt},
         {"SIMULATE_1_HOUR_BEFORE", &toBool},
-        {"CROSSOVER", &toCrossoverType}
+        {"CROSSOVER", &toCrossoverType},
+        {"GENOTYPE_INIT_RANDOM", &toDouble}
     };
 
  public:
