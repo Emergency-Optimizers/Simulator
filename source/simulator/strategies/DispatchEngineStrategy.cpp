@@ -10,7 +10,7 @@
 #include "file-reader/ODMatrix.hpp"
 
 void DispatchEngineStrategy::assigningAmbulance(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -19,7 +19,7 @@ void DispatchEngineStrategy::assigningAmbulance(
 }
 
 void DispatchEngineStrategy::dispatchingToScene(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -52,7 +52,7 @@ void DispatchEngineStrategy::dispatchingToScene(
 }
 
 void DispatchEngineStrategy::dispatchingToHospital(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -61,7 +61,7 @@ void DispatchEngineStrategy::dispatchingToHospital(
 }
 
 void DispatchEngineStrategy::dispatchingToDepot(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -84,7 +84,7 @@ void DispatchEngineStrategy::dispatchingToDepot(
 }
 
 void DispatchEngineStrategy::finishingEvent(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -119,7 +119,7 @@ void DispatchEngineStrategy::finishingEvent(
 }
 
 void DispatchEngineStrategy::reallocating(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex

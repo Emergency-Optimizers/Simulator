@@ -21,14 +21,12 @@ IndividualGA::IndividualGA(
     int numAmbulances,
     int numTimeSegments,
     double mutationProbability,
-    const bool dayShift,
     bool child
 ) : rnd(rnd),
     numDepots(numDepots),
     numAmbulances(numAmbulances),
     numTimeSegments(numTimeSegments),
     mutationProbability(mutationProbability),
-    dayShift(dayShift),
     child(child) {
     // generate genotype
     if (!child) {
@@ -107,7 +105,7 @@ void IndividualGA::evenGenotype() {
     }
 }
 
-void IndividualGA::evaluateFitness(std::vector<Event> events) {
+void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift) {
     // allocate ambulances based on genotype
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
@@ -123,19 +121,12 @@ void IndividualGA::evaluateFitness(std::vector<Event> events) {
     simulatedEvents = simulator.run();
     simulatedAmbulances = ambulanceAllocator.ambulances;
 
-    updateFitness();
+    // update the metrics (fitness, rank, etc.)
+    updateMetrics();
 }
 
-void IndividualGA::updateFitness() {
+void IndividualGA::updateMetrics() {
     fitness = averageResponseTime(simulatedEvents, "A", true);
-}
-
-bool IndividualGA::isValid() const {
-    for (const auto& segment : genotype) {
-        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
-        if (totalAmbulances != numAmbulances) return false;
-    }
-    return true;
 }
 
 void IndividualGA::mutate() {
@@ -183,6 +174,17 @@ void IndividualGA::repair() {
     }
 }
 
+bool IndividualGA::isValid() const {
+    for (const auto& segment : genotype) {
+        // sum all ambulances allocated for segment and verify it
+        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
+
+        if (totalAmbulances != numAmbulances) return false;
+    }
+
+    return true;
+}
+
 void IndividualGA::printGenotype() const {
     std::cout << "Genotype: " << std::endl;
 
@@ -195,24 +197,4 @@ void IndividualGA::printGenotype() const {
 
         std::cout << std::endl;
     }
-}
-
-const std::vector<std::vector<int>>& IndividualGA::getGenotype() const {
-    return genotype;
-}
-
-void IndividualGA::setGenotype(const std::vector<std::vector<int>> newGenotype) {
-    genotype = newGenotype;
-}
-
-double IndividualGA::getFitness() const {
-    return fitness;
-}
-
-std::vector<Event> IndividualGA::getSimulatedEvents() const {
-    return simulatedEvents;
-}
-
-std::vector<Ambulance> IndividualGA::getSimulatedAmbulances() const {
-    return simulatedAmbulances;
 }

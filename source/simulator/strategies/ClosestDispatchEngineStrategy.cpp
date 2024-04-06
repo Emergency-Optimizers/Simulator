@@ -16,35 +16,35 @@
 #include "file-reader/ODMatrix.hpp"
 
 void ClosestDispatchEngineStrategy::run(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
-            assigningAmbulance(rng, ambulances, events, eventIndex);
+            assigningAmbulance(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
-            dispatchingToScene(rng, ambulances, events, eventIndex);
+            dispatchingToScene(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_HOSPITAL:
-            dispatchingToHospital(rng, ambulances, events, eventIndex);
+            dispatchingToHospital(rnd, ambulances, events, eventIndex);
             break;
         case EventType::PREPARING_DISPATCH_TO_DEPOT:
-            dispatchingToDepot(rng, ambulances, events, eventIndex);
+            dispatchingToDepot(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_DEPOT:
-            finishingEvent(rng, ambulances, events, eventIndex);
+            finishingEvent(rnd, ambulances, events, eventIndex);
             break;
         case EventType::REALLOCATE:
-            reallocating(rng, ambulances, events, eventIndex);
+            reallocating(rnd, ambulances, events, eventIndex);
             break;
     }
 }
 
 void ClosestDispatchEngineStrategy::assigningAmbulance(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -143,7 +143,7 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
 }
 
 void ClosestDispatchEngineStrategy::dispatchingToHospital(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -195,7 +195,7 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
 }
 
 void ClosestDispatchEngineStrategy::reallocating(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex

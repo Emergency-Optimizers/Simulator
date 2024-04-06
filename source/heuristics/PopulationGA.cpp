@@ -38,7 +38,7 @@ PopulationGA::PopulationGA(
     events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
-        IndividualGA individual = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, false);
+        IndividualGA individual = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, false);
         individuals.push_back(individual);
     }
 
@@ -47,7 +47,7 @@ PopulationGA::PopulationGA(
 
 void PopulationGA::evaluateFitness() {
     for (IndividualGA& individual : individuals) {
-        individual.evaluateFitness(events);
+        individual.evaluate(events, dayShift);
     }
 }
 
@@ -65,7 +65,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection(int tournamentSize) {
             tournament.begin(),
             tournament.end(),
             [](const IndividualGA &a, const IndividualGA &b) {
-                return a.getFitness() > b.getFitness();
+                return a.fitness > b.fitness;
             }
         );
 
@@ -80,7 +80,7 @@ std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
     std::sort(
         individuals.begin(),
         individuals.end(),
-        [](const IndividualGA &a, const IndividualGA &b) { return a.getFitness() < b.getFitness(); }
+        [](const IndividualGA &a, const IndividualGA &b) { return a.fitness < b.fitness; }
     );
 
     std::vector<IndividualGA> survivors;
@@ -113,8 +113,8 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
 
 std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA& parent1, const IndividualGA& parent2) {
     // initialize offspring genotypes to respective parents
-    std::vector<std::vector<int>> offspring1Genotype = parent1.getGenotype();
-    std::vector<std::vector<int>> offspring2Genotype = parent2.getGenotype();
+    std::vector<std::vector<int>> offspring1Genotype = parent1.genotype;
+    std::vector<std::vector<int>> offspring2Genotype = parent2.genotype;
 
     // iterate over each time segment
     for (size_t t = 0; t < offspring1Genotype.size(); ++t) {
@@ -125,25 +125,25 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
         // perform crossover around this randomly chosen midpoint for the current time segment
         for (size_t i = 0; i < offspring1Genotype[t].size(); ++i) {
             if (i <= midpoint) {
-                offspring2Genotype[t][i] = parent1.getGenotype()[t][i];
+                offspring2Genotype[t][i] = parent1.genotype[t][i];
             } else {
-                offspring1Genotype[t][i] = parent2.getGenotype()[t][i];
+                offspring1Genotype[t][i] = parent2.genotype[t][i];
             }
         }
     }
 
-    IndividualGA offspring1 = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
-    IndividualGA offspring2 = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, true);
+    IndividualGA offspring1 = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, true);
+    IndividualGA offspring2 = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, true);
 
-    offspring1.setGenotype(offspring1Genotype);
-    offspring2.setGenotype(offspring2Genotype);
+    offspring1.genotype = offspring1Genotype;
+    offspring2.genotype = offspring2Genotype;
 
     // repair, mutate, and evaluate fitness for each offspring
     std::vector<IndividualGA> offspring = {offspring1, offspring2};
     for (auto& child : offspring) {
         child.repair();
         child.mutate();
-        child.evaluateFitness(events);
+        child.evaluate(events, dayShift);
     }
 
     return offspring;
@@ -180,8 +180,7 @@ void PopulationGA::evolve(int generations) {
 
         std::ostringstream postfix;
         postfix
-            << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.getFitness()
-            << ", Valid: " << std::setw(5) << (fittest.isValid() ? "true" : "false")
+            << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.fitness
             << ", Unique: " << std::setw(std::to_string(populationSize).size()) << countUnique();
 
         progressBar.update(gen + 1, postfix.str());
@@ -191,11 +190,11 @@ void PopulationGA::evolve(int generations) {
     IndividualGA finalIndividual = findFittest();
 
     // write metrics to file
-    writeMetrics(finalIndividual.getSimulatedEvents());
+    writeMetrics(finalIndividual.simulatedEvents);
 
-    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype());
+    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.genotype);
 
-    printAmbulanceWorkload(finalIndividual.getSimulatedAmbulances());
+    printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }
 
 int PopulationGA::countUnique() {
@@ -204,7 +203,7 @@ int PopulationGA::countUnique() {
 
     for (const auto& individual : individuals) {
         std::ostringstream genotypeStream;
-        for (const auto& segment : individual.getGenotype()) {
+        for (const auto& segment : individual.genotype) {
             for (const auto& depotAllocation : segment) {
                 genotypeStream << depotAllocation << ",";
             }
@@ -225,7 +224,7 @@ const IndividualGA PopulationGA::findFittest() {
         individuals.begin(),
         individuals.end(),
         [](const IndividualGA &a, const IndividualGA &b) {
-            return a.getFitness() > b.getFitness();
+            return a.fitness > b.fitness;
         }
     );
 

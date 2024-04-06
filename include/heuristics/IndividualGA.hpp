@@ -18,15 +18,10 @@
 class IndividualGA {
  private:
     std::mt19937& rnd;
-    mutable std::vector<std::vector<int>> genotype;
-    mutable std::vector<Event> simulatedEvents;
-    mutable std::vector<Ambulance> simulatedAmbulances;
-    mutable double fitness = 0.0;
     int numDepots;
     int numAmbulances;
     int numTimeSegments;
     double mutationProbability;
-    bool dayShift;
     bool child;
 
     void generateGenotype();
@@ -35,28 +30,27 @@ class IndividualGA {
     void evenGenotype();
 
  protected:
-    virtual void updateFitness();
+    virtual void updateMetrics();
 
  public:
+    double fitness = 0.0;
+    std::vector<std::vector<int>> genotype;
+    std::vector<Event> simulatedEvents;
+    std::vector<Ambulance> simulatedAmbulances;
+
     IndividualGA(
         std::mt19937& rnd,
         int numDepots,
         int numAmbulances,
         int numTimeSegments,
         double mutationProbability,
-        const bool dayShift,
-        bool child = true
+        bool child
     );
-    void evaluateFitness(std::vector<Event> events);
-    bool isValid() const;
+    void evaluate(std::vector<Event> events, const bool dayShift);
     void mutate();
     void repair();
+    bool isValid() const;
     void printGenotype() const;
-    const std::vector<std::vector<int>>& getGenotype() const;
-    void setGenotype(const std::vector<std::vector<int>> newGenotype);
-    double getFitness() const;
-    std::vector<Event> getSimulatedEvents() const;
-    std::vector<Ambulance> getSimulatedAmbulances() const;
 
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
@@ -69,7 +63,6 @@ class IndividualGA {
             numAmbulances = other.numAmbulances;
             numTimeSegments = other.numTimeSegments;
             mutationProbability = other.mutationProbability;
-            dayShift = other.dayShift;
             child = other.child;
         }
         return *this;

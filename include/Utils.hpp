@@ -101,8 +101,8 @@ int findIndex(const std::vector<T>& vec, const T& value) {
 }
 
 template <typename T>
-T getRandomElement(std::mt19937& rng, const std::vector<T>& vec) {
+T getRandomElement(std::mt19937& rnd, const std::vector<T>& vec) {
     std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
 
-    return vec[rndBetween(rng)];
+    return vec[rndBetween(rnd)];
 }

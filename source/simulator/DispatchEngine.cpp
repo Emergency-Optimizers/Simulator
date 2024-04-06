@@ -11,7 +11,7 @@
 
 void DispatchEngine::dispatch(
     const DispatchEngineStrategyType strategy,
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -19,7 +19,7 @@ void DispatchEngine::dispatch(
     switch (strategy) {
         case DispatchEngineStrategyType::CLOSEST:
             ClosestDispatchEngineStrategy::run(
-                rng,
+                rnd,
                 ambulances,
                 events,
                 eventIndex
@@ -27,7 +27,7 @@ void DispatchEngine::dispatch(
             break;
         default:
             RandomDispatchEngineStrategy::run(
-                rng,
+                rnd,
                 ambulances,
                 events,
                 eventIndex

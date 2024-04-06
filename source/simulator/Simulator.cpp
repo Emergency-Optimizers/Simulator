@@ -13,11 +13,11 @@
 #include "simulator/DispatchEngine.hpp"
 
 Simulator::Simulator(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     AmbulanceAllocator& ambulanceAllocator,
     DispatchEngineStrategyType dispatchStrategy,
     std::vector<Event> events
-) : rng(rng), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
+) : rnd(rnd), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
     eventHandler.populate(events);
 
     eventHandler.sortEvents();
@@ -29,7 +29,7 @@ std::vector<Event> Simulator::run() {
     while (eventIndex != -1) {
         DispatchEngine::dispatch(
             dispatchStrategy,
-            rng,
+            rnd,
             ambulanceAllocator.ambulances,
             eventHandler.events,
             eventIndex

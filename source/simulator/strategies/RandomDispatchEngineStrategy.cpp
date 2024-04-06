@@ -15,35 +15,35 @@
 #include "file-reader/Settings.hpp"
 
 void RandomDispatchEngineStrategy::run(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
-            assigningAmbulance(rng, ambulances, events, eventIndex);
+            assigningAmbulance(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
-            dispatchingToScene(rng, ambulances, events, eventIndex);
+            dispatchingToScene(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_HOSPITAL:
-            dispatchingToHospital(rng, ambulances, events, eventIndex);
+            dispatchingToHospital(rnd, ambulances, events, eventIndex);
             break;
         case EventType::PREPARING_DISPATCH_TO_DEPOT:
-            dispatchingToDepot(rng, ambulances, events, eventIndex);
+            dispatchingToDepot(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_DEPOT:
-            finishingEvent(rng, ambulances, events, eventIndex);
+            finishingEvent(rnd, ambulances, events, eventIndex);
             break;
         case EventType::REALLOCATE:
-            reallocating(rng, ambulances, events, eventIndex);
+            reallocating(rnd, ambulances, events, eventIndex);
             break;
     }
 }
 
 void RandomDispatchEngineStrategy::assigningAmbulance(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -56,7 +56,7 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
 
     int randomAmbulanceIndex = -1;
     while (!availableAmbulanceIndicies.empty()) {
-        int randomAvailableAmbulanceIndex = getRandomInt(rng, 0, availableAmbulanceIndicies.size() - 1);
+        int randomAvailableAmbulanceIndex = getRandomInt(rnd, 0, availableAmbulanceIndicies.size() - 1);
         randomAmbulanceIndex = availableAmbulanceIndicies[randomAvailableAmbulanceIndex];
 
         if (ambulances[randomAmbulanceIndex].assignedEventId != -1) {
@@ -112,14 +112,14 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
 }
 
 void RandomDispatchEngineStrategy::dispatchingToHospital(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
     events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
-        getRandomElement(rng, Stations::getInstance().getHospitalIndices())
+        getRandomElement(rnd, Stations::getInstance().getHospitalIndices())
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
@@ -141,7 +141,7 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
 }
 
 void RandomDispatchEngineStrategy::reallocating(
-    std::mt19937& rng,
+    std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
@@ -162,7 +162,7 @@ void RandomDispatchEngineStrategy::reallocating(
     std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
 
     // shuffle the indicies to adhere to the random strategy
-    std::shuffle(ambulanceIndices.begin(), ambulanceIndices.end(), rng);
+    std::shuffle(ambulanceIndices.begin(), ambulanceIndices.end(), rnd);
 
     // reallocate by assigning the ambulance indicies to the depot according to allocation vector
     size_t currentAmbulanceIndex = 0;
