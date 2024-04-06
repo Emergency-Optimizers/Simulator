@@ -41,12 +41,21 @@ PopulationNSGA::PopulationNSGA(
     );
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
     numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
-    numObjectives = 7; // TODO: Fix magic number
+    numObjectives = 7;
 
     events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
-        IndividualNSGA individual = IndividualNSGA(rnd, numObjectives, numDepots, numAmbulances, numTimeSegments, mutationProbability, dayShift, false);
+        IndividualNSGA individual = IndividualNSGA(
+            rnd,
+            numObjectives,
+            numDepots,
+            numAmbulances,
+            numTimeSegments,
+            mutationProbability,
+            dayShift,
+            false
+        );
         individuals.push_back(individual);
     }
 
@@ -138,9 +147,9 @@ std::vector<IndividualNSGA> PopulationNSGA::survivorSelection(int numSurvivors) 
     } else {
         // Select based on fitness
         std::sort(individuals.begin(), individuals.end(), [](const IndividualNSGA& a, const IndividualNSGA& b) {
-            return a.getFitness() < b.getFitness(); // Assuming minimizing fitness
+            return a.getFitness() < b.getFitness();  // Assuming minimizing fitness
         });
-        nextGeneration.assign(individuals.begin(), individuals.begin() + std::min(numSurvivors, (int)individuals.size()));
+        nextGeneration.assign(individuals.begin(), individuals.begin() + std::min(numSurvivors, static_cast<int>(individuals.size())));
     }
 
     return nextGeneration;
@@ -308,7 +317,7 @@ void PopulationNSGA::evolve(int generations) {
     if (!useFronts) {
         std::fill(objectiveWeights.begin(), objectiveWeights.end(), 1.0f);
     }
-    
+
     for (int gen = 0; gen < generations; ++gen) {
         // step 1: sort the population into Pareto fronts
         if (useFronts) {
@@ -325,14 +334,14 @@ void PopulationNSGA::evolve(int generations) {
         std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
         while (offspring.size() < populationSize) {
-            if (shouldCrossover(rnd) < crossoverProbability) {           
+            if (shouldCrossover(rnd) < crossoverProbability) {
                 std::vector<IndividualNSGA> parents = parentSelection(tournamentSize);
                 std::vector<IndividualNSGA> children = crossover(parents[0], parents[1]);
-                
+
                 // calculate how many children can be added without exceeding populationSize
                 size_t spaceLeft = populationSize - offspring.size();
                 size_t childrenToAdd = std::min(children.size(), spaceLeft);
-                
+
                 // add children directly to offspring, ensuring not to exceed populationSize
                 offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
             }
@@ -350,10 +359,12 @@ void PopulationNSGA::evolve(int generations) {
     if (useFronts) {
         fastNonDominatedSort();  // Re-sort combined population
     }
+
+    // get best individual
     IndividualNSGA finalIndividual = findFittest();
 
-    bool saveMetricsToFile = true;
-    finalIndividual.evaluateObjectives(events, objectiveWeights, saveMetricsToFile);
+    // write metrics to file
+    writeMetrics(finalIndividual.getSimulatedEvents());
 
     printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype());
 

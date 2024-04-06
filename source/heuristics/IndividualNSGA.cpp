@@ -62,7 +62,7 @@ bool IndividualNSGA::isValid() const {
     return true;
 }
 
-void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<float> objectiveWeights, bool saveMetricsToFile) {
+void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<float> objectiveWeights) {
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
@@ -73,7 +73,7 @@ void IndividualNSGA::evaluateObjectives(std::vector<Event> events, std::vector<f
         events
     );
 
-    simulatedEvents = simulator.run(saveMetricsToFile);
+    simulatedEvents = simulator.run();
 
     objectives[0] = objectiveWeights[0] * averageResponseTime(simulatedEvents, "A", true);
     objectives[1] = objectiveWeights[1] * averageResponseTime(simulatedEvents, "A", false);
@@ -239,4 +239,8 @@ void IndividualNSGA::nowDominates(IndividualNSGA* dominatedIndividual) {
 
 void IndividualNSGA::clearDominatedIndividuals() {
     dominatedIndividuals.clear();
+}
+
+std::vector<Event> IndividualNSGA::getSimulatedEvents() const {
+    return simulatedEvents;
 }

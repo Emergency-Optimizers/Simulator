@@ -23,10 +23,7 @@ Simulator::Simulator(
     eventHandler.sortEvents();
 }
 
-std::vector<Event> Simulator::run(bool saveMetricsToFile) {
-    // std::cout << "\nSimulator started. Total events to simulate: " << eventHandler.events.size() << std::endl;
-    auto start = std::chrono::steady_clock::now();
-
+std::vector<Event> Simulator::run() {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
@@ -41,14 +38,6 @@ std::vector<Event> Simulator::run(bool saveMetricsToFile) {
         eventHandler.sortEvent(eventIndex);
 
         eventIndex = eventHandler.getNextEventIndex();
-    }
-
-    auto stop = std::chrono::steady_clock::now();
-    std::chrono::duration<double> duration = stop - start;
-    // std::cout << "\nSimulator finished. Time taken by process: " << duration.count() << " seconds" << std::endl;
-
-    if (saveMetricsToFile) {
-        writeMetrics(eventHandler.events);
     }
 
     return eventHandler.events;

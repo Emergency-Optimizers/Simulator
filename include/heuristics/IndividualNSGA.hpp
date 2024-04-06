@@ -46,7 +46,7 @@ class IndividualNSGA {
     );
     void randomizeAmbulances();
     bool isValid() const;
-    void evaluateObjectives(std::vector<Event> events, const std::vector<float> objectiveWeights, bool saveMetricsToFile = false);
+    void evaluateObjectives(std::vector<Event> events, const std::vector<float> objectiveWeights);
     void evaluateFitness();
     double calculateMinimizeMaxDepotObjective();
     double calculateUniformityObjective();
@@ -79,6 +79,8 @@ class IndividualNSGA {
     const std::vector<IndividualNSGA*>& getDominatedIndividuals() const;
     void nowDominates(IndividualNSGA* dominatedIndividual);
     void clearDominatedIndividuals();
+    std::vector<Event> getSimulatedEvents() const;
+
     IndividualNSGA& IndividualNSGA::operator=(const IndividualNSGA& other) {
         if (this != &other) {
             genotype = other.genotype;

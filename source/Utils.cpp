@@ -675,3 +675,26 @@ void printTimeSegmentedAllocationTable(
         std::cout << "|" << std::setw(6) << calculateFitnessForSegment(d) << "\n";
     }
 }
+
+void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {
+    int totalHours = 0;
+    std::vector<int> times;
+
+    std::cout << std::endl;
+
+    for (int i = 0; i < ambulances.size(); i++) {
+        totalHours += (ambulances[i].timeUnavailable / 60) / 60;
+        times.push_back(ambulances[i].timeUnavailable);
+
+        std::cout
+            << "Ambulance " << i << ": "
+            << "Working: " << (ambulances[i].timeUnavailable / 60) / 60 << " hours"
+            << ", Break: " << (ambulances[i].timeNotWorking / 60) / 60 << " hours"
+            << std::endl;
+    }
+
+    std::cout
+        << "Total: " << totalHours << " hours, "
+        << "Standard deviation: " << calculateStandardDeviation(times)
+        << std::endl;
+}

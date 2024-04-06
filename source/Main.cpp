@@ -96,7 +96,10 @@ int main() {
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
             events
         );
-        std::vector<Event> simulatedEvents = simulator.run(true);
+        std::vector<Event> simulatedEvents = simulator.run();
+
+        // write metrics to file
+        writeMetrics(simulatedEvents);
 
         // print metrics
         double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);

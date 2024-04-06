@@ -107,17 +107,7 @@ void IndividualGA::evenGenotype() {
     }
 }
 
-bool IndividualGA::isValid() const {
-    for (const auto& segment : genotype) {
-        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
-        if (totalAmbulances != numAmbulances) return false;
-    }
-    return true;
-}
-
-void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsToFile) {
-    fitness = 0.0;
-
+void IndividualGA::evaluateFitness(std::vector<Event> events) {
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
@@ -128,28 +118,18 @@ void IndividualGA::evaluateFitness(std::vector<Event> events, bool saveMetricsTo
         events
     );
 
-    simulatedEvents = simulator.run(saveMetricsToFile);
+    simulatedEvents = simulator.run();
+    simulatedAmbulances = ambulanceAllocator.ambulances;
 
     fitness = averageResponseTime(simulatedEvents, "A", true);
+}
 
-    if (saveMetricsToFile) {
-        int totalHours = 0;
-        std::vector<int> times;
-        std::cout << std::endl;
-        for (int i = 0; i < ambulanceAllocator.ambulances.size(); i++) {
-            totalHours += (ambulanceAllocator.ambulances[i].timeUnavailable / 60) / 60;
-            times.push_back(ambulanceAllocator.ambulances[i].timeUnavailable);
-            std::cout
-                << "Ambulance " << i << ": "
-                << "Working: " << (ambulanceAllocator.ambulances[i].timeUnavailable / 60) / 60 << " hours"
-                << ", Break: " << (ambulanceAllocator.ambulances[i].timeNotWorking / 60) / 60 << " hours"
-                << std::endl;
-        }
-        std::cout
-            << "Total: " << totalHours << " hours, "
-            << "Standard deviation: " << calculateStandardDeviation(times)
-            << std::endl;
+bool IndividualGA::isValid() const {
+    for (const auto& segment : genotype) {
+        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
+        if (totalAmbulances != numAmbulances) return false;
     }
+    return true;
 }
 
 void IndividualGA::mutate() {
@@ -221,4 +201,12 @@ void IndividualGA::setGenotype(const std::vector<std::vector<int>> newGenotype) 
 
 double IndividualGA::getFitness() const {
     return fitness;
+}
+
+std::vector<Event> IndividualGA::getSimulatedEvents() const {
+    return simulatedEvents;
+}
+
+std::vector<Ambulance> IndividualGA::getSimulatedAmbulances() const {
+    return simulatedAmbulances;
 }

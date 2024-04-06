@@ -187,17 +187,15 @@ void PopulationGA::evolve(int generations) {
         progressBar.update(gen + 1, postfix.str());
     }
 
-    // run one last time to print metrics
+    // get best individual
     IndividualGA finalIndividual = findFittest();
-    bool saveMetricsToFile = true;
-    finalIndividual.evaluateFitness(events, saveMetricsToFile);
 
-    std::cout
-        << "Fittest IndividualGA: " << finalIndividual.getFitness()
-        << (finalIndividual.isValid() ? " [valid]\n" : " [invalid]\n")
-        << std::endl;
+    // write metrics to file
+    writeMetrics(finalIndividual.getSimulatedEvents());
 
     printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype());
+
+    printAmbulanceWorkload(finalIndividual.getSimulatedAmbulances());
 }
 
 int PopulationGA::countUnique() {

@@ -28,5 +28,5 @@ class Simulator {
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event> events
     );
-    std::vector<Event> run(bool saveMetricsToFile = false);
+    std::vector<Event> run();
 };
