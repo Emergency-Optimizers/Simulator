@@ -7,5 +7,6 @@
 #pragma once
 
 enum class GenotypeInitType {
-    RANDOM
+    RANDOM,
+    EVEN
 };

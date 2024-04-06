@@ -45,20 +45,23 @@ void IndividualGA::generateGenotype() {
     // contains the init types and their weights, add new ones here
     std::vector<GenotypeInitType> initTypes = {
         GenotypeInitType::RANDOM,
+        GenotypeInitType::EVEN,
     };
 
     std::vector<double> initTypeWeights = {
-        Settings::get<double>("GENOTYPE_INIT_RANDOM"),
+        Settings::get<double>("GENOTYPE_INIT_WEIGHT_RANDOM"),
+        Settings::get<double>("GENOTYPE_INIT_WEIGHT_EVEN"),
     };
 
     // get random init from weights
     int initTypeIndex = weightedLottery(rnd, initTypeWeights, {});
 
-    std::cout << "\nINDEX: " << initTypeIndex << " ";
-
     switch (initTypes[initTypeIndex]) {
         case GenotypeInitType::RANDOM:
             randomGenotype();
+            break;
+        case GenotypeInitType::EVEN:
+            evenGenotype();
             break;
     }
 }
@@ -71,6 +74,34 @@ void IndividualGA::randomGenotype() {
     for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
         for (int i = 0; i < numAmbulances; i++) {
             int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
+            genotype[allocationIndex][depotIndex]++;
+        }
+    }
+}
+
+void IndividualGA::evenGenotype() {
+    // calculate the base number of ambulances per depot and the remainder
+    int baseAmbulancesPerDepot = numAmbulances / numDepots;
+    int remainder = numAmbulances % numDepots;
+
+    // create a vector of depot indices
+    std::vector<int> depotIndices(numDepots);
+    for (int i = 0; i < numDepots; i++) {
+        depotIndices[i] = i;
+    }
+
+    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
+        // distribute the base number of ambulances to each depot
+        for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+            genotype[allocationIndex][depotIndex] = baseAmbulancesPerDepot;
+        }
+
+        // shuffle the depot indices to randomize which depots get the remainder ambulances
+        std::shuffle(depotIndices.begin(), depotIndices.end(), rnd);
+
+        // evenly and randomly distribute the remainder ambulances to the depots
+        for (int remainderIndex = 0; remainderIndex < remainder; remainderIndex++) {
+            int depotIndex = depotIndices[remainderIndex];
             genotype[allocationIndex][depotIndex]++;
         }
     }
@@ -174,6 +205,17 @@ void IndividualGA::printChromosome() const {
             std::cout << "  Depot " << Stations::getInstance().get<std::string>("name", depotIndices[d])
                       << ": " << genotype[t][d] << " ambulances\n";
         }
+    }
+}
+
+void IndividualGA::printGenotype() const {
+    std::cout << "Genotype allocation:" << std::endl;
+    for (int timeSegment = 0; timeSegment < numTimeSegments; ++timeSegment) {
+        std::cout << "Time Segment " << timeSegment << ": ";
+        for (int depot = 0; depot < numDepots; ++depot) {
+            std::cout << genotype[timeSegment][depot] << " ";
+        }
+        std::cout << std::endl;
     }
 }
 
