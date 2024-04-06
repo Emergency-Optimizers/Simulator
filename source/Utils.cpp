@@ -244,6 +244,14 @@ int weightedLottery(
     const std::vector<double>& weights,
     const std::vector<std::pair<int, int>>& ranges
 ) {
+    if (weights.empty()) {
+        return -1;
+    }
+
+    if (weights.size() == 1) {
+        return 0;
+    }
+
     std::vector<double> adjustedWeights;
 
     if (ranges.empty()) {

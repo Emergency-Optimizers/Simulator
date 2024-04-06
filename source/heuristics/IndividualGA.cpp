@@ -6,6 +6,7 @@
 
 /* external libraries */
 #include <iomanip>
+#include <numeric>
 /* internal libraries */
 #include "heuristics/IndividualGA.hpp"
 #include "Utils.hpp"
@@ -14,6 +15,7 @@
 #include "file-reader/Stations.hpp"
 #include "file-reader/Settings.hpp"
 #include "heuristics/GenotypeInitType.hpp"
+#include "heuristics/MutationType.hpp"
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
@@ -130,25 +132,63 @@ void IndividualGA::updateMetrics() {
 }
 
 void IndividualGA::mutate() {
-    std::uniform_real_distribution<> probDist(0.0, 1.0);
-    std::uniform_int_distribution<> depotDist(0, numDepots - 1);
+    // contains the init types and their weights, add new ones here
+    std::vector<MutationType> types = {
+        MutationType::REDISTRIBUTE,
+    };
+
+    std::vector<double> weights = {
+        Settings::get<double>("MUTATION_WEIGHT_REDISTRIBUTE"),
+    };
+
+    // get random init from weights
+    int typeIndex = weightedLottery(rnd, weights, {});
+
+    switch (types[typeIndex]) {
+        case MutationType::REDISTRIBUTE:
+            redistributeMutation();
+            break;
+    }
+}
+
+void IndividualGA::redistributeMutation() {
+    // TODO(sindre0830): this mutation used to check the mutationProbability against each depot in the segment
+    // until it could mutate, then it would go to next segment, this is an alternative way. Check if we should revert.
+    double cumulativeMutationProbability = mutationProbability * (static_cast<double>(numDepots) / 2.0);
+
+    // fill a vector of possible depot indices
+    std::vector<int> depotIndices(numDepots);
+    std::iota(depotIndices.begin(), depotIndices.end(), 0);
 
     for (auto& segment : genotype) {
-        for (int depot = 0; depot < segment.size(); ++depot) {
-            if (probDist(rnd) < mutationProbability && segment[depot] > 0) {
-                int otherDepot = depotDist(rnd);
-                while (otherDepot == depot) {
-                    otherDepot = depotDist(rnd);
-                }
-
-                segment[depot]--;
-                segment[otherDepot]++;
-            }
+        // check if segment should be mutated
+        if (getRandomProbability(rnd) > cumulativeMutationProbability) {
+            continue;
         }
+
+        // randomly select a depot index for potential mutation and check if it contains any resources
+        int depotIndex = getRandomInt(rnd, 0, numDepots  - 1);
+
+        if (segment[depotIndex] <= 0) {
+            continue;
+        }
+
+        // remove the selected depot index from pool of available target depot indices
+        std::vector<int> potentialTargetDepotIndices = depotIndices;
+
+        potentialTargetDepotIndices.erase(potentialTargetDepotIndices.begin() + depotIndex);
+
+        // randomly select a target depot index
+        int targetDepotIndex = getRandomElement<int>(rnd, potentialTargetDepotIndices);
+
+        // perform the redistribution
+        segment[depotIndex]--;
+        segment[targetDepotIndex]++;
     }
 
+    // check if genotype is valid after mutation
     if (!isValid()) {
-        throw std::runtime_error("Total number of ambulances changed during mutation.");
+        throw std::runtime_error("Total number of ambulances changed during redistribute mutation.");
     }
 }
 

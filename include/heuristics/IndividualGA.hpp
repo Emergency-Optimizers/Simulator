@@ -28,6 +28,7 @@ class IndividualGA {
     void emptyGenotype();
     void randomGenotype();
     void evenGenotype();
+    void redistributeMutation();
 
  protected:
     virtual void updateMetrics();
