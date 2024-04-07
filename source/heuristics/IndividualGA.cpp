@@ -107,7 +107,7 @@ void IndividualGA::evenGenotype() {
     }
 }
 
-void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift) {
+void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy) {
     // allocate ambulances based on genotype
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
@@ -116,7 +116,7 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift) {
     Simulator simulator(
         rnd,
         ambulanceAllocator,
-        Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
+        dispatchStrategy,
         events
     );
 
@@ -197,7 +197,7 @@ void IndividualGA::repair() {
         int totalAmbulancesInSegment = std::accumulate(segment.begin(), segment.end(), 0);
 
         while (totalAmbulancesInSegment != numAmbulances) {
-            int depotIndex = std::uniform_int_distribution<>(0, numDepots - 1)(rnd);
+            int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
 
             if (totalAmbulancesInSegment < numAmbulances) {
                 segment[depotIndex]++;

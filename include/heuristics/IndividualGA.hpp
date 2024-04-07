@@ -47,7 +47,7 @@ class IndividualGA {
         double mutationProbability,
         bool child
     );
-    void evaluate(std::vector<Event> events, const bool dayShift);
+    void evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy);
     void mutate();
     void repair();
     bool isValid() const;
@@ -56,16 +56,17 @@ class IndividualGA {
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
             rnd = other.rnd;
-            genotype = other.genotype;
-            simulatedEvents = other.simulatedEvents;
-            simulatedAmbulances = other.simulatedAmbulances;
-            fitness = other.fitness;
             numDepots = other.numDepots;
             numAmbulances = other.numAmbulances;
             numTimeSegments = other.numTimeSegments;
             mutationProbability = other.mutationProbability;
             child = other.child;
+            fitness = other.fitness;
+            genotype = other.genotype;
+            simulatedEvents = other.simulatedEvents;
+            simulatedAmbulances = other.simulatedAmbulances;
         }
+
         return *this;
     }
 };

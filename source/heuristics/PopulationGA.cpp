@@ -47,7 +47,7 @@ PopulationGA::PopulationGA(
 
 void PopulationGA::evaluateFitness() {
     for (IndividualGA& individual : individuals) {
-        individual.evaluate(events, dayShift);
+        individual.evaluate(events, dayShift, Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"));
     }
 }
 
@@ -143,7 +143,7 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
     for (auto& child : offspring) {
         child.repair();
         child.mutate();
-        child.evaluate(events, dayShift);
+        child.evaluate(events, dayShift, Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"));
     }
 
     return offspring;
