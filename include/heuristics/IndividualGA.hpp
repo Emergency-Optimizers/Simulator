@@ -8,12 +8,12 @@
 
 /* external libraries */
 #include <vector>
-#include <iostream>
 #include <numeric>
 #include <random>
 /* internal libraries */
-#include "file-reader/Incidents.hpp"
 #include "simulator/Event.hpp"
+#include "simulator/Ambulance.hpp"
+#include "simulator/strategies/DispatchEngineStrategyType.hpp"
 
 class IndividualGA {
  private:

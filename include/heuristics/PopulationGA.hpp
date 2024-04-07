@@ -8,7 +8,6 @@
 
 /* external libraries */
 #include <vector>
-#include <iostream>
 #include <numeric>
 #include <random>
 /* internal libraries */

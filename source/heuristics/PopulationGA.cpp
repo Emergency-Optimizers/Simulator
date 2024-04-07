@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <iostream>
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
