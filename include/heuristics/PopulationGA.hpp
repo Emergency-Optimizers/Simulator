@@ -17,6 +17,7 @@
 #include "file-reader/ODMatrix.hpp"
 #include "simulator/Event.hpp"
 #include "heuristics/GenotypeInitType.hpp"
+#include "heuristics/MutationType.hpp"
 
 class PopulationGA {
  private:
@@ -33,8 +34,11 @@ class PopulationGA {
     std::vector<IndividualGA> individuals;
     std::vector<GenotypeInitType> genotypeInitTypes;
     std::vector<double> genotypeInitTypeWeights;
+    std::vector<MutationType> mutationTypes;
+    std::vector<double> mutationTypeWeights;
 
     void getPossibleGenotypeInits();
+    void getPossibleMutations();
 
  public:
     PopulationGA::PopulationGA(

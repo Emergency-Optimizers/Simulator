@@ -14,7 +14,6 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "file-reader/Settings.hpp"
-#include "heuristics/MutationType.hpp"
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
@@ -124,20 +123,13 @@ void IndividualGA::updateMetrics() {
     fitness = averageResponseTime(simulatedEvents, "A", true);
 }
 
-void IndividualGA::mutate() {
-    // contains the init types and their weights, add new ones here
-    std::vector<MutationType> types = {
-        MutationType::REDISTRIBUTE,
-    };
+void IndividualGA::mutate(
+    const std::vector<MutationType>& mutations,
+    const std::vector<double>& weights
+) {
+    int mutationIndex = weightedLottery(rnd, weights, {});
 
-    std::vector<double> weights = {
-        Settings::get<double>("MUTATION_WEIGHT_REDISTRIBUTE"),
-    };
-
-    // get random init from weights
-    int typeIndex = weightedLottery(rnd, weights, {});
-
-    switch (types[typeIndex]) {
+    switch (mutations[mutationIndex]) {
         case MutationType::REDISTRIBUTE:
             redistributeMutation();
             break;

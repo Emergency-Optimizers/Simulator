@@ -39,6 +39,7 @@ PopulationGA::PopulationGA(
     numTimeSegments(numTimeSegments) {
     // generate list of possible genotype inits, mutations, crossovers
     getPossibleGenotypeInits();
+    getPossibleMutations();
 
     // generate initial generation of individuals
     const bool child = false;
@@ -82,6 +83,26 @@ void PopulationGA::getPossibleGenotypeInits() {
     // check if valid
     if (genotypeInitTypes.empty()) {
         throwError("No applicable genotype init types.");
+    }
+}
+
+void PopulationGA::getPossibleMutations() {
+    // clear lists
+    mutationTypes.clear();
+    mutationTypeWeights.clear();
+
+    // add types and weights if applicable
+    double weight = 0.0;
+
+    weight = Settings::get<double>("MUTATION_WEIGHT_REDISTRIBUTE");
+    if (weight > 0.0) {
+        mutationTypes.push_back(MutationType::REDISTRIBUTE);
+        mutationTypeWeights.push_back(weight);
+    }
+
+    // check if valid
+    if (mutationTypes.empty()) {
+        throwError("No applicable mutation types.");
     }
 }
 
@@ -202,7 +223,7 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
     std::vector<IndividualGA> offspring = {offspring1, offspring2};
     for (auto& child : offspring) {
         child.repair();
-        child.mutate();
+        child.mutate(mutationTypes, mutationTypeWeights);
         child.evaluate(events, dayShift, dispatchStrategy);
     }
 
