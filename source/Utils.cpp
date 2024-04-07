@@ -706,3 +706,10 @@ void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {
         << "Standard deviation: " << calculateStandardDeviation(times)
         << std::endl;
 }
+
+void throwError(const std::string& msg) {
+    std::cerr << std::endl << "Error: " << msg << std::endl;
+
+    // exit program gracefully (call destructors)
+    std::exit(0);
+}
