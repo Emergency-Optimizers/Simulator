@@ -52,10 +52,13 @@ int main() {
         PopulationGA population(
             rnd,
             events,
+            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
+            Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
+            Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY"),
+            Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT"),
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
             Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));

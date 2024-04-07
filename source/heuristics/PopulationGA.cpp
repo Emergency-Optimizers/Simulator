@@ -18,25 +18,36 @@
 
 PopulationGA::PopulationGA(
     std::mt19937& rnd,
-    std::vector<Event>& events,
-    int populationSize,
-    double mutationProbability,
-    double crossoverProbability,
+    const std::vector<Event>& events,
     const bool dayShift,
-    int numTimeSegments
+    const DispatchEngineStrategyType dispatchStrategy,
+    const int numAmbulancesDuringDay,
+    const int numAmbulancesDuringNight,
+    const int populationSize,
+    const double mutationProbability,
+    const double crossoverProbability,
+    const int numTimeSegments
 ) : rnd(rnd),
     events(events),
+    dayShift(dayShift),
+    dispatchStrategy(dispatchStrategy),
     populationSize(populationSize),
+    numDepots(Stations::getInstance().getDepotIndices(dayShift).size()),
+    numAmbulances(dayShift ? numAmbulancesDuringDay : numAmbulancesDuringNight),
     mutationProbability(mutationProbability),
     crossoverProbability(crossoverProbability),
-    dayShift(dayShift),
     numTimeSegments(numTimeSegments) {
     // generate initial generation of individuals
-    numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
-    numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
-
+    const bool child = false;
     for (int i = 0; i < populationSize; i++) {
-        IndividualGA individual = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, false);
+        IndividualGA individual = IndividualGA(
+            rnd,
+            numDepots,
+            numAmbulances,
+            numTimeSegments,
+            mutationProbability,
+            child
+        );
         individuals.push_back(individual);
     }
 
@@ -45,7 +56,7 @@ PopulationGA::PopulationGA(
 
 void PopulationGA::evaluateFitness() {
     for (IndividualGA& individual : individuals) {
-        individual.evaluate(events, dayShift, Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"));
+        individual.evaluate(events, dayShift, dispatchStrategy);
     }
 }
 
@@ -141,7 +152,7 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
     for (auto& child : offspring) {
         child.repair();
         child.mutate();
-        child.evaluate(events, dayShift, Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"));
+        child.evaluate(events, dayShift, dispatchStrategy);
     }
 
     return offspring;

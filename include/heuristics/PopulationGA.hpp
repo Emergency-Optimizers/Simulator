@@ -21,24 +21,28 @@ class PopulationGA {
  private:
     std::mt19937& rnd;
     const std::vector<Event>& events;
-    std::vector<IndividualGA> individuals;
-    int populationSize;
-    int numDepots;
-    int numAmbulances;
-    double mutationProbability;
-    double crossoverProbability;
     const bool dayShift;
-    int numTimeSegments;
+    const DispatchEngineStrategyType dispatchStrategy;
+    const int populationSize;
+    const int numDepots;
+    const int numAmbulances;
+    const double mutationProbability;
+    const double crossoverProbability;
+    const int numTimeSegments;
+    std::vector<IndividualGA> individuals;
 
  public:
     PopulationGA::PopulationGA(
         std::mt19937& rnd,
-        std::vector<Event>& events,
-        int populationSize,
-        double mutationProbability,
-        double crossoverProbability,
+        const std::vector<Event>& events,
         const bool dayShift,
-        int numTimeSegments
+        const DispatchEngineStrategyType dispatchStrategy,
+        const int numAmbulancesDuringDay,
+        const int numAmbulancesDuringNight,
+        const int populationSize,
+        const double mutationProbability,
+        const double crossoverProbability,
+        const int numTimeSegments
     );
     void evaluateFitness();
     std::vector<IndividualGA> parentSelection(int tournamentSize);
