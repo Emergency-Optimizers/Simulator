@@ -10,6 +10,7 @@
 #include <vector>
 #include <numeric>
 #include <random>
+#include <string>
 /* internal libraries */
 #include "heuristics/IndividualGA.hpp"
 #include "file-reader/Incidents.hpp"
@@ -36,9 +37,21 @@ class PopulationGA {
     std::vector<double> genotypeInitTypeWeights;
     std::vector<MutationType> mutationTypes;
     std::vector<double> mutationTypeWeights;
+    const std::string progressBarPrefix = "Running GA";
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();
+    std::vector<IndividualGA> parentSelection(int tournamentSize);
+    std::vector<IndividualGA> survivorSelection(int numSurvivors);
+    std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
+    std::vector<IndividualGA> singlePointCrossover(const IndividualGA& parent1, const IndividualGA& parent2);
+    const int countUnique() const;
+    const IndividualGA getFittest() const;
+    IndividualGA createIndividual(const bool child);
+
+ protected:
+    virtual void evaluateFitness();
+    virtual const std::string getProgressBarPostfix() const;
 
  public:
     PopulationGA::PopulationGA(
@@ -53,13 +66,5 @@ class PopulationGA {
         const double crossoverProbability,
         const int numTimeSegments
     );
-    void evaluateFitness();
-    std::vector<IndividualGA> parentSelection(int tournamentSize);
-    std::vector<IndividualGA> survivorSelection(int numSurvivors);
-    void addChildren(const std::vector<IndividualGA>& children);
-    std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2);
-    std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA& parent1, const IndividualGA& parent2);
     void evolve(int generations);
-    int PopulationGA::countUnique();
-    const IndividualGA findFittest();
 };

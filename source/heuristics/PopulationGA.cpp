@@ -44,20 +44,54 @@ PopulationGA::PopulationGA(
     // generate initial generation of individuals
     const bool child = false;
     for (int i = 0; i < populationSize; i++) {
-        IndividualGA individual = IndividualGA(
-            rnd,
-            numDepots,
-            numAmbulances,
-            numTimeSegments,
-            mutationProbability,
-            child,
-            genotypeInitTypes,
-            genotypeInitTypeWeights
-        );
-        individuals.push_back(individual);
+        individuals.push_back(createIndividual(child));
     }
 
     evaluateFitness();
+}
+
+void PopulationGA::evolve(int generations) {
+    ProgressBar progressBar(generations, progressBarPrefix);
+
+    for (int gen = 0; gen < generations; gen++) {
+        // step 1: parent selection
+        std::vector<IndividualGA> offspring;
+        int tournamentSize = 3;
+        std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
+
+        while (offspring.size() < populationSize) {
+            if (shouldCrossover(rnd) < crossoverProbability) {
+                std::vector<IndividualGA> parents = parentSelection(tournamentSize);
+                std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
+
+                // calculate how many children can be added without exceeding populationSize
+                size_t spaceLeft = populationSize - offspring.size();
+                size_t childrenToAdd = std::min(children.size(), spaceLeft);
+
+                // add children directly to offspring, ensuring not to exceed populationSize
+                offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
+            }
+        }
+        // step 3: survivor selection
+        // combining existing population with children
+        for (int i = 0; i < offspring.size(); i++) {
+            individuals.push_back(offspring[i]);
+        }
+        individuals = survivorSelection(populationSize);
+
+        // update progress bar
+        progressBar.update(gen + 1, getProgressBarPostfix());
+    }
+
+    // get best individual
+    IndividualGA finalIndividual = getFittest();
+
+    // write metrics to file
+    writeMetrics(finalIndividual.simulatedEvents);
+
+    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.genotype);
+
+    printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }
 
 void PopulationGA::getPossibleGenotypeInits() {
@@ -158,10 +192,6 @@ std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
     return survivors;
 }
 
-void PopulationGA::addChildren(const std::vector<IndividualGA>& children) {
-    for (int i = 0; i < children.size(); i++) individuals.push_back(children[i]);
-}
-
 std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
     CrossoverType crossoverType = Settings::get<CrossoverType>("CROSSOVER");
     switch(crossoverType) {
@@ -195,26 +225,8 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
 
     const bool child = true;
 
-    IndividualGA offspring1 = IndividualGA(
-        rnd,
-        numDepots,
-        numAmbulances,
-        numTimeSegments,
-        mutationProbability,
-        child,
-        genotypeInitTypes,
-        genotypeInitTypeWeights
-    );
-    IndividualGA offspring2 = IndividualGA(
-        rnd,
-        numDepots,
-        numAmbulances,
-        numTimeSegments,
-        mutationProbability,
-        child,
-        genotypeInitTypes,
-        genotypeInitTypeWeights
-    );
+    IndividualGA offspring1 = createIndividual(child);
+    IndividualGA offspring2 = createIndividual(child);
 
     offspring1.genotype = offspring1Genotype;
     offspring2.genotype = offspring2Genotype;
@@ -230,55 +242,18 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
     return offspring;
 }
 
-void PopulationGA::evolve(int generations) {
-    ProgressBar progressBar(generations, "Running GA");
+const std::string PopulationGA::getProgressBarPostfix() const {
+    IndividualGA fittest = getFittest();
 
-    for (int gen = 0; gen < generations; gen++) {
-        // step 1: parent selection
-        std::vector<IndividualGA> offspring;
-        int tournamentSize = 3;
-        std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
+    std::ostringstream postfix;
+    postfix
+        << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.fitness
+        << ", Unique: " << std::setw(std::to_string(populationSize).size()) << countUnique();
 
-        while (offspring.size() < populationSize) {
-            if (shouldCrossover(rnd) < crossoverProbability) {
-                std::vector<IndividualGA> parents = parentSelection(tournamentSize);
-                std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
-
-                // calculate how many children can be added without exceeding populationSize
-                size_t spaceLeft = populationSize - offspring.size();
-                size_t childrenToAdd = std::min(children.size(), spaceLeft);
-
-                // add children directly to offspring, ensuring not to exceed populationSize
-                offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
-            }
-        }
-        // step 3: survivor selection
-        // combining existing population with children
-        addChildren(offspring);
-        individuals = survivorSelection(populationSize);
-
-        IndividualGA fittest = findFittest();
-
-        std::ostringstream postfix;
-        postfix
-            << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.fitness
-            << ", Unique: " << std::setw(std::to_string(populationSize).size()) << countUnique();
-
-        progressBar.update(gen + 1, postfix.str());
-    }
-
-    // get best individual
-    IndividualGA finalIndividual = findFittest();
-
-    // write metrics to file
-    writeMetrics(finalIndividual.simulatedEvents);
-
-    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.genotype);
-
-    printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
+    return postfix.str();
 }
 
-int PopulationGA::countUnique() {
+const int PopulationGA::countUnique() const {
     std::vector<std::string> genotypeStrings;
     genotypeStrings.reserve(individuals.size());
 
@@ -300,7 +275,7 @@ int PopulationGA::countUnique() {
     return std::distance(genotypeStrings.begin(), lastUnique);
 }
 
-const IndividualGA PopulationGA::findFittest() {
+const IndividualGA PopulationGA::getFittest() const {
     auto fittest = std::max_element(
         individuals.begin(),
         individuals.end(),
@@ -310,4 +285,19 @@ const IndividualGA PopulationGA::findFittest() {
     );
 
     return *fittest;
+}
+
+IndividualGA PopulationGA::createIndividual(const bool child) {
+    IndividualGA individual = IndividualGA(
+        rnd,
+        numDepots,
+        numAmbulances,
+        numTimeSegments,
+        mutationProbability,
+        child,
+        genotypeInitTypes,
+        genotypeInitTypeWeights
+    );
+
+    return individual;
 }
