@@ -35,10 +35,23 @@ int main() {
 
     std::mt19937 rnd(Settings::get<int>("SEED"));
 
+    // generate events
+    MonteCarloSimulator monteCarloSim(
+        rnd,
+        Settings::get<int>("SIMULATE_YEAR"),
+        Settings::get<int>("SIMULATE_MONTH"),
+        Settings::get<int>("SIMULATE_DAY"),
+        Settings::get<bool>("SIMULATE_DAY_SHIFT"),
+        Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
+    );
+    std::vector<Event> events = monteCarloSim.generateEvents();
+
+    // run heuristic
     std::string heuristic = Settings::get<std::string>("HEURISTIC");
     if (heuristic == "GA") {
         PopulationGA population(
             rnd,
+            events,
             Settings::get<int>("POPULATION_SIZE"),
             Settings::get<float>("MUTATION_PROBABILITY"),
             Settings::get<float>("CROSSOVER_PROBABILITY"),
@@ -60,17 +73,6 @@ int main() {
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
     } else if (heuristic == "NONE") {
-        // generate events
-        MonteCarloSimulator monteCarloSim(
-            rnd,
-            Settings::get<int>("SIMULATE_YEAR"),
-            Settings::get<int>("SIMULATE_MONTH"),
-            Settings::get<int>("SIMULATE_DAY"),
-            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-            Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
-        );
-        std::vector<Event> events = monteCarloSim.generateEvents();
-
         // set allocation
         std::vector<std::vector<int>> allocations;
         allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});

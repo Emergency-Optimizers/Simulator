@@ -26,7 +26,7 @@ class Simulator {
         std::mt19937& rnd,
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
-        std::vector<Event> events
+        std::vector<Event>& events
     );
     std::vector<Event> run();
 };

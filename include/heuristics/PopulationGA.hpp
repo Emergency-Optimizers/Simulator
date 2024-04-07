@@ -20,7 +20,7 @@
 class PopulationGA {
  private:
     std::mt19937& rnd;
-    std::vector<Event> events = { };
+    const std::vector<Event>& events;
     std::vector<IndividualGA> individuals;
     int populationSize;
     int numDepots;
@@ -33,6 +33,7 @@ class PopulationGA {
  public:
     PopulationGA::PopulationGA(
         std::mt19937& rnd,
+        std::vector<Event>& events,
         int populationSize,
         double mutationProbability,
         double crossoverProbability,

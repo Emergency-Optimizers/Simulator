@@ -18,25 +18,22 @@
 
 PopulationGA::PopulationGA(
     std::mt19937& rnd,
+    std::vector<Event>& events,
     int populationSize,
     double mutationProbability,
     double crossoverProbability,
     const bool dayShift,
     int numTimeSegments
-) : rnd(rnd), populationSize(populationSize), mutationProbability(mutationProbability), crossoverProbability(crossoverProbability), dayShift(dayShift), numTimeSegments(numTimeSegments) {
-    MonteCarloSimulator monteCarloSim(
-        rnd,
-        Settings::get<int>("SIMULATE_YEAR"),
-        Settings::get<int>("SIMULATE_MONTH"),
-        Settings::get<int>("SIMULATE_DAY"),
-        dayShift,
-        Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
-    );
-
+) : rnd(rnd),
+    events(events),
+    populationSize(populationSize),
+    mutationProbability(mutationProbability),
+    crossoverProbability(crossoverProbability),
+    dayShift(dayShift),
+    numTimeSegments(numTimeSegments) {
+    // generate initial generation of individuals
     numDepots = Stations::getInstance().getDepotIndices(dayShift).size();
     numAmbulances = dayShift ? Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
-
-    events = monteCarloSim.generateEvents();
 
     for (int i = 0; i < populationSize; i++) {
         IndividualGA individual = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, false);
