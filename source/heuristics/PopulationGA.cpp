@@ -42,9 +42,9 @@ PopulationGA::PopulationGA(
     getPossibleMutations();
 
     // generate initial generation of individuals
-    const bool child = false;
+    const bool isChild = false;
     for (int i = 0; i < populationSize; i++) {
-        individuals.push_back(createIndividual(child));
+        individuals.push_back(createIndividual(isChild));
     }
 
     evaluateFitness();
@@ -193,51 +193,58 @@ std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
 }
 
 std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
+    std::vector<std::vector<std::vector<int>>> offspringGenotypes;
+
     CrossoverType crossoverType = Settings::get<CrossoverType>("CROSSOVER");
     switch(crossoverType) {
         case CrossoverType::SINGLE_POINT:
-          return singlePointCrossover(parent1, parent2);
+            offspringGenotypes = singlePointCrossover(parent1.genotype, parent2.genotype);
+            break;
         default:
-           return singlePointCrossover(parent1, parent2);
+            offspringGenotypes = singlePointCrossover(parent1.genotype, parent2.genotype);
+            break;
     }
+
+    const bool isChild = true;
+    std::vector<IndividualGA> offspring;
+    for (int i = 0; i < offspringGenotypes.size(); i++) {
+        IndividualGA child = createIndividual(isChild);
+        child.genotype = offspringGenotypes[i];
+
+        child.repair();
+        child.mutate(mutationTypes, mutationTypeWeights);
+        child.evaluate(events, dayShift, dispatchStrategy);
+
+        offspring.push_back(child);
+    }
+
+    return offspring;
 }
 
-std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA& parent1, const IndividualGA& parent2) {
+std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
+    const std::vector<std::vector<int>>& parent1Genotype,
+    const std::vector<std::vector<int>>& parent2Genotype
+) {
     // initialize offspring genotypes to respective parents
-    std::vector<std::vector<int>> offspring1Genotype = parent1.genotype;
-    std::vector<std::vector<int>> offspring2Genotype = parent2.genotype;
+    std::vector<std::vector<int>> offspring1Genotype = parent1Genotype;
+    std::vector<std::vector<int>> offspring2Genotype = parent2Genotype;
 
     // iterate over each time segment
-    for (size_t t = 0; t < offspring1Genotype.size(); ++t) {
+    for (size_t t = 0; t < numTimeSegments; t++) {
         // generate random midpoint for the current time segment's allocation
-        std::uniform_int_distribution<> midpointDist(1, offspring1Genotype[t].size() - 2);
-        size_t midpoint = midpointDist(rnd);
+        size_t midpoint = getRandomInt(rnd, 1, offspring1Genotype[t].size() - 2);
 
         // perform crossover around this randomly chosen midpoint for the current time segment
-        for (size_t i = 0; i < offspring1Genotype[t].size(); ++i) {
+        for (size_t i = 0; i < numDepots; i++) {
             if (i <= midpoint) {
-                offspring2Genotype[t][i] = parent1.genotype[t][i];
+                offspring2Genotype[t][i] = parent1Genotype[t][i];
             } else {
-                offspring1Genotype[t][i] = parent2.genotype[t][i];
+                offspring1Genotype[t][i] = parent2Genotype[t][i];
             }
         }
     }
 
-    const bool child = true;
-
-    IndividualGA offspring1 = createIndividual(child);
-    IndividualGA offspring2 = createIndividual(child);
-
-    offspring1.genotype = offspring1Genotype;
-    offspring2.genotype = offspring2Genotype;
-
-    // repair, mutate, and evaluate fitness for each offspring
-    std::vector<IndividualGA> offspring = {offspring1, offspring2};
-    for (auto& child : offspring) {
-        child.repair();
-        child.mutate(mutationTypes, mutationTypeWeights);
-        child.evaluate(events, dayShift, dispatchStrategy);
-    }
+    std::vector<std::vector<std::vector<int>>> offspring = {offspring1Genotype, offspring2Genotype};
 
     return offspring;
 }

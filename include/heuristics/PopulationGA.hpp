@@ -41,17 +41,18 @@ class PopulationGA {
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();
+    void evaluateFitness();
     std::vector<IndividualGA> parentSelection(int tournamentSize);
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
     std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
-    std::vector<IndividualGA> singlePointCrossover(const IndividualGA& parent1, const IndividualGA& parent2);
+    std::vector<std::vector<std::vector<int>>> singlePointCrossover(
+        const std::vector<std::vector<int>>& parent1Genotype,
+        const std::vector<std::vector<int>>& parent2Genotype
+    );
     const int countUnique() const;
     const IndividualGA getFittest() const;
+    const std::string getProgressBarPostfix() const;
     IndividualGA createIndividual(const bool child);
-
- protected:
-    virtual void evaluateFitness();
-    virtual const std::string getProgressBarPostfix() const;
 
  public:
     PopulationGA::PopulationGA(
