@@ -16,6 +16,7 @@
 #include "file-reader/Stations.hpp"
 #include "file-reader/ODMatrix.hpp"
 #include "simulator/Event.hpp"
+#include "heuristics/GenotypeInitType.hpp"
 
 class PopulationGA {
  private:
@@ -30,6 +31,10 @@ class PopulationGA {
     const double crossoverProbability;
     const int numTimeSegments;
     std::vector<IndividualGA> individuals;
+    std::vector<GenotypeInitType> genotypeInitTypes;
+    std::vector<double> genotypeInitTypeWeights;
+
+    void getPossibleGenotypeInits();
 
  public:
     PopulationGA::PopulationGA(

@@ -14,7 +14,6 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "file-reader/Settings.hpp"
-#include "heuristics/GenotypeInitType.hpp"
 #include "heuristics/MutationType.hpp"
 
 IndividualGA::IndividualGA(
@@ -23,7 +22,9 @@ IndividualGA::IndividualGA(
     int numAmbulances,
     int numTimeSegments,
     double mutationProbability,
-    bool child
+    bool child,
+    const std::vector<GenotypeInitType>& genotypeInitTypes,
+    const std::vector<double>& genotypeInitTypeWeights
 ) : rnd(rnd),
     numDepots(numDepots),
     numAmbulances(numAmbulances),
@@ -32,26 +33,18 @@ IndividualGA::IndividualGA(
     child(child) {
     // generate genotype
     if (!child) {
-        generateGenotype();
+        generateGenotype(genotypeInitTypes, genotypeInitTypeWeights);
     } else {
         emptyGenotype();
     }
 }
 
-void IndividualGA::generateGenotype() {
+void IndividualGA::generateGenotype(
+    const std::vector<GenotypeInitType>& initTypes,
+    const std::vector<double>& initTypeWeights
+) {
     // reset genotype
     emptyGenotype();
-
-    // contains the init types and their weights, add new ones here
-    std::vector<GenotypeInitType> initTypes = {
-        GenotypeInitType::RANDOM,
-        GenotypeInitType::EVEN,
-    };
-
-    std::vector<double> initTypeWeights = {
-        Settings::get<double>("GENOTYPE_INIT_WEIGHT_RANDOM"),
-        Settings::get<double>("GENOTYPE_INIT_WEIGHT_EVEN"),
-    };
 
     // get random init from weights
     int initTypeIndex = weightedLottery(rnd, initTypeWeights, {});

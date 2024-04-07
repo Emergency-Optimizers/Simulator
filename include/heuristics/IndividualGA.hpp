@@ -14,6 +14,7 @@
 #include "simulator/Event.hpp"
 #include "simulator/Ambulance.hpp"
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
+#include "heuristics/GenotypeInitType.hpp"
 
 class IndividualGA {
  private:
@@ -24,7 +25,10 @@ class IndividualGA {
     double mutationProbability;
     bool child;
 
-    void generateGenotype();
+    void generateGenotype(
+        const std::vector<GenotypeInitType>& initTypes,
+        const std::vector<double>& initTypeWeights
+    );
     void emptyGenotype();
     void randomGenotype();
     void evenGenotype();
@@ -45,7 +49,9 @@ class IndividualGA {
         int numAmbulances,
         int numTimeSegments,
         double mutationProbability,
-        bool child
+        bool child,
+        const std::vector<GenotypeInitType>& genotypeInitTypes,
+        const std::vector<double>& genotypeInitTypeWeights
     );
     void evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy);
     void mutate();

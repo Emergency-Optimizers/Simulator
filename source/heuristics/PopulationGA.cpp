@@ -37,6 +37,9 @@ PopulationGA::PopulationGA(
     mutationProbability(mutationProbability),
     crossoverProbability(crossoverProbability),
     numTimeSegments(numTimeSegments) {
+    // generate list of possible genotype inits, mutations, crossovers
+    getPossibleGenotypeInits();
+
     // generate initial generation of individuals
     const bool child = false;
     for (int i = 0; i < populationSize; i++) {
@@ -46,12 +49,40 @@ PopulationGA::PopulationGA(
             numAmbulances,
             numTimeSegments,
             mutationProbability,
-            child
+            child,
+            genotypeInitTypes,
+            genotypeInitTypeWeights
         );
         individuals.push_back(individual);
     }
 
     evaluateFitness();
+}
+
+void PopulationGA::getPossibleGenotypeInits() {
+    // clear lists
+    genotypeInitTypes.clear();
+    genotypeInitTypeWeights.clear();
+
+    // add types and weights if applicable
+    double weight = 0.0;
+
+    weight = Settings::get<double>("GENOTYPE_INIT_WEIGHT_RANDOM");
+    if (weight > 0.0) {
+        genotypeInitTypes.push_back(GenotypeInitType::RANDOM);
+        genotypeInitTypeWeights.push_back(weight);
+    }
+
+    weight = Settings::get<double>("GENOTYPE_INIT_WEIGHT_EVEN");
+    if (weight > 0.0) {
+        genotypeInitTypes.push_back(GenotypeInitType::EVEN);
+        genotypeInitTypeWeights.push_back(weight);
+    }
+
+    // check if valid
+    if (genotypeInitTypes.empty()) {
+        throwError("No applicable genotype init types.");
+    }
 }
 
 void PopulationGA::evaluateFitness() {
@@ -141,8 +172,28 @@ std::vector<IndividualGA> PopulationGA::singlePointCrossover(const IndividualGA&
         }
     }
 
-    IndividualGA offspring1 = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, true);
-    IndividualGA offspring2 = IndividualGA(rnd, numDepots, numAmbulances, numTimeSegments, mutationProbability, true);
+    const bool child = true;
+
+    IndividualGA offspring1 = IndividualGA(
+        rnd,
+        numDepots,
+        numAmbulances,
+        numTimeSegments,
+        mutationProbability,
+        child,
+        genotypeInitTypes,
+        genotypeInitTypeWeights
+    );
+    IndividualGA offspring2 = IndividualGA(
+        rnd,
+        numDepots,
+        numAmbulances,
+        numTimeSegments,
+        mutationProbability,
+        child,
+        genotypeInitTypes,
+        genotypeInitTypeWeights
+    );
 
     offspring1.genotype = offspring1Genotype;
     offspring2.genotype = offspring2Genotype;
