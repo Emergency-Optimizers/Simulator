@@ -461,6 +461,10 @@ double getRandomDouble(std::mt19937& rnd, const double min, const double max) {
     return dist(rnd);
 }
 
+bool getRandomBool(std::mt19937& rnd) {
+    return getRandomDouble(rnd) < 0.5;
+}
+
 double calculateMean(const std::vector<int>& numbers) {
     double sum = 0.0;
 
