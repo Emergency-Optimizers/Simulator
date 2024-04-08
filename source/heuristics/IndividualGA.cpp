@@ -17,7 +17,6 @@
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
-    const double mutationProbability,
     const int numAmbulances,
     const int numAllocations,
     const int numDepots,
@@ -25,7 +24,6 @@ IndividualGA::IndividualGA(
     const std::vector<GenotypeInitType>& genotypeInits,
     const std::vector<double>& genotypeInitsTickets
 ) : rnd(rnd),
-    mutationProbability(mutationProbability),
     numAmbulances(numAmbulances),
     numAllocations(numAllocations),
     numDepots(numDepots) {
@@ -119,29 +117,47 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
     simulatedEvents = simulator.run();
     simulatedAmbulances = ambulanceAllocator.ambulances;
 
-    // update the metrics (fitness, rank, etc.)
+    // update objectives
+    objectiveAvgResponseTimeUrbanA = averageResponseTime(simulatedEvents, "A", true);
+    objectiveAvgResponseTimeUrbanH = averageResponseTime(simulatedEvents, "H", true);
+    objectiveAvgResponseTimeUrbanV1 = averageResponseTime(simulatedEvents, "V1", true);
+    objectiveAvgResponseTimeRuralA = averageResponseTime(simulatedEvents, "A", false);
+    objectiveAvgResponseTimeRuralH = averageResponseTime(simulatedEvents, "H", false);
+    objectiveAvgResponseTimeRuralV1 = averageResponseTime(simulatedEvents, "V1", false);
+    objectiveNumViolations = responseTimeViolations(simulatedEvents);
+
+    // update metrics (fitness, rank, etc.)
     updateMetrics();
-}
 
-void IndividualGA::updateMetrics() {
-    fitness = averageResponseTime(simulatedEvents, "A", true);
-
+    // mark as checked to not run simulator again
     metricsChecked = true;
 }
 
+void IndividualGA::updateMetrics() {
+    fitness = 0.0;
+    fitness += objectiveAvgResponseTimeUrbanA * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A");
+    fitness += objectiveAvgResponseTimeUrbanH * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H");
+    fitness += objectiveAvgResponseTimeUrbanV1 * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_V1");
+    fitness += objectiveAvgResponseTimeRuralA * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_A");
+    fitness += objectiveAvgResponseTimeRuralH * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H");
+    fitness += objectiveAvgResponseTimeRuralV1 * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1");
+    fitness += objectiveNumViolations * Settings::get<double>("OBJECTIVE_WEIGHT_NUM_VIOLATIONS");
+}
+
 void IndividualGA::mutate(
+    const double mutationProbability,
     const std::vector<MutationType>& mutations,
     const std::vector<double>& tickets
 ) {
     // get random mutation from tickets
     switch (mutations[weightedLottery(rnd, tickets, {})]) {
         case MutationType::REDISTRIBUTE:
-            redistributeMutation();
+            redistributeMutation(mutationProbability);
             break;
     }
 }
 
-void IndividualGA::redistributeMutation() {
+void IndividualGA::redistributeMutation(const double mutationProbability) {
     // TODO(sindre0830): this mutation used to check the mutationProbability against each depot in the segment
     // until it could mutate, then it would go to next segment, this is an alternative way. Check if we should revert.
     double cumulativeMutationProbability = mutationProbability * (static_cast<double>(genotype[0].size()) / 2.0);

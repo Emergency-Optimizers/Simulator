@@ -20,11 +20,17 @@
 class IndividualGA {
  private:
     std::mt19937& rnd;
-    double mutationProbability;
     int numAmbulances;
     int numAllocations;
     int numDepots;
     bool metricsChecked = false;
+    double objectiveAvgResponseTimeUrbanA = 0.0;
+    double objectiveAvgResponseTimeUrbanH = 0.0;
+    double objectiveAvgResponseTimeUrbanV1 = 0.0;
+    double objectiveAvgResponseTimeRuralA = 0.0;
+    double objectiveAvgResponseTimeRuralH = 0.0;
+    double objectiveAvgResponseTimeRuralV1 = 0.0;
+    double objectiveNumViolations = 0.0;
 
     void generateGenotype(
         const bool isChild,
@@ -34,7 +40,7 @@ class IndividualGA {
     void emptyGenotype();
     void randomGenotype();
     void evenGenotype();
-    void redistributeMutation();
+    void redistributeMutation(const double mutationProbability);
 
  protected:
     virtual void updateMetrics();
@@ -47,7 +53,6 @@ class IndividualGA {
 
     IndividualGA(
         std::mt19937& rnd,
-        const double mutationProbability,
         const int numAmbulances,
         const int numAllocations,
         const int numDepots,
@@ -57,6 +62,7 @@ class IndividualGA {
     );
     void evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy);
     void mutate(
+        const double mutationProbability,
         const std::vector<MutationType>& mutations,
         const std::vector<double>& tickets
     );
@@ -67,7 +73,6 @@ class IndividualGA {
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
             rnd = other.rnd;
-            mutationProbability = other.mutationProbability;
             numAmbulances = other.numAmbulances;
             numAllocations = other.numAllocations;
             numDepots = other.numDepots;

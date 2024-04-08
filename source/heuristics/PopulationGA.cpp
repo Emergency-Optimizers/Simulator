@@ -202,7 +202,7 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
         child.genotype = offspringGenotypes[i];
 
         child.repair();
-        child.mutate(mutations, mutationsTickets);
+        child.mutate(mutationProbability, mutations, mutationsTickets);
 
         offspring.push_back(child);
     }
@@ -241,7 +241,6 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
 IndividualGA PopulationGA::createIndividual(const bool child) {
     IndividualGA individual = IndividualGA(
         rnd,
-        mutationProbability,
         numAmbulances,
         numTimeSegments,
         numDepots,
