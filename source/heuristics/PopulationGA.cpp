@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <string>
 #include <iostream>
+#include <set>
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
@@ -567,23 +568,11 @@ const IndividualGA PopulationGA::getFittest() const {
 }
 
 const int PopulationGA::countUnique() const {
-    std::vector<std::string> genotypeStrings;
-    genotypeStrings.reserve(individuals.size());
+    std::set<std::vector<std::vector<int>>> uniqueGenotypes;
 
-    for (const auto& individual : individuals) {
-        std::ostringstream genotypeStream;
-        for (const auto& segment : individual.genotype) {
-            for (const auto& depotAllocation : segment) {
-                genotypeStream << depotAllocation << ",";
-            }
-            genotypeStream << ";";
-        }
-        genotypeStrings.push_back(genotypeStream.str());
+    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
+        uniqueGenotypes.insert(individuals[individualIndex].genotype);
     }
 
-    std::sort(genotypeStrings.begin(), genotypeStrings.end());
-
-    auto lastUnique = std::unique(genotypeStrings.begin(), genotypeStrings.end());
-
-    return std::distance(genotypeStrings.begin(), lastUnique);
+    return uniqueGenotypes.size();
 }
