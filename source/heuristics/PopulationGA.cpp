@@ -77,6 +77,9 @@ void PopulationGA::evolve(int generations) {
         for (int i = 0; i < offspring.size(); i++) {
             individuals.push_back(offspring[i]);
         }
+
+        evaluateFitness();
+
         individuals = survivorSelection(populationSize);
 
         // update progress bar
@@ -140,12 +143,6 @@ void PopulationGA::getPossibleMutations() {
     }
 }
 
-void PopulationGA::evaluateFitness() {
-    for (IndividualGA& individual : individuals) {
-        individual.evaluate(events, dayShift, dispatchStrategy);
-    }
-}
-
 std::vector<IndividualGA> PopulationGA::parentSelection(int tournamentSize) {
     std::vector<IndividualGA> selectedParents;
 
@@ -171,13 +168,6 @@ std::vector<IndividualGA> PopulationGA::parentSelection(int tournamentSize) {
 }
 
 std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
-    // sort the current population based on fitness in descending order
-    std::sort(
-        individuals.begin(),
-        individuals.end(),
-        [](const IndividualGA &a, const IndividualGA &b) { return a.fitness < b.fitness; }
-    );
-
     std::vector<IndividualGA> survivors;
 
     // calculate the actual number of survivors to keep, which is the minimum
@@ -213,7 +203,6 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
 
         child.repair();
         child.mutate(mutationTypes, mutationTypeWeights);
-        child.evaluate(events, dayShift, dispatchStrategy);
 
         offspring.push_back(child);
     }
@@ -249,6 +238,37 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
     return offspring;
 }
 
+IndividualGA PopulationGA::createIndividual(const bool child) {
+    IndividualGA individual = IndividualGA(
+        rnd,
+        numDepots,
+        numAmbulances,
+        numTimeSegments,
+        mutationProbability,
+        child,
+        genotypeInitTypes,
+        genotypeInitTypeWeights
+    );
+
+    return individual;
+}
+
+void PopulationGA::evaluateFitness() {
+    for (IndividualGA& individual : individuals) {
+        individual.evaluate(events, dayShift, dispatchStrategy);
+    }
+
+    sortIndividuals();
+}
+
+void PopulationGA::sortIndividuals() {
+    std::sort(
+        individuals.begin(),
+        individuals.end(),
+        [](const IndividualGA &a, const IndividualGA &b) { return a.fitness < b.fitness; }
+    );
+}
+
 const std::string PopulationGA::getProgressBarPostfix() const {
     IndividualGA fittest = getFittest();
 
@@ -258,6 +278,10 @@ const std::string PopulationGA::getProgressBarPostfix() const {
         << ", Unique: " << std::setw(std::to_string(populationSize).size()) << countUnique();
 
     return postfix.str();
+}
+
+const IndividualGA PopulationGA::getFittest() const {
+    return individuals[0];
 }
 
 const int PopulationGA::countUnique() const {
@@ -280,31 +304,4 @@ const int PopulationGA::countUnique() const {
     auto lastUnique = std::unique(genotypeStrings.begin(), genotypeStrings.end());
 
     return std::distance(genotypeStrings.begin(), lastUnique);
-}
-
-const IndividualGA PopulationGA::getFittest() const {
-    auto fittest = std::max_element(
-        individuals.begin(),
-        individuals.end(),
-        [](const IndividualGA &a, const IndividualGA &b) {
-            return a.fitness > b.fitness;
-        }
-    );
-
-    return *fittest;
-}
-
-IndividualGA PopulationGA::createIndividual(const bool child) {
-    IndividualGA individual = IndividualGA(
-        rnd,
-        numDepots,
-        numAmbulances,
-        numTimeSegments,
-        mutationProbability,
-        child,
-        genotypeInitTypes,
-        genotypeInitTypeWeights
-    );
-
-    return individual;
 }

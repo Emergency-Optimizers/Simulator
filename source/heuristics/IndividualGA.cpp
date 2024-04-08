@@ -100,6 +100,11 @@ void IndividualGA::evenGenotype() {
 }
 
 void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy) {
+    // branch if metrics is already checked
+    if (metricsChecked) {
+        return;
+    }
+
     // allocate ambulances based on genotype
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
@@ -121,6 +126,8 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
 
 void IndividualGA::updateMetrics() {
     fitness = averageResponseTime(simulatedEvents, "A", true);
+
+    metricsChecked = true;
 }
 
 void IndividualGA::mutate(

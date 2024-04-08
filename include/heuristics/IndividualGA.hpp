@@ -25,6 +25,7 @@ class IndividualGA {
     int numTimeSegments;
     double mutationProbability;
     bool child;
+    bool metricsChecked = false;
 
     void generateGenotype(
         const std::vector<GenotypeInitType>& initTypes,

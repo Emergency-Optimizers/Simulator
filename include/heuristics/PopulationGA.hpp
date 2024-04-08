@@ -37,11 +37,9 @@ class PopulationGA {
     std::vector<double> genotypeInitTypeWeights;
     std::vector<MutationType> mutationTypes;
     std::vector<double> mutationTypeWeights;
-    const std::string progressBarPrefix = "Running GA";
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();
-    void evaluateFitness();
     std::vector<IndividualGA> parentSelection(int tournamentSize);
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
     std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
@@ -49,10 +47,15 @@ class PopulationGA {
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype
     );
-    const int countUnique() const;
-    const IndividualGA getFittest() const;
-    const std::string getProgressBarPostfix() const;
     IndividualGA createIndividual(const bool child);
+    void evaluateFitness();
+    void sortIndividuals();
+    const std::string getProgressBarPostfix() const;
+    const IndividualGA getFittest() const;
+    const int countUnique() const;
+
+ protected:
+    const std::string progressBarPrefix = "Running GA";
 
  public:
     PopulationGA::PopulationGA(
