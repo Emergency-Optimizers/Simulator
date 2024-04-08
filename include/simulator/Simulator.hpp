@@ -16,14 +16,14 @@
 
 class Simulator {
  private:
-    std::mt19937& rnd;
+    std::mt19937 rnd;
     AmbulanceAllocator& ambulanceAllocator;
     EventHandler eventHandler;
     DispatchEngineStrategyType dispatchStrategy;
 
  public:
     Simulator(
-        std::mt19937& rnd,
+        std::mt19937 rnd,
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event>& events

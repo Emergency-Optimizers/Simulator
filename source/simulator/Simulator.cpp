@@ -13,11 +13,14 @@
 #include "simulator/DispatchEngine.hpp"
 
 Simulator::Simulator(
-    std::mt19937& rnd,
+    std::mt19937 rnd,
     AmbulanceAllocator& ambulanceAllocator,
     DispatchEngineStrategyType dispatchStrategy,
     std::vector<Event>& events
-) : rnd(rnd), ambulanceAllocator(ambulanceAllocator), dispatchStrategy(dispatchStrategy) {
+) : rnd(rnd),
+    ambulanceAllocator(ambulanceAllocator),
+    dispatchStrategy(dispatchStrategy) {
+    // populate and sort event handler
     eventHandler.populate(events);
 
     eventHandler.sortEvents();
