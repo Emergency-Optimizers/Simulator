@@ -11,6 +11,7 @@
 #include <numeric>
 #include <random>
 #include <string>
+#include <utility>
 /* internal libraries */
 #include "heuristics/IndividualGA.hpp"
 #include "file-reader/Incidents.hpp"
@@ -44,8 +45,13 @@ class PopulationGA {
     void getPossibleGenotypeInits();
     void getPossibleMutations();
     void getPossibleCrossovers();
-    std::vector<IndividualGA> parentSelection(int tournamentSize);
+    std::vector<IndividualGA> parentSelection();
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
+    std::vector<int> tournamentSelection(
+        const std::vector<std::pair<int, double>>& population,
+        const int k,
+        const int tournamentSize
+    );
     std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
     std::vector<std::vector<std::vector<int>>> singlePointCrossover(
         const std::vector<std::vector<int>>& parent1Genotype,
@@ -59,6 +65,7 @@ class PopulationGA {
     const std::string progressBarPrefix = "Running GA";
 
     virtual void generatePopulation();
+    std::vector<std::pair<int, double>> generateIndexFitnessPair();
     virtual void evaluateFitness();
     virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;

@@ -62,12 +62,11 @@ void PopulationGA::evolve(int generations) {
     for (int gen = 0; gen < generations; gen++) {
         // step 1: parent selection
         std::vector<IndividualGA> offspring;
-        int tournamentSize = 3;
         std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
 
         while (offspring.size() < populationSize) {
             if (shouldCrossover(rnd) < crossoverProbability) {
-                std::vector<IndividualGA> parents = parentSelection(tournamentSize);
+                std::vector<IndividualGA> parents = parentSelection();
                 std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
 
                 // calculate how many children can be added without exceeding populationSize
@@ -169,25 +168,23 @@ void PopulationGA::getPossibleCrossovers() {
     }
 }
 
-std::vector<IndividualGA> PopulationGA::parentSelection(int tournamentSize) {
+std::vector<IndividualGA> PopulationGA::parentSelection() {
+    // generate population pair holding index and fitness for each individual
+    const std::vector<std::pair<int, double>> populationIndices = generateIndexFitnessPair();
+
+    // perform selection
+    const int individualsToSelect = 2;
+
+    const std::vector<int> selectedIndices = tournamentSelection(
+        populationIndices,
+        individualsToSelect,
+        3
+    );
+
+    // return selected individuals
     std::vector<IndividualGA> selectedParents;
-
-    for (int i = 0; i < 2; i++) {
-        std::vector<IndividualGA> tournament;
-        for (int j = 0; j < tournamentSize; j++) {
-            tournament.push_back(getRandomElement(rnd, individuals));
-        }
-
-        // select the individual with the highest fitness in the tournament
-        auto best = std::max_element(
-            tournament.begin(),
-            tournament.end(),
-            [](const IndividualGA &a, const IndividualGA &b) {
-                return a.fitness > b.fitness;
-            }
-        );
-
-        selectedParents.push_back(*best);
+    for (int i = 0; i < selectedIndices.size(); i++) {
+        selectedParents.push_back(individuals[selectedIndices[i]]);
     }
 
     return selectedParents;
@@ -206,6 +203,41 @@ std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
     }
 
     return survivors;
+}
+
+std::vector<std::pair<int, double>> PopulationGA::generateIndexFitnessPair() {
+    std::vector<std::pair<int, double>> populationIndices;
+
+    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
+        populationIndices.push_back({individualIndex, individuals[individualIndex].fitness});
+    }
+
+    return populationIndices;
+}
+
+std::vector<int> PopulationGA::tournamentSelection(
+    const std::vector<std::pair<int, double>>& population,
+    const int k,
+    const int tournamentSize
+) {
+    std::vector<int> selected;
+
+    while (selected.size() < k) {
+        double bestFitness = -1.0;
+        int bestIndex = -1;
+        for (int i = 0; i < tournamentSize; ++i) {
+            int idx = getRandomInt(rnd, 0, population.size() - 1);
+
+            if (population[idx].second > bestFitness) {
+                bestFitness = population[idx].second;
+                bestIndex = population[idx].first;
+            }
+        }
+
+        selected.push_back(bestIndex);
+    }
+
+    return selected;
 }
 
 std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
