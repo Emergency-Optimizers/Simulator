@@ -44,11 +44,14 @@ class PopulationGA {
     std::vector<double> crossoversTickets;
     std::vector<SelectionType> parentSelections;
     std::vector<double> parentSelectionsTickets;
+    std::vector<SelectionType> survivorSelections;
+    std::vector<double> survivorSelectionsTickets;
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();
     void getPossibleCrossovers();
     void getPossibleParentSelections();
+    void getPossibleSurvivorSelections();
     std::vector<IndividualGA> parentSelection();
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
     std::vector<int> tournamentSelection(
@@ -82,7 +85,7 @@ class PopulationGA {
     const std::string progressBarPrefix = "Running GA";
 
     virtual void generatePopulation();
-    std::vector<std::pair<int, double>> generateIndexFitnessPair();
+    std::vector<std::pair<int, double>> generateIndexFitnessPair(const int startIndex = 0);
     virtual void evaluateFitness();
     virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;

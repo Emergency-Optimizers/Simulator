@@ -42,6 +42,7 @@ PopulationGA::PopulationGA(
     getPossibleMutations();
     getPossibleCrossovers();
     getPossibleParentSelections();
+    getPossibleSurvivorSelections();
 
     // init population
     generatePopulation();
@@ -87,6 +88,8 @@ void PopulationGA::evolve(int generations) {
         evaluateFitness();
 
         individuals = survivorSelection(populationSize);
+
+        sortIndividuals();
 
         // update progress bar
         progressBar.update(gen + 1, getProgressBarPostfix());
@@ -207,6 +210,44 @@ void PopulationGA::getPossibleParentSelections() {
     }
 }
 
+void PopulationGA::getPossibleSurvivorSelections() {
+    // clear lists
+    survivorSelections.clear();
+    survivorSelectionsTickets.clear();
+
+    // add types and tickets if applicable
+    double tickets;
+
+    tickets = Settings::get<double>("SURVIVOR_SELECTION_TICKETS_TOURNAMENT");
+    if (tickets > 0.0) {
+        survivorSelections.push_back(SelectionType::TOURNAMENT);
+        survivorSelectionsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("SURVIVOR_SELECTION_TICKETS_ROULETTE_WHEEL");
+    if (tickets > 0.0) {
+        survivorSelections.push_back(SelectionType::ROULETTE_WHEEL);
+        survivorSelectionsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("SURVIVOR_SELECTION_TICKETS_ELITISM");
+    if (tickets > 0.0) {
+        survivorSelections.push_back(SelectionType::ELITISM);
+        survivorSelectionsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("SURVIVOR_SELECTION_TICKETS_RANK");
+    if (tickets > 0.0) {
+        survivorSelections.push_back(SelectionType::RANK);
+        survivorSelectionsTickets.push_back(tickets);
+    }
+
+    // check if valid
+    if (survivorSelections.empty()) {
+        throwError("No applicable survivor selections.");
+    }
+}
+
 std::vector<IndividualGA> PopulationGA::parentSelection() {
     // generate population pair holding index and fitness for each individual
     // fitness is inversed so selection methods can maximize fitness
@@ -214,8 +255,6 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
 
     // perform selection
     const int individualsToSelect = 2;
-    const int tournamentSize = 3;
-    const double selectionPressure = 1.7;
     std::vector<int> selectedIndices;
 
     switch(parentSelections[weightedLottery(rnd, parentSelectionsTickets, {})]) {
@@ -223,7 +262,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
             selectedIndices = tournamentSelection(
                 populationIndices,
                 individualsToSelect,
-                tournamentSize
+                Settings::get<int>("PARENT_SELECTION_TOURNAMENT_SIZE")
             );
             break;
         case SelectionType::ROULETTE_WHEEL:
@@ -242,7 +281,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
             selectedIndices = rankSelection(
                 populationIndices,
                 individualsToSelect,
-                selectionPressure
+                Settings::get<double>("PARENT_SELECTION_RANK_SELECTION_PRESSURE")
             );
             break;
     }
@@ -257,24 +296,63 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
 }
 
 std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
-    std::vector<IndividualGA> survivors;
+    // generate population pair holding index and fitness for each individual
+    // fitness is inversed so selection methods can maximize fitness
+    const int startIndex = Settings::get<int>("SURVIVOR_SELECTION_KEEP_N_BEST");
+    const std::vector<std::pair<int, double>> populationIndices = generateIndexFitnessPair(startIndex);
 
-    // calculate the actual number of survivors to keep, which is the minimum
-    // of numSurvivors and the current population size to avoid out-of-bounds access
-    int actualNumSurvivors = std::min(numSurvivors, static_cast<int>(individuals.size()));
+    // perform selection
+    const int individualsToSelect = std::min(numSurvivors, static_cast<int>(individuals.size()));
+    std::vector<int> selectedIndices;
 
-    // copy the top 'actualNumSurvivors' individuals to the survivors vector
-    for (int i = 0; i < actualNumSurvivors; i++) {
-        survivors.push_back(individuals[i]);
+    switch(survivorSelections[weightedLottery(rnd, survivorSelectionsTickets, {})]) {
+        case SelectionType::TOURNAMENT:
+            selectedIndices = tournamentSelection(
+                populationIndices,
+                individualsToSelect,
+                Settings::get<int>("SURVIVOR_SELECTION_TOURNAMENT_SIZE")
+            );
+            break;
+        case SelectionType::ROULETTE_WHEEL:
+            selectedIndices = rouletteWheelSelection(
+                populationIndices,
+                individualsToSelect
+            );
+            break;
+        case SelectionType::ELITISM:
+            selectedIndices = elitismSelection(
+                populationIndices,
+                individualsToSelect
+            );
+            break;
+        case SelectionType::RANK:
+            selectedIndices = rankSelection(
+                populationIndices,
+                individualsToSelect,
+                Settings::get<double>("SURVIVOR_SELECTION_RANK_SELECTION_PRESSURE")
+            );
+            break;
     }
 
-    return survivors;
+    // return selected individuals
+    std::vector<IndividualGA> selectedSurvivors;
+
+    // add the n best individuals
+    for (int i = 0; i < Settings::get<int>("SURVIVOR_SELECTION_KEEP_N_BEST"); i++) {
+        selectedSurvivors.push_back(individuals[i]);
+    }
+
+    for (int i = 0; i < selectedIndices.size(); i++) {
+        selectedSurvivors.push_back(individuals[selectedIndices[i]]);
+    }
+
+    return selectedSurvivors;
 }
 
-std::vector<std::pair<int, double>> PopulationGA::generateIndexFitnessPair() {
+std::vector<std::pair<int, double>> PopulationGA::generateIndexFitnessPair(const int startIndex) {
     std::vector<std::pair<int, double>> populationIndices;
 
-    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
+    for (int individualIndex = startIndex; individualIndex < individuals.size(); individualIndex++) {
         // we inverse the fitness, this allows the selection methods to maximize the fitness
         double inverseFitness = 1.0 / (individuals[individualIndex].fitness + std::numeric_limits<double>::epsilon());
 
