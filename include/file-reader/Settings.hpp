@@ -83,7 +83,7 @@ class Settings {
         while (getline(file, line)) {
             progressBar.update(++linesRead);
 
-            if (line == "") {
+            if (line == "" || line[0] == '/') {
                 continue;
             }
 

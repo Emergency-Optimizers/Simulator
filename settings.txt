@@ -1,4 +1,6 @@
 SEED: 42
+
+// can pick between: GA, NSGA, NONE (just runs the simulator once with static allocation)
 HEURISTIC: GA
 
 CROSSOVER_TICKETS_SINGLE_POINT: 100
