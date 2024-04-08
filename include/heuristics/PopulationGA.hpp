@@ -60,6 +60,10 @@ class PopulationGA {
         const std::vector<std::pair<int, double>>& population,
         const int k
     );
+    std::vector<int> elitismSelection(
+        const std::vector<std::pair<int, double>>& population,
+        const int k
+    );
     std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
     std::vector<std::vector<std::vector<int>>> singlePointCrossover(
         const std::vector<std::vector<int>>& parent1Genotype,

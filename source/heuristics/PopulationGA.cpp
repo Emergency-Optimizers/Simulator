@@ -189,6 +189,12 @@ void PopulationGA::getPossibleParentSelections() {
         parentSelectionsTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("PARENT_SELECTION_TICKETS_ELITISM");
+    if (tickets > 0.0) {
+        parentSelections.push_back(SelectionType::ELITISM);
+        parentSelectionsTickets.push_back(tickets);
+    }
+
     // check if valid
     if (parentSelections.empty()) {
         throwError("No applicable parent selections.");
@@ -202,6 +208,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
 
     // perform selection
     const int individualsToSelect = 2;
+    const int tournamentSize = 3;
     std::vector<int> selectedIndices;
 
     switch(parentSelections[weightedLottery(rnd, parentSelectionsTickets, {})]) {
@@ -209,11 +216,17 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
             selectedIndices = tournamentSelection(
                 populationIndices,
                 individualsToSelect,
-                3
+                tournamentSize
             );
             break;
         case SelectionType::ROULETTE_WHEEL:
             selectedIndices = rouletteWheelSelection(
+                populationIndices,
+                individualsToSelect
+            );
+            break;
+        case SelectionType::ELITISM:
+            selectedIndices = elitismSelection(
                 populationIndices,
                 individualsToSelect
             );
@@ -297,7 +310,7 @@ std::vector<int> PopulationGA::rouletteWheelSelection(
         double slice = getRandomDouble(rnd, 0.0, totalFitness);
         double current = 0.0;
 
-        for (const auto& individual : population) {
+        for (const std::pair<int, double>& individual : population) {
             current += individual.second;
 
             if (current >= slice) {
@@ -305,6 +318,20 @@ std::vector<int> PopulationGA::rouletteWheelSelection(
                 break;
             }
         }
+    }
+
+    return selected;
+}
+
+std::vector<int> PopulationGA::elitismSelection(
+    const std::vector<std::pair<int, double>>& population,
+    const int k
+) {
+    std::vector<int> selected;
+
+    // assumes population is already sorted by fitness (best to worst)
+    for (int individualIndex = 0; individualIndex < k && individualIndex < population.size(); individualIndex++) {
+        selected.push_back(population[individualIndex].first);
     }
 
     return selected;

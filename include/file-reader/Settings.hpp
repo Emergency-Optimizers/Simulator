@@ -54,6 +54,7 @@ class Settings {
         {"CROSSOVER_TICKETS_SINGLE_POINT", &toDouble},
         {"PARENT_SELECTION_TICKETS_TOURNAMENT", &toDouble},
         {"PARENT_SELECTION_TICKETS_ROULETTE_WHEEL", &toDouble},
+        {"PARENT_SELECTION_TICKETS_ELITISM", &toDouble},
     };
 
  public:
