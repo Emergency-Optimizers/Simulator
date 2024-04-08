@@ -77,6 +77,10 @@ class PopulationGA {
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype
     );
+    std::vector<std::vector<std::vector<int>>> segmentSwapCrossover(
+        const std::vector<std::vector<int>>& parent1Genotype,
+        const std::vector<std::vector<int>>& parent2Genotype
+    );
     IndividualGA createIndividual(const bool child);
     const IndividualGA getFittest() const;
     const int countUnique() const;

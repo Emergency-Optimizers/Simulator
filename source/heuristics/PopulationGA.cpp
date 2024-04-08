@@ -167,6 +167,12 @@ void PopulationGA::getPossibleCrossovers() {
         crossoversTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("CROSSOVER_TICKETS_SEGMENT_SWAP");
+    if (tickets > 0.0) {
+        crossovers.push_back(CrossoverType::SEGMENT_SWAP);
+        crossoversTickets.push_back(tickets);
+    }
+
     // check if valid
     if (crossovers.empty()) {
         throwError("No applicable crossovers.");
@@ -477,6 +483,9 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
         case CrossoverType::SINGLE_POINT:
             offspringGenotypes = singlePointCrossover(parent1.genotype, parent2.genotype);
             break;
+        case CrossoverType::SEGMENT_SWAP:
+            offspringGenotypes = segmentSwapCrossover(parent1.genotype, parent2.genotype);
+            break;
     }
 
     const bool isChild = true;
@@ -514,6 +523,27 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
             } else {
                 offspring1Genotype[t][i] = parent2Genotype[t][i];
             }
+        }
+    }
+
+    std::vector<std::vector<std::vector<int>>> offspring = {offspring1Genotype, offspring2Genotype};
+
+    return offspring;
+}
+
+std::vector<std::vector<std::vector<int>>> PopulationGA::segmentSwapCrossover(
+    const std::vector<std::vector<int>>& parent1Genotype,
+    const std::vector<std::vector<int>>& parent2Genotype
+) {
+    // initialize offspring genotypes to respective parents
+    std::vector<std::vector<int>> offspring1Genotype = parent1Genotype;
+    std::vector<std::vector<int>> offspring2Genotype = parent2Genotype;
+
+    // iterate over each time segment
+    for (size_t t = 0; t < numTimeSegments; t++) {
+         // swap entire time segments
+        if (getRandomBool(rnd)) {
+            std::swap(offspring1Genotype[t], offspring2Genotype[t]);
         }
     }
 

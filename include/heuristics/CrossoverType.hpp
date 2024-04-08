@@ -7,5 +7,6 @@
 #pragma once
 
 enum class CrossoverType {
-    SINGLE_POINT
+    SINGLE_POINT,
+    SEGMENT_SWAP,
 };
