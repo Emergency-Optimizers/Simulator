@@ -20,14 +20,14 @@
 class IndividualGA {
  private:
     std::mt19937& rnd;
-    int numDepots;
-    int numAmbulances;
-    int numTimeSegments;
     double mutationProbability;
-    bool child;
+    int numAmbulances;
+    int numAllocations;
+    int numDepots;
     bool metricsChecked = false;
 
     void generateGenotype(
+        const bool isChild,
         const std::vector<GenotypeInitType>& initTypes,
         const std::vector<double>& initTypeWeights
     );
@@ -47,11 +47,11 @@ class IndividualGA {
 
     IndividualGA(
         std::mt19937& rnd,
-        int numDepots,
-        int numAmbulances,
-        int numTimeSegments,
-        double mutationProbability,
-        bool child,
+        const double mutationProbability,
+        const int numAmbulances,
+        const int numAllocations,
+        const int numDepots,
+        const bool isChild,
         const std::vector<GenotypeInitType>& genotypeInitTypes,
         const std::vector<double>& genotypeInitTypeWeights
     );
@@ -67,11 +67,10 @@ class IndividualGA {
     IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
         if (this != &other) {
             rnd = other.rnd;
-            numDepots = other.numDepots;
-            numAmbulances = other.numAmbulances;
-            numTimeSegments = other.numTimeSegments;
             mutationProbability = other.mutationProbability;
-            child = other.child;
+            numAmbulances = other.numAmbulances;
+            numAllocations = other.numAllocations;
+            numDepots = other.numDepots;
             fitness = other.fitness;
             genotype = other.genotype;
             simulatedEvents = other.simulatedEvents;

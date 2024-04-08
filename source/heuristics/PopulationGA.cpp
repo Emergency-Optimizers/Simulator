@@ -241,10 +241,10 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
 IndividualGA PopulationGA::createIndividual(const bool child) {
     IndividualGA individual = IndividualGA(
         rnd,
-        numDepots,
+        mutationProbability,
         numAmbulances,
         numTimeSegments,
-        mutationProbability,
+        numDepots,
         child,
         genotypeInitTypes,
         genotypeInitTypeWeights

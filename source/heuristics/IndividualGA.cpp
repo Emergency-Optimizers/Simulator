@@ -17,33 +17,33 @@
 
 IndividualGA::IndividualGA(
     std::mt19937& rnd,
-    int numDepots,
-    int numAmbulances,
-    int numTimeSegments,
-    double mutationProbability,
-    bool child,
+    const double mutationProbability,
+    const int numAmbulances,
+    const int numAllocations,
+    const int numDepots,
+    const bool isChild,
     const std::vector<GenotypeInitType>& genotypeInitTypes,
     const std::vector<double>& genotypeInitTypeWeights
 ) : rnd(rnd),
-    numDepots(numDepots),
-    numAmbulances(numAmbulances),
-    numTimeSegments(numTimeSegments),
     mutationProbability(mutationProbability),
-    child(child) {
-    // generate genotype
-    if (!child) {
-        generateGenotype(genotypeInitTypes, genotypeInitTypeWeights);
-    } else {
-        emptyGenotype();
-    }
+    numAmbulances(numAmbulances),
+    numAllocations(numAllocations),
+    numDepots(numDepots) {
+    generateGenotype(isChild, genotypeInitTypes, genotypeInitTypeWeights);
 }
 
 void IndividualGA::generateGenotype(
+    const bool isChild,
     const std::vector<GenotypeInitType>& initTypes,
     const std::vector<double>& initTypeWeights
 ) {
     // reset genotype
     emptyGenotype();
+
+    // branch if individual is child and don't init genotype (will be done in crossover)
+    if (isChild) {
+        return;
+    }
 
     // get random init from weights
     int initTypeIndex = weightedLottery(rnd, initTypeWeights, {});
@@ -59,13 +59,14 @@ void IndividualGA::generateGenotype(
 }
 
 void IndividualGA::emptyGenotype() {
-    genotype = std::vector<std::vector<int>>(numTimeSegments, std::vector<int>(numDepots, 0));
+    genotype = std::vector<std::vector<int>>(numAllocations, std::vector<int>(numDepots, 0));
 }
 
 void IndividualGA::randomGenotype() {
-    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
-        for (int i = 0; i < numAmbulances; i++) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        for (int ambulanceIndex = 0; ambulanceIndex < numAmbulances; ambulanceIndex++) {
             int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
+
             genotype[allocationIndex][depotIndex]++;
         }
     }
@@ -78,11 +79,11 @@ void IndividualGA::evenGenotype() {
 
     // create a vector of depot indices
     std::vector<int> depotIndices(numDepots);
-    for (int i = 0; i < numDepots; i++) {
-        depotIndices[i] = i;
+    for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+        depotIndices[depotIndex] = depotIndex;
     }
 
-    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // distribute the base number of ambulances to each depot
         for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
             genotype[allocationIndex][depotIndex] = baseAmbulancesPerDepot;
@@ -146,13 +147,13 @@ void IndividualGA::mutate(
 void IndividualGA::redistributeMutation() {
     // TODO(sindre0830): this mutation used to check the mutationProbability against each depot in the segment
     // until it could mutate, then it would go to next segment, this is an alternative way. Check if we should revert.
-    double cumulativeMutationProbability = mutationProbability * (static_cast<double>(numDepots) / 2.0);
+    double cumulativeMutationProbability = mutationProbability * (static_cast<double>(genotype[0].size()) / 2.0);
 
     // fill a vector of possible depot indices
     std::vector<int> depotIndices(numDepots);
     std::iota(depotIndices.begin(), depotIndices.end(), 0);
 
-    for (auto& segment : genotype) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // check if segment should be mutated
         if (getRandomProbability(rnd) > cumulativeMutationProbability) {
             continue;
@@ -161,7 +162,7 @@ void IndividualGA::redistributeMutation() {
         // randomly select a depot index for potential mutation and check if it contains any resources
         int depotIndex = getRandomInt(rnd, 0, numDepots  - 1);
 
-        if (segment[depotIndex] <= 0) {
+        if (genotype[allocationIndex][depotIndex] <= 0) {
             continue;
         }
 
@@ -174,8 +175,8 @@ void IndividualGA::redistributeMutation() {
         int targetDepotIndex = getRandomElement<int>(rnd, potentialTargetDepotIndices);
 
         // perform the redistribution
-        segment[depotIndex]--;
-        segment[targetDepotIndex]++;
+        genotype[allocationIndex][depotIndex]--;
+        genotype[allocationIndex][targetDepotIndex]++;
     }
 
     // check if genotype is valid after mutation
@@ -185,17 +186,17 @@ void IndividualGA::redistributeMutation() {
 }
 
 void IndividualGA::repair() {
-    for (auto& segment : genotype) {
-        int totalAmbulancesInSegment = std::accumulate(segment.begin(), segment.end(), 0);
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        int totalAmbulancesInSegment = std::accumulate(genotype[allocationIndex].begin(), genotype[allocationIndex].end(), 0);
 
         while (totalAmbulancesInSegment != numAmbulances) {
             int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
 
             if (totalAmbulancesInSegment < numAmbulances) {
-                segment[depotIndex]++;
+                genotype[allocationIndex][depotIndex]++;
                 totalAmbulancesInSegment++;
-            } else if (totalAmbulancesInSegment > numAmbulances && segment[depotIndex] > 0) {
-                segment[depotIndex]--;
+            } else if (totalAmbulancesInSegment > numAmbulances && genotype[allocationIndex][depotIndex] > 0) {
+                genotype[allocationIndex][depotIndex]--;
                 totalAmbulancesInSegment--;
             }
         }
@@ -207,9 +208,9 @@ void IndividualGA::repair() {
 }
 
 bool IndividualGA::isValid() const {
-    for (const auto& segment : genotype) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // sum all ambulances allocated for segment and verify it
-        int totalAmbulances = std::accumulate(segment.begin(), segment.end(), 0);
+        int totalAmbulances = std::accumulate(genotype[allocationIndex].begin(), genotype[allocationIndex].end(), 0);
 
         if (totalAmbulances != numAmbulances) return false;
     }
@@ -220,11 +221,11 @@ bool IndividualGA::isValid() const {
 void IndividualGA::printGenotype() const {
     std::cout << "Genotype: " << std::endl;
 
-    for (int timeSegment = 0; timeSegment < numTimeSegments; timeSegment++) {
-        std::cout << "    TS " << timeSegment + 1 << ": ";
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        std::cout << "    TS " << allocationIndex + 1 << ": ";
 
-        for (int depot = 0; depot < numDepots; depot++) {
-            std::cout << genotype[timeSegment][depot] << " ";
+        for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+            std::cout << genotype[allocationIndex][depotIndex] << " ";
         }
 
         std::cout << std::endl;
