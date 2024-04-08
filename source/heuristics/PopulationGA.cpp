@@ -40,14 +40,20 @@ PopulationGA::PopulationGA(
     // generate list of possible genotype inits, mutations, crossovers
     getPossibleGenotypeInits();
     getPossibleMutations();
+    getPossibleCrossovers();
 
-    // generate initial generation of individuals
+    // init population
+    generatePopulation();
+    evaluateFitness();
+}
+
+void PopulationGA::generatePopulation() {
+    individuals.clear();
+
     const bool isChild = false;
     for (int i = 0; i < populationSize; i++) {
         individuals.push_back(createIndividual(isChild));
     }
-
-    evaluateFitness();
 }
 
 void PopulationGA::evolve(int generations) {
@@ -119,7 +125,7 @@ void PopulationGA::getPossibleGenotypeInits() {
 
     // check if valid
     if (genotypeInits.empty()) {
-        throwError("No applicable genotype init types.");
+        throwError("No applicable genotype inits.");
     }
 }
 
@@ -139,7 +145,27 @@ void PopulationGA::getPossibleMutations() {
 
     // check if valid
     if (mutations.empty()) {
-        throwError("No applicable mutation types.");
+        throwError("No applicable mutations.");
+    }
+}
+
+void PopulationGA::getPossibleCrossovers() {
+    // clear lists
+    crossovers.clear();
+    crossoversTickets.clear();
+
+    // add types and tickets if applicable
+    double tickets;
+
+    tickets = Settings::get<double>("CROSSOVER_TICKETS_SINGLE_POINT");
+    if (tickets > 0.0) {
+        crossovers.push_back(CrossoverType::SINGLE_POINT);
+        crossoversTickets.push_back(tickets);
+    }
+
+    // check if valid
+    if (crossovers.empty()) {
+        throwError("No applicable crossovers.");
     }
 }
 
@@ -185,12 +211,8 @@ std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
 std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
     std::vector<std::vector<std::vector<int>>> offspringGenotypes;
 
-    CrossoverType crossoverType = Settings::get<CrossoverType>("CROSSOVER");
-    switch(crossoverType) {
+    switch(crossovers[weightedLottery(rnd, crossoversTickets, {})]) {
         case CrossoverType::SINGLE_POINT:
-            offspringGenotypes = singlePointCrossover(parent1.genotype, parent2.genotype);
-            break;
-        default:
             offspringGenotypes = singlePointCrossover(parent1.genotype, parent2.genotype);
             break;
     }

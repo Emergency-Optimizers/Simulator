@@ -19,6 +19,7 @@
 #include "simulator/Event.hpp"
 #include "heuristics/GenotypeInitType.hpp"
 #include "heuristics/MutationType.hpp"
+#include "heuristics/CrossoverType.hpp"
 
 class PopulationGA {
  private:
@@ -37,9 +38,12 @@ class PopulationGA {
     std::vector<double> genotypeInitsTickets;
     std::vector<MutationType> mutations;
     std::vector<double> mutationsTickets;
+    std::vector<CrossoverType> crossovers;
+    std::vector<double> crossoversTickets;
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();
+    void getPossibleCrossovers();
     std::vector<IndividualGA> parentSelection(int tournamentSize);
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
     std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
@@ -48,14 +52,16 @@ class PopulationGA {
         const std::vector<std::vector<int>>& parent2Genotype
     );
     IndividualGA createIndividual(const bool child);
-    void evaluateFitness();
-    void sortIndividuals();
-    const std::string getProgressBarPostfix() const;
     const IndividualGA getFittest() const;
     const int countUnique() const;
 
  protected:
     const std::string progressBarPrefix = "Running GA";
+
+    virtual void generatePopulation();
+    virtual void evaluateFitness();
+    virtual void sortIndividuals();
+    virtual const std::string getProgressBarPostfix() const;
 
  public:
     PopulationGA::PopulationGA(
@@ -70,5 +76,5 @@ class PopulationGA {
         const double crossoverProbability,
         const int numTimeSegments
     );
-    void evolve(int generations);
+    virtual void evolve(int generations);
 };

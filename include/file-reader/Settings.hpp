@@ -51,6 +51,7 @@ class Settings {
         {"OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H", &toDouble},
         {"OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1", &toDouble},
         {"OBJECTIVE_WEIGHT_NUM_VIOLATIONS", &toDouble},
+        {"CROSSOVER_TICKETS_SINGLE_POINT", &toDouble},
     };
 
  public:
