@@ -183,6 +183,12 @@ void PopulationGA::getPossibleParentSelections() {
         parentSelectionsTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("PARENT_SELECTION_TICKETS_ROULETTE_WHEEL");
+    if (tickets > 0.0) {
+        parentSelections.push_back(SelectionType::ROULETTE_WHEEL);
+        parentSelectionsTickets.push_back(tickets);
+    }
+
     // check if valid
     if (parentSelections.empty()) {
         throwError("No applicable parent selections.");
@@ -191,6 +197,7 @@ void PopulationGA::getPossibleParentSelections() {
 
 std::vector<IndividualGA> PopulationGA::parentSelection() {
     // generate population pair holding index and fitness for each individual
+    // fitness is inversed so selection methods can maximize fitness
     const std::vector<std::pair<int, double>> populationIndices = generateIndexFitnessPair();
 
     // perform selection
@@ -203,6 +210,12 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
                 populationIndices,
                 individualsToSelect,
                 3
+            );
+            break;
+        case SelectionType::ROULETTE_WHEEL:
+            selectedIndices = rouletteWheelSelection(
+                populationIndices,
+                individualsToSelect
             );
             break;
     }
@@ -235,7 +248,10 @@ std::vector<std::pair<int, double>> PopulationGA::generateIndexFitnessPair() {
     std::vector<std::pair<int, double>> populationIndices;
 
     for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
-        populationIndices.push_back({individualIndex, individuals[individualIndex].fitness});
+        // we inverse the fitness, this allows the selection methods to maximize the fitness
+        double inverseFitness = 1.0 / (individuals[individualIndex].fitness + std::numeric_limits<double>::epsilon());
+
+        populationIndices.push_back({individualIndex, inverseFitness});
     }
 
     return populationIndices;
@@ -261,6 +277,34 @@ std::vector<int> PopulationGA::tournamentSelection(
         }
 
         selected.push_back(bestIndex);
+    }
+
+    return selected;
+}
+
+std::vector<int> PopulationGA::rouletteWheelSelection(
+    const std::vector<std::pair<int, double>>& population,
+    const int k
+) {
+    std::vector<int> selected;
+
+    double totalFitness = 0.0;
+    for (const std::pair<int, double>& individual : population) {
+        totalFitness += individual.second;
+    }
+
+    while (selected.size() < k) {
+        double slice = getRandomDouble(rnd, 0.0, totalFitness);
+        double current = 0.0;
+
+        for (const auto& individual : population) {
+            current += individual.second;
+
+            if (current >= slice) {
+                selected.push_back(individual.first);
+                break;
+            }
+        }
     }
 
     return selected;

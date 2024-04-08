@@ -455,8 +455,8 @@ void save2dDistributionToFile(const std::vector<std::vector<double>>& distributi
     }
 }
 
-double getRandomProbability(std::mt19937& rnd) {
-    std::uniform_real_distribution<> dist(0.0, 1.0);
+double getRandomDouble(std::mt19937& rnd, const double min, const double max) {
+    std::uniform_real_distribution<> dist(min, max);
 
     return dist(rnd);
 }

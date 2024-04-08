@@ -498,7 +498,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.triageImpression = triageImpressions[indexTriage];
 
         // check if it should be canceled
-        bool canceled = canceledProbability[indexTriage][indexShift] > getRandomProbability(rnd);
+        bool canceled = canceledProbability[indexTriage][indexShift] > getRandomDouble(rnd);
 
         // location
         event.gridId = indexToGridIdMapping[weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];

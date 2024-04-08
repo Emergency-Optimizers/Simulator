@@ -53,6 +53,7 @@ class Settings {
         {"OBJECTIVE_WEIGHT_NUM_VIOLATIONS", &toDouble},
         {"CROSSOVER_TICKETS_SINGLE_POINT", &toDouble},
         {"PARENT_SELECTION_TICKETS_TOURNAMENT", &toDouble},
+        {"PARENT_SELECTION_TICKETS_ROULETTE_WHEEL", &toDouble},
     };
 
  public:

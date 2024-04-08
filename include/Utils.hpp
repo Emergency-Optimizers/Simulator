@@ -60,7 +60,7 @@ int weightedLottery(
     const std::vector<std::pair<int, int>>& ranges = {}
 );
 int getRandomInt(std::mt19937& rnd, const int min, const int max);
-double getRandomProbability(std::mt19937& rnd);
+double getRandomDouble(std::mt19937& rnd, const double min = 0.0, const double max = 1.0);
 double calculateMean(const std::vector<int>& numbers);
 double calculateStandardDeviation(const std::vector<int>& numbers);
 double calculateEuclideanDistance(const double x1, const double y1, const double x2, const double y2);

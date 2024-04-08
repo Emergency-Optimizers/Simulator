@@ -168,7 +168,7 @@ void IndividualGA::redistributeMutation(const double mutationProbability) {
 
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // check if segment should be mutated
-        if (getRandomProbability(rnd) > cumulativeMutationProbability) {
+        if (getRandomDouble(rnd) > cumulativeMutationProbability) {
             continue;
         }
 
