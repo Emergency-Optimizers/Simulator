@@ -41,6 +41,7 @@ class IndividualGA {
     void randomGenotype();
     void evenGenotype();
     void redistributeMutation(const double mutationProbability);
+    void scrambleMutation(const double mutationProbability);
 
  protected:
     virtual void updateMetrics();

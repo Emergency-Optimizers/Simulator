@@ -44,6 +44,7 @@ class Settings {
         {"GENOTYPE_INIT_TICKETS_RANDOM", &toDouble},
         {"GENOTYPE_INIT_TICKETS_EVEN", &toDouble},
         {"MUTATION_TICKETS_REDISTRIBUTE", &toDouble},
+        {"MUTATION_TICKETS_SCRAMBLE", &toDouble},
         {"OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A", &toDouble},
         {"OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H", &toDouble},
         {"OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_V1", &toDouble},

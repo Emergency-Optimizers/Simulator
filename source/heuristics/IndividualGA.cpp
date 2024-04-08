@@ -154,47 +154,62 @@ void IndividualGA::mutate(
         case MutationType::REDISTRIBUTE:
             redistributeMutation(mutationProbability);
             break;
+        case MutationType::SCRAMBLE:
+            scrambleMutation(mutationProbability);
+            break;
     }
 }
 
 void IndividualGA::redistributeMutation(const double mutationProbability) {
-    // TODO(sindre0830): this mutation used to check the mutationProbability against each depot in the segment
-    // until it could mutate, then it would go to next segment, this is an alternative way. Check if we should revert.
-    double cumulativeMutationProbability = mutationProbability * (static_cast<double>(genotype[0].size()) / 2.0);
-
     // fill a vector of possible depot indices
     std::vector<int> depotIndices(numDepots);
     std::iota(depotIndices.begin(), depotIndices.end(), 0);
 
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
-        // check if segment should be mutated
-        if (getRandomDouble(rnd) > cumulativeMutationProbability) {
-            continue;
+        for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+            // check if depot should be mutated
+            if (getRandomDouble(rnd) > mutationProbability) {
+                continue;
+            }
+
+            // check if depot contains any resources
+            if (genotype[allocationIndex][depotIndex] <= 0) {
+                continue;
+            }
+
+            // remove the selected depot index from pool of available target depot indices
+            std::vector<int> potentialTargetDepotIndices = depotIndices;
+
+            potentialTargetDepotIndices.erase(potentialTargetDepotIndices.begin() + depotIndex);
+
+            // randomly select a target depot index
+            int targetDepotIndex = getRandomElement<int>(rnd, potentialTargetDepotIndices);
+
+            // perform the redistribution
+            genotype[allocationIndex][depotIndex]--;
+            genotype[allocationIndex][targetDepotIndex]++;
         }
-
-        // randomly select a depot index for potential mutation and check if it contains any resources
-        int depotIndex = getRandomInt(rnd, 0, numDepots  - 1);
-
-        if (genotype[allocationIndex][depotIndex] <= 0) {
-            continue;
-        }
-
-        // remove the selected depot index from pool of available target depot indices
-        std::vector<int> potentialTargetDepotIndices = depotIndices;
-
-        potentialTargetDepotIndices.erase(potentialTargetDepotIndices.begin() + depotIndex);
-
-        // randomly select a target depot index
-        int targetDepotIndex = getRandomElement<int>(rnd, potentialTargetDepotIndices);
-
-        // perform the redistribution
-        genotype[allocationIndex][depotIndex]--;
-        genotype[allocationIndex][targetDepotIndex]++;
     }
+}
 
-    // check if genotype is valid after mutation
-    if (!isValid()) {
-        throw std::runtime_error("Total number of ambulances changed during redistribute mutation.");
+void IndividualGA::scrambleMutation(const double mutationProbability) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        // check if allocation should be mutated
+        if (getRandomDouble(rnd) > mutationProbability) {
+            continue;
+        }
+
+        // get a random range within the allocation
+        int start = getRandomInt(rnd, 0, numDepots - 2);
+        int end = getRandomInt(rnd, start + 1, numDepots - 1);
+
+        // create a temporary vector to hold the subset to be scrambled
+        std::vector<int> subsetToScramble(genotype[allocationIndex].begin() + start, genotype[allocationIndex].begin() + end + 1);
+
+        // shuffle the subset and place it back into the genotype
+        std::shuffle(subsetToScramble.begin(), subsetToScramble.end(), rnd);
+
+        std::copy(subsetToScramble.begin(), subsetToScramble.end(), genotype[allocationIndex].begin() + start);
     }
 }
 
