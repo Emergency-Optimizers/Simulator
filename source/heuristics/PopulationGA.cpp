@@ -195,6 +195,12 @@ void PopulationGA::getPossibleParentSelections() {
         parentSelectionsTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("PARENT_SELECTION_TICKETS_RANK");
+    if (tickets > 0.0) {
+        parentSelections.push_back(SelectionType::RANK);
+        parentSelectionsTickets.push_back(tickets);
+    }
+
     // check if valid
     if (parentSelections.empty()) {
         throwError("No applicable parent selections.");
@@ -209,6 +215,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
     // perform selection
     const int individualsToSelect = 2;
     const int tournamentSize = 3;
+    const double selectionPressure = 1.7;
     std::vector<int> selectedIndices;
 
     switch(parentSelections[weightedLottery(rnd, parentSelectionsTickets, {})]) {
@@ -229,6 +236,13 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
             selectedIndices = elitismSelection(
                 populationIndices,
                 individualsToSelect
+            );
+            break;
+        case SelectionType::RANK:
+            selectedIndices = rankSelection(
+                populationIndices,
+                individualsToSelect,
+                selectionPressure
             );
             break;
     }
@@ -332,6 +346,46 @@ std::vector<int> PopulationGA::elitismSelection(
     // assumes population is already sorted by fitness (best to worst)
     for (int individualIndex = 0; individualIndex < k && individualIndex < population.size(); individualIndex++) {
         selected.push_back(population[individualIndex].first);
+    }
+
+    return selected;
+}
+
+std::vector<int> PopulationGA::rankSelection(
+    const std::vector<std::pair<int, double>>& population,
+    const int k,
+    const double selectionPressure
+) {
+    std::vector<int> selected;
+
+    const int N = population.size();
+    std::vector<double> probabilities(N);
+    std::vector<double> cumulativeProbabilities(N);
+
+    // calculate selection probabilities for each rank
+    // assumes population is sorted
+    double totalProbability = 0.0;
+    for (int i = 0; i < N; i++) {
+        probabilities[i] = (2 - selectionPressure) / N + 2 * (i + 1) * (selectionPressure - 1) / (N * (N - 1));
+        totalProbability += probabilities[i];
+    }
+
+    // calculate cumulative probabilities
+    cumulativeProbabilities[0] = probabilities[0];
+    for (int i = 1; i < N; i++) {
+        cumulativeProbabilities[i] = cumulativeProbabilities[i - 1] + probabilities[i];
+    }
+
+    // select k individuals based on cumulative probabilities
+    for (int n = 0; n < k; n++) {
+        const double r = getRandomDouble(rnd, 0.0, totalProbability);
+
+        for (int i = 0; i < N; i++) {
+            if (r <= cumulativeProbabilities[i]) {
+                selected.push_back(population[i].first);
+                break;
+            }
+        }
     }
 
     return selected;

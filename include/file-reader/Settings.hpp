@@ -55,6 +55,7 @@ class Settings {
         {"PARENT_SELECTION_TICKETS_TOURNAMENT", &toDouble},
         {"PARENT_SELECTION_TICKETS_ROULETTE_WHEEL", &toDouble},
         {"PARENT_SELECTION_TICKETS_ELITISM", &toDouble},
+        {"PARENT_SELECTION_TICKETS_RANK", &toDouble},
     };
 
  public:

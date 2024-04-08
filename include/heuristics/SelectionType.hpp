@@ -10,4 +10,5 @@ enum class SelectionType {
     TOURNAMENT,
     ROULETTE_WHEEL,
     ELITISM,
+    RANK,
 };
