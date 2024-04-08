@@ -28,8 +28,8 @@ class IndividualGA {
 
     void generateGenotype(
         const bool isChild,
-        const std::vector<GenotypeInitType>& initTypes,
-        const std::vector<double>& initTypeWeights
+        const std::vector<GenotypeInitType>& inits,
+        const std::vector<double>& tickets
     );
     void emptyGenotype();
     void randomGenotype();
@@ -52,13 +52,13 @@ class IndividualGA {
         const int numAllocations,
         const int numDepots,
         const bool isChild,
-        const std::vector<GenotypeInitType>& genotypeInitTypes,
-        const std::vector<double>& genotypeInitTypeWeights
+        const std::vector<GenotypeInitType>& genotypeInits,
+        const std::vector<double>& genotypeInitsTickets
     );
     void evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy);
     void mutate(
         const std::vector<MutationType>& mutations,
-        const std::vector<double>& weights
+        const std::vector<double>& tickets
     );
     void repair();
     bool isValid() const;

@@ -33,10 +33,10 @@ class PopulationGA {
     const double crossoverProbability;
     const int numTimeSegments;
     std::vector<IndividualGA> individuals;
-    std::vector<GenotypeInitType> genotypeInitTypes;
-    std::vector<double> genotypeInitTypeWeights;
-    std::vector<MutationType> mutationTypes;
-    std::vector<double> mutationTypeWeights;
+    std::vector<GenotypeInitType> genotypeInits;
+    std::vector<double> genotypeInitsTickets;
+    std::vector<MutationType> mutations;
+    std::vector<double> mutationsTickets;
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();

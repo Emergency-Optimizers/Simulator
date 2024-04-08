@@ -99,46 +99,46 @@ void PopulationGA::evolve(int generations) {
 
 void PopulationGA::getPossibleGenotypeInits() {
     // clear lists
-    genotypeInitTypes.clear();
-    genotypeInitTypeWeights.clear();
+    genotypeInits.clear();
+    genotypeInitsTickets.clear();
 
-    // add types and weights if applicable
-    double weight = 0.0;
+    // add types and tickets if applicable
+    double tickets;
 
-    weight = Settings::get<double>("GENOTYPE_INIT_WEIGHT_RANDOM");
-    if (weight > 0.0) {
-        genotypeInitTypes.push_back(GenotypeInitType::RANDOM);
-        genotypeInitTypeWeights.push_back(weight);
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_RANDOM");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::RANDOM);
+        genotypeInitsTickets.push_back(tickets);
     }
 
-    weight = Settings::get<double>("GENOTYPE_INIT_WEIGHT_EVEN");
-    if (weight > 0.0) {
-        genotypeInitTypes.push_back(GenotypeInitType::EVEN);
-        genotypeInitTypeWeights.push_back(weight);
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_EVEN");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::EVEN);
+        genotypeInitsTickets.push_back(tickets);
     }
 
     // check if valid
-    if (genotypeInitTypes.empty()) {
+    if (genotypeInits.empty()) {
         throwError("No applicable genotype init types.");
     }
 }
 
 void PopulationGA::getPossibleMutations() {
     // clear lists
-    mutationTypes.clear();
-    mutationTypeWeights.clear();
+    mutations.clear();
+    mutationsTickets.clear();
 
-    // add types and weights if applicable
-    double weight = 0.0;
+    // add types and tickets if applicable
+    double tickets;
 
-    weight = Settings::get<double>("MUTATION_WEIGHT_REDISTRIBUTE");
-    if (weight > 0.0) {
-        mutationTypes.push_back(MutationType::REDISTRIBUTE);
-        mutationTypeWeights.push_back(weight);
+    tickets = Settings::get<double>("MUTATION_TICKETS_REDISTRIBUTE");
+    if (tickets > 0.0) {
+        mutations.push_back(MutationType::REDISTRIBUTE);
+        mutationsTickets.push_back(tickets);
     }
 
     // check if valid
-    if (mutationTypes.empty()) {
+    if (mutations.empty()) {
         throwError("No applicable mutation types.");
     }
 }
@@ -202,7 +202,7 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
         child.genotype = offspringGenotypes[i];
 
         child.repair();
-        child.mutate(mutationTypes, mutationTypeWeights);
+        child.mutate(mutations, mutationsTickets);
 
         offspring.push_back(child);
     }
@@ -246,8 +246,8 @@ IndividualGA PopulationGA::createIndividual(const bool child) {
         numTimeSegments,
         numDepots,
         child,
-        genotypeInitTypes,
-        genotypeInitTypeWeights
+        genotypeInits,
+        genotypeInitsTickets
     );
 
     return individual;

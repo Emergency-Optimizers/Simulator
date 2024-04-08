@@ -22,20 +22,20 @@ IndividualGA::IndividualGA(
     const int numAllocations,
     const int numDepots,
     const bool isChild,
-    const std::vector<GenotypeInitType>& genotypeInitTypes,
-    const std::vector<double>& genotypeInitTypeWeights
+    const std::vector<GenotypeInitType>& genotypeInits,
+    const std::vector<double>& genotypeInitsTickets
 ) : rnd(rnd),
     mutationProbability(mutationProbability),
     numAmbulances(numAmbulances),
     numAllocations(numAllocations),
     numDepots(numDepots) {
-    generateGenotype(isChild, genotypeInitTypes, genotypeInitTypeWeights);
+    generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
 }
 
 void IndividualGA::generateGenotype(
     const bool isChild,
-    const std::vector<GenotypeInitType>& initTypes,
-    const std::vector<double>& initTypeWeights
+    const std::vector<GenotypeInitType>& inits,
+    const std::vector<double>& tickets
 ) {
     // reset genotype
     emptyGenotype();
@@ -45,10 +45,8 @@ void IndividualGA::generateGenotype(
         return;
     }
 
-    // get random init from weights
-    int initTypeIndex = weightedLottery(rnd, initTypeWeights, {});
-
-    switch (initTypes[initTypeIndex]) {
+    // get random init from tickets
+    switch (inits[weightedLottery(rnd, tickets, {})]) {
         case GenotypeInitType::RANDOM:
             randomGenotype();
             break;
@@ -133,11 +131,10 @@ void IndividualGA::updateMetrics() {
 
 void IndividualGA::mutate(
     const std::vector<MutationType>& mutations,
-    const std::vector<double>& weights
+    const std::vector<double>& tickets
 ) {
-    int mutationIndex = weightedLottery(rnd, weights, {});
-
-    switch (mutations[mutationIndex]) {
+    // get random mutation from tickets
+    switch (mutations[weightedLottery(rnd, tickets, {})]) {
         case MutationType::REDISTRIBUTE:
             redistributeMutation();
             break;

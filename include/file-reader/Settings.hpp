@@ -41,9 +41,9 @@ class Settings {
         {"SEED", &toInt},
         {"SIMULATE_1_HOUR_BEFORE", &toBool},
         {"CROSSOVER", &toCrossoverType},
-        {"GENOTYPE_INIT_WEIGHT_RANDOM", &toDouble},
-        {"GENOTYPE_INIT_WEIGHT_EVEN", &toDouble},
-        {"MUTATION_WEIGHT_REDISTRIBUTE", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_RANDOM", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_EVEN", &toDouble},
+        {"MUTATION_TICKETS_REDISTRIBUTE", &toDouble},
     };
 
  public:
