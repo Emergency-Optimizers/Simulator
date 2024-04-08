@@ -21,6 +21,7 @@
 #include "heuristics/GenotypeInitType.hpp"
 #include "heuristics/MutationType.hpp"
 #include "heuristics/CrossoverType.hpp"
+#include "heuristics/SelectionType.hpp"
 
 class PopulationGA {
  private:
@@ -41,10 +42,13 @@ class PopulationGA {
     std::vector<double> mutationsTickets;
     std::vector<CrossoverType> crossovers;
     std::vector<double> crossoversTickets;
+    std::vector<SelectionType> parentSelections;
+    std::vector<double> parentSelectionsTickets;
 
     void getPossibleGenotypeInits();
     void getPossibleMutations();
     void getPossibleCrossovers();
+    void getPossibleParentSelections();
     std::vector<IndividualGA> parentSelection();
     std::vector<IndividualGA> survivorSelection(int numSurvivors);
     std::vector<int> tournamentSelection(

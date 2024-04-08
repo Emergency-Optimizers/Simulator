@@ -41,6 +41,7 @@ PopulationGA::PopulationGA(
     getPossibleGenotypeInits();
     getPossibleMutations();
     getPossibleCrossovers();
+    getPossibleParentSelections();
 
     // init population
     generatePopulation();
@@ -168,18 +169,43 @@ void PopulationGA::getPossibleCrossovers() {
     }
 }
 
+void PopulationGA::getPossibleParentSelections() {
+    // clear lists
+    parentSelections.clear();
+    parentSelectionsTickets.clear();
+
+    // add types and tickets if applicable
+    double tickets;
+
+    tickets = Settings::get<double>("PARENT_SELECTION_TICKETS_TOURNAMENT");
+    if (tickets > 0.0) {
+        parentSelections.push_back(SelectionType::TOURNAMENT);
+        parentSelectionsTickets.push_back(tickets);
+    }
+
+    // check if valid
+    if (parentSelections.empty()) {
+        throwError("No applicable parent selections.");
+    }
+}
+
 std::vector<IndividualGA> PopulationGA::parentSelection() {
     // generate population pair holding index and fitness for each individual
     const std::vector<std::pair<int, double>> populationIndices = generateIndexFitnessPair();
 
     // perform selection
     const int individualsToSelect = 2;
+    std::vector<int> selectedIndices;
 
-    const std::vector<int> selectedIndices = tournamentSelection(
-        populationIndices,
-        individualsToSelect,
-        3
-    );
+    switch(parentSelections[weightedLottery(rnd, parentSelectionsTickets, {})]) {
+        case SelectionType::TOURNAMENT:
+            selectedIndices = tournamentSelection(
+                populationIndices,
+                individualsToSelect,
+                3
+            );
+            break;
+    }
 
     // return selected individuals
     std::vector<IndividualGA> selectedParents;
