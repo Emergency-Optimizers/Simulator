@@ -532,7 +532,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
 
         // remove event.secondsWaitAppointingResource
         event.updateTimer(event.secondsWaitCallAnswered, "duration_incident_creation");
-        event.updateTimer(30, "duration_resource_appointment");
+        event.updateTimer(event.secondsWaitAppointingResource, "duration_resource_appointment");
 
         event.incidentGridId = event.gridId;
 
