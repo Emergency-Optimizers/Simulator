@@ -718,31 +718,25 @@ void printTimeSegmentedAllocationTable(
         fitnessValues.push_back(responseTimeViolations(simulatedEvents, allocationsIndex));
     }
 
-    // print the header
-    std::cout << std::left << std::setw(20) << "Time Segment" << "|";
-    for (int t = 0; t < numTimeSegments; ++t) {
-        std::cout << std::setw(8) << "T" + std::to_string(t + 1);
+    // print header
+    std::cout << std::left << std::setw(6) << "Depot" << "|";
+    for (int d = 0; d < depotIndicies.size(); ++d) {
+        std::cout << std::right << std::setw(3) << d; // Depot indexes as headers
     }
+    std::cout << std::setw(8) << " Fitness" << std::endl;
 
-    std::cout << std::endl << std::string(20, '-') << "+" << std::string((8 * numTimeSegments), '-') << "\n";
+    std::cout << std::string(6, '-') << "+" << std::string((3 * depotIndicies.size()) + 7, '-') << std::endl;
 
-    // print depot rows
-    for (const auto& depotName : depotNames) {
-        std::cout << std::right << std::setw(19) << depotName << " |";
-        for (size_t t = 0; t < numTimeSegments; ++t) {
-            std::cout << std::setw(8) << allocations[t][&depotName - &depotNames[0]];
+    // print rows
+    for (size_t t = 0; t < allocations.size(); ++t) {
+        std::cout << std::right << std::setw(5) << "T" + std::to_string(t + 1) << " |";
+        for (size_t d = 0; d < depotIndicies.size(); ++d) {
+            std::cout << std::setw(3) << allocations[t][d];
         }
-        std::cout << "\n";
-    }
 
-    std::cout << std::string(20, '-') << "+" << std::string((8 * numTimeSegments), '-') << "\n";
-
-    // print fitness row
-    std::cout << std::right << std::setw(19) << "Fitness" << " |";
-    for (const auto& fitnessValue : fitnessValues) {
-        std::cout << std::fixed << std::setprecision(2) << std::setw(8) << fitnessValue;
+        // print fitness cell
+        std::cout << std::fixed << std::setprecision(2) << std::setw(8) << fitnessValues[t] << std::endl;
     }
-    std::cout << "\n";
 }
 
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {
