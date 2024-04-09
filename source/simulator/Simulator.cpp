@@ -16,15 +16,11 @@ Simulator::Simulator(
     std::mt19937 rnd,
     AmbulanceAllocator& ambulanceAllocator,
     DispatchEngineStrategyType dispatchStrategy,
-    std::vector<Event>& events
+    std::vector<Event> events
 ) : rnd(rnd),
     ambulanceAllocator(ambulanceAllocator),
-    dispatchStrategy(dispatchStrategy) {
-    // populate and sort event handler
-    eventHandler.populate(events);
-
-    eventHandler.sortEvents();
-}
+    dispatchStrategy(dispatchStrategy),
+    eventHandler(events) { }
 
 std::vector<Event> Simulator::run() {
     int eventIndex = eventHandler.getNextEventIndex();

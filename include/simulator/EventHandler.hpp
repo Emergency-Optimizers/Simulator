@@ -16,11 +16,10 @@ class EventHandler {
     int currentIndex = 0;
 
  public:
-    std::vector<Event>& events = std::vector<Event>(0);
+    std::vector<Event> events;
 
-    EventHandler();
+    EventHandler(std::vector<Event>& events);
     ~EventHandler() = default;
-    void populate(std::vector<Event> newEvents);
     int getNextEventIndex();
     void sortEvent(size_t eventIndex);
     void sortEvents();

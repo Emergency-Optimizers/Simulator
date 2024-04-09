@@ -10,6 +10,7 @@
 #include <string>
 #include <iostream>
 #include <set>
+#include <future>
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
@@ -587,8 +588,18 @@ IndividualGA PopulationGA::createIndividual(const bool child) {
 }
 
 void PopulationGA::evaluateFitness() {
+    std::vector<std::future<void>> futures;
+
     for (IndividualGA& individual : individuals) {
-        individual.evaluate(events, dayShift, dispatchStrategy);
+        // launch an asynchronous task to evaluate fitness of each individual
+        futures.push_back(std::async(std::launch::async, [&individual, this]() {
+            individual.evaluate(events, dayShift, dispatchStrategy);
+        }));
+    }
+
+    // wait for all asynchronous operations to complete
+    for (auto& future : futures) {
+        future.get();
     }
 }
 
