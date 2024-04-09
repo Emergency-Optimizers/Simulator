@@ -575,11 +575,41 @@ std::string eventTypeToString(EventType eventType) {
     }
 }
 
-double averageResponseTime(std::vector<Event>& simulatedEvents, const std::string& triageImpression, const bool urban) {
+double averageResponseTime(
+    std::vector<Event>& simulatedEvents,
+    const std::string& triageImpression,
+    const bool urban,
+    const int allocationIndex
+) {
     int totalEvents = 0;
     float totalResponseTime = 0;
-    for (int i = 0; i < simulatedEvents.size(); i++) {
-        Event event = simulatedEvents[i];
+
+    int eventIndex = 0;
+    int maxEventIndex = simulatedEvents.size();
+
+    if (allocationIndex != -1) {
+        int allocationCount = 0;
+
+        for (int i = 0; i < simulatedEvents.size(); i++) {
+            Event event = simulatedEvents[i];
+
+            if (event.reallocation.empty()) {
+                continue;
+            }
+
+            if (allocationIndex == allocationCount) {
+                maxEventIndex = i + 1;
+
+                break;
+            } else {
+                allocationCount++;
+                eventIndex = i + 1;
+            }
+        }
+    }
+
+    for (; eventIndex < maxEventIndex; eventIndex++) {
+        Event event = simulatedEvents[eventIndex];
 
         if (event.utility) {
             continue;
@@ -600,14 +630,38 @@ double averageResponseTime(std::vector<Event>& simulatedEvents, const std::strin
     return static_cast<double>(totalResponseTime) / static_cast<double>(totalEvents);
 }
 
-double responseTimeViolations(std::vector<Event>& simulatedEvents) {
+double responseTimeViolations(std::vector<Event>& simulatedEvents, const int allocationIndex) {
     int totalViolations = 0;
 
-    for (int i = 0; i < simulatedEvents.size(); i++) {
-        int responseTime = simulatedEvents[i].getResponseTime();
+    int eventIndex = 0;
+    int maxEventIndex = simulatedEvents.size();
 
-        bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[i].incidentGridId];
-        std::string triage = simulatedEvents[i].triageImpression;
+    if (allocationIndex != -1) {
+        int allocationCount = 0;
+
+        for (int i = 0; i < simulatedEvents.size(); i++) {
+            Event event = simulatedEvents[i];
+
+            if (event.reallocation.empty()) {
+                continue;
+            }
+
+            if (allocationIndex == allocationCount) {
+                maxEventIndex = i + 1;
+
+                break;
+            } else {
+                allocationCount++;
+                eventIndex = i + 1;
+            }
+        }
+    }
+
+    for (; eventIndex < maxEventIndex; eventIndex++) {
+        int responseTime = simulatedEvents[eventIndex].getResponseTime();
+
+        bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[eventIndex].incidentGridId];
+        std::string triage = simulatedEvents[eventIndex].triageImpression;
 
         if (triage == "A") {
             if (urban && responseTime > 720) {
@@ -630,7 +684,8 @@ double responseTimeViolations(std::vector<Event>& simulatedEvents) {
 void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,
-    const std::vector<std::vector<int>>& allocations
+    const std::vector<std::vector<int>>& allocations,
+    std::vector<Event>& simulatedEvents
 ) {
     std::cout << "\n";
     std::vector<std::string> depotNames;
@@ -657,37 +712,37 @@ void printTimeSegmentedAllocationTable(
         depotNames.push_back(depotName);
     }
 
-    // TODO: Placeholder
-    auto calculateFitnessForSegment = [&](int segmentIndex) -> double {
-        return 33.0;
-    };
+    std::vector<double> fitnessValues;
+    for (int allocationsIndex = 0; allocationsIndex < allocations.size(); allocationsIndex++) {
+        // fitnessValues.push_back(averageResponseTime(simulatedEvents, "A", true, allocationsIndex));
+        fitnessValues.push_back(responseTimeViolations(simulatedEvents, allocationsIndex));
+    }
 
-    // Print the header
+    // print the header
     std::cout << std::left << std::setw(20) << "Time Segment" << "|";
     for (int t = 0; t < numTimeSegments; ++t) {
-        std::cout << std::setw(1) << "T" << t + 1;
-        if (t + 1 < 10) {
-            std::cout << " ";
-        }
+        std::cout << std::setw(8) << "T" + std::to_string(t + 1);
     }
 
-    int headerStart = 24;
-    int timeSegmentWidth = 5;
-    int headerEnd = 12;
-    int totalWidth = headerStart + (numTimeSegments * timeSegmentWidth) - 1 + headerEnd;
+    std::cout << std::endl << std::string(20, '-') << "+" << std::string((8 * numTimeSegments), '-') << "\n";
 
-
-    std::cout << "|" << std::setw(2) << "Fitness\n";
-    std::cout << std::string(totalWidth, '-') << "\n";
-
-    // iterate over depots and print each row
-    for (size_t d = 0; d < depotNames.size(); ++d) {
-        std::cout << std::right << std::setw(19) << depotNames[d] << std::setw(1) << "|";
+    // print depot rows
+    for (const auto& depotName : depotNames) {
+        std::cout << std::right << std::setw(19) << depotName << " |";
         for (size_t t = 0; t < numTimeSegments; ++t) {
-            std::cout << std::right << std::setw(2) << allocations[t][d] << std::setw(2);
+            std::cout << std::setw(8) << allocations[t][&depotName - &depotNames[0]];
         }
-        std::cout << "|" << std::setw(6) << calculateFitnessForSegment(d) << "\n";
+        std::cout << "\n";
     }
+
+    std::cout << std::string(20, '-') << "+" << std::string((8 * numTimeSegments), '-') << "\n";
+
+    // print fitness row
+    std::cout << std::right << std::setw(19) << "Fitness" << " |";
+    for (const auto& fitnessValue : fitnessValues) {
+        std::cout << std::fixed << std::setprecision(2) << std::setw(8) << fitnessValue;
+    }
+    std::cout << "\n";
 }
 
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {

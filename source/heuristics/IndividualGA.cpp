@@ -117,6 +117,17 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
     simulatedEvents = simulator.run();
     simulatedAmbulances = ambulanceAllocator.ambulances;
 
+    // sort simulated events
+    std::sort(simulatedEvents.begin(), simulatedEvents.end(), [](const Event& a, const Event& b) {
+        std::tm aTimeStruct = a.callReceived;
+        std::tm bTimeStruct = b.callReceived;
+
+        time_t aTime = std::mktime(&aTimeStruct);
+        time_t bTime = std::mktime(&bTimeStruct);
+
+        return aTime < bTime;
+    });
+
     // update objectives
     objectiveAvgResponseTimeUrbanA = averageResponseTime(simulatedEvents, "A", true);
     objectiveAvgResponseTimeUrbanH = averageResponseTime(simulatedEvents, "H", true);

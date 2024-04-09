@@ -81,12 +81,18 @@ void save1dDistributionToFile(const std::vector<double>& distribution, const std
 void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd);
 std::string eventTypeToString(EventType eventType);
-double averageResponseTime(std::vector<Event>& simulatedEvents, const std::string& triageImpression, const bool urban);
-double responseTimeViolations(std::vector<Event>& simulatedEvents);
+double averageResponseTime(
+    std::vector<Event>& simulatedEvents,
+    const std::string& triageImpression,
+    const bool urban,
+    const int allocationIndex = -1
+);
+double responseTimeViolations(std::vector<Event>& simulatedEvents, const int allocationIndex = -1);
 void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,
-    const std::vector<std::vector<int>>& allocations
+    const std::vector<std::vector<int>>& allocations,
+    std::vector<Event>& simulatedEvents
 );
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances);
 void throwError(const std::string& msg);

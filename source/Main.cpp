@@ -81,10 +81,12 @@ int main() {
         allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
 
         if (Settings::get<bool>("SIMULATE_DAY_SHIFT")) {
-            allocations[0].push_back(0);
-            allocations[0].push_back(0);
-            allocations[0].push_back(0);
-            allocations[0].push_back(0);
+            for (int allocationIndex = 0; allocationIndex < allocations.size(); allocationIndex++) {
+                allocations[allocationIndex].push_back(0);
+                allocations[allocationIndex].push_back(0);
+                allocations[allocationIndex].push_back(0);
+                allocations[allocationIndex].push_back(0);
+            }
         }
 
         AmbulanceAllocator ambulanceAllocator;

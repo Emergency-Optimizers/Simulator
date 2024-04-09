@@ -366,7 +366,8 @@ void PopulationNSGA::evolve(int generations) {
     // write metrics to file
     writeMetrics(finalIndividual.getSimulatedEvents());
 
-    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype());
+    // TODO(sindre0830): replace events with simulated events
+    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.getGenotype(), events);
 
     printBestScoresForEachObjective();
 }

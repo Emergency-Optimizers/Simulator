@@ -8,6 +8,7 @@
 #include <map>
 #include <iomanip>
 #include <algorithm>
+#include <ctime>
 /* internal libraries */
 #include "simulator/AmbulanceAllocator.hpp"
 #include "file-reader/Settings.hpp"
@@ -69,6 +70,8 @@ void AmbulanceAllocator::allocate(
             event.timer = reallocationTime;
             event.reallocation = allocations[reallocationIndex];
             event.utility = true;
+            // define call received for sorting in utility functions
+            localtime_s(&event.callReceived, &reallocationTime);
 
             events.push_back(event);
         }
