@@ -48,6 +48,7 @@ PopulationGA::PopulationGA(
     // init population
     generatePopulation();
     evaluateFitness();
+    sortIndividuals();
 }
 
 void PopulationGA::generatePopulation() {
@@ -60,40 +61,53 @@ void PopulationGA::generatePopulation() {
 }
 
 void PopulationGA::evolve(int generations) {
+    // init progress bar
     ProgressBar progressBar(generations, progressBarPrefix);
 
-    for (int gen = 0; gen < generations; gen++) {
-        // step 1: parent selection
+    for (int generationIndex = 0; generationIndex < generations; generationIndex++) {
+        // create offspring
         std::vector<IndividualGA> offspring;
-        std::uniform_real_distribution<> shouldCrossover(0.0, 1.0);
-
         while (offspring.size() < populationSize) {
-            if (shouldCrossover(rnd) < crossoverProbability) {
-                std::vector<IndividualGA> parents = parentSelection();
+            std::vector<IndividualGA> parents = parentSelection();
+
+            if (getRandomDouble(rnd) < crossoverProbability) {
                 std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
 
                 // calculate how many children can be added without exceeding populationSize
-                size_t spaceLeft = populationSize - offspring.size();
-                size_t childrenToAdd = std::min(children.size(), spaceLeft);
+                const size_t spaceLeft = populationSize - offspring.size();
+                const size_t childrenToAdd = std::min(children.size(), spaceLeft);
 
                 // add children directly to offspring, ensuring not to exceed populationSize
                 offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
+            } else {
+                // clone one of the parents
+                const bool isChild = true;
+                IndividualGA clonedOffspring = createIndividual(isChild);
+
+                clonedOffspring.genotype = getRandomBool(rnd) ? parents[0].genotype : parents[1].genotype;
+
+                // apply mutation to the cloned offspring
+                clonedOffspring.mutate(mutationProbability, mutations, mutationsTickets);
+
+                offspring.push_back(clonedOffspring);
             }
         }
-        // step 3: survivor selection
+
         // combining existing population with children
         for (int i = 0; i < offspring.size(); i++) {
             individuals.push_back(offspring[i]);
         }
 
+        // get fitness of new individuals
         evaluateFitness();
+        sortIndividuals();
 
+        // survivor selection
         individuals = survivorSelection(populationSize);
-
         sortIndividuals();
 
         // update progress bar
-        progressBar.update(gen + 1, getProgressBarPostfix());
+        progressBar.update(generationIndex + 1, getProgressBarPostfix());
     }
 
     // get best individual
@@ -104,7 +118,7 @@ void PopulationGA::evolve(int generations) {
 
     printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.genotype);
 
-    printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
+    // printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }
 
 void PopulationGA::getPossibleGenotypeInits() {
@@ -576,8 +590,6 @@ void PopulationGA::evaluateFitness() {
     for (IndividualGA& individual : individuals) {
         individual.evaluate(events, dayShift, dispatchStrategy);
     }
-
-    sortIndividuals();
 }
 
 void PopulationGA::sortIndividuals() {
