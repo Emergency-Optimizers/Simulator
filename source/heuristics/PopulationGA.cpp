@@ -588,18 +588,8 @@ IndividualGA PopulationGA::createIndividual(const bool child) {
 }
 
 void PopulationGA::evaluateFitness() {
-    std::vector<std::future<void>> futures;
-
-    for (IndividualGA& individual : individuals) {
-        // launch an asynchronous task to evaluate fitness of each individual
-        futures.push_back(std::async(std::launch::async, [&individual, this]() {
-            individual.evaluate(events, dayShift, dispatchStrategy);
-        }));
-    }
-
-    // wait for all asynchronous operations to complete
-    for (auto& future : futures) {
-        future.get();
+    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
+        individuals[individualIndex].evaluate(events, dayShift, dispatchStrategy);
     }
 }
 
