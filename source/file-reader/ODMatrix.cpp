@@ -88,7 +88,7 @@ int ODMatrix::getTravelTime(
         return 0;
     }
 
-    float travelTime = matrix[idToIndexMap[id1]][idToIndexMap[id2]];
+    double travelTime = static_cast<double>(matrix[idToIndexMap[id1]][idToIndexMap[id2]]);
 
     if (travelTime == 0) {
         travelTime = 60.0;
@@ -96,7 +96,12 @@ int ODMatrix::getTravelTime(
 
     if (forceTrafficFactor || triage == "V1") {
         double trafficFactor = Traffic::getInstance().getTrafficFactor(time);
-        travelTime = static_cast<float>(round(static_cast<double>(travelTime) * trafficFactor));
+        travelTime = round(travelTime * trafficFactor);
+    }
+
+    if (!forceTrafficFactor && triage == "A") {
+        double acuteFactor = 0.7953711902650347;
+        travelTime *= acuteFactor;
     }
 
     return static_cast<int>(floor(travelTime));
