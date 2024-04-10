@@ -13,7 +13,8 @@
 
 ProgressBar::ProgressBar(
     const size_t maxProgress,
-    const std::string prefix
+    const std::string prefix,
+    const std::string& postfix
 ) : maxProgress(maxProgress), prefix(prefix), startTime(std::chrono::steady_clock::now()) {
     if (prefix.length() > prefixWidth) {
         this->prefix = prefix.substr(0, prefixWidth);
@@ -21,7 +22,7 @@ ProgressBar::ProgressBar(
         this->prefix += std::string(prefixWidth - prefix.length(), ' ');
     }
 
-    update(0);
+    update(0, postfix);
 }
 
 void ProgressBar::update(const size_t currentProgress, const std::string& postfix) {
