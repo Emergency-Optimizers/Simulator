@@ -15,15 +15,20 @@
 #include "file-reader/Settings.hpp"
 #include "file-reader/ODMatrix.hpp"
 
-void ClosestDispatchEngineStrategy::run(
+bool ClosestDispatchEngineStrategy::run(
     std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    bool sortAllEvents = false;
+
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
-            assigningAmbulance(rnd, ambulances, events, eventIndex);
+            sortAllEvents = assigningAmbulance(rnd, ambulances, events, eventIndex);
+            break;
+        case EventType::PREPARING_DISPATCH_TO_SCENE:
+            preparingToDispatchToScene(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
             dispatchingToScene(rnd, ambulances, events, eventIndex);
@@ -41,25 +46,30 @@ void ClosestDispatchEngineStrategy::run(
             reallocating(rnd, ambulances, events, eventIndex);
             break;
     }
+
+    return sortAllEvents;
 }
 
-void ClosestDispatchEngineStrategy::assigningAmbulance(
+bool ClosestDispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    bool sortAllEvents = false;
+
     std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
         ambulances,
         events,
-        events[eventIndex].timer
+        events[eventIndex].timer,
+        events[eventIndex].triageImpression
     );
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
         events[eventIndex].updateTimer(60, "duration_resource_appointment");
 
-        return;
+        return sortAllEvents;
     }
 
     // find closest ambulance
@@ -109,37 +119,73 @@ void ClosestDispatchEngineStrategy::assigningAmbulance(
     if (closestAmbulanceIndex == -1) {
         events[eventIndex].updateTimer(60, "duration_resource_appointment");
 
-        return;
+        return sortAllEvents;
     }
 
     if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
         int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
+        int incrementSeconds;
 
-        int incrementSeconds = ODMatrix::getInstance().getTravelTime(
-            ambulances[closestAmbulanceIndex].currentGridId,
-            closestAmbulanceGridId,
-            true,
-            events[currentAmbulanceEventIndex].triageImpression,
-            events[currentAmbulanceEventIndex].prevTimer
-        );
-        events[currentAmbulanceEventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
-        ambulances[closestAmbulanceIndex].timeUnavailable += incrementSeconds;
+        if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
+            incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                ambulances[closestAmbulanceIndex].currentGridId,
+                closestAmbulanceGridId,
+                true,
+                events[currentAmbulanceEventIndex].triageImpression,
+                events[currentAmbulanceEventIndex].prevTimer
+            );
+            events[currentAmbulanceEventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
 
-        events[currentAmbulanceEventIndex].gridId = closestAmbulanceGridId;
+            events[currentAmbulanceEventIndex].gridId = closestAmbulanceGridId;
+            events[currentAmbulanceEventIndex].type = EventType::NONE;
+        } else if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_SCENE) {
+            incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                ambulances[closestAmbulanceIndex].currentGridId,
+                closestAmbulanceGridId,
+                false,
+                events[currentAmbulanceEventIndex].triageImpression,
+                events[currentAmbulanceEventIndex].prevTimer
+            );
+
+            // set old event metrics to resource appointment resetting the event
+            int oldMetrics = events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"];
+            events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"] = 0;
+
+            events[currentAmbulanceEventIndex].metrics["duration_resource_appointment"] += incrementSeconds + oldMetrics;
+
+            events[currentAmbulanceEventIndex].type = EventType::RESOURCE_APPOINTMENT;
+
+            // reset timer
+            int oldEventTravelTime = ODMatrix::getInstance().getTravelTime(
+                ambulances[closestAmbulanceIndex].currentGridId,
+                events[currentAmbulanceEventIndex].gridId,
+                false,
+                events[currentAmbulanceEventIndex].triageImpression,
+                events[currentAmbulanceEventIndex].prevTimer
+            );
+
+            events[currentAmbulanceEventIndex].timer -= oldEventTravelTime;
+            events[currentAmbulanceEventIndex].timer += incrementSeconds;
+
+            sortAllEvents = true;
+        }
+
         events[currentAmbulanceEventIndex].assignedAmbulanceIndex = -1;
-        events[currentAmbulanceEventIndex].type = EventType::NONE;
 
+        ambulances[closestAmbulanceIndex].timeUnavailable += incrementSeconds;
         ambulances[closestAmbulanceIndex].currentGridId = closestAmbulanceGridId;
     }
 
     events[eventIndex].assignedAmbulanceIndex = closestAmbulanceIndex;
     ambulances[closestAmbulanceIndex].assignedEventId = events[eventIndex].id;
-    events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
+    events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
         events[eventIndex].secondsWaitResourcePreparingDeparture,
         "duration_resource_preparing_departure"
     );
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitResourcePreparingDeparture;
+
+    return sortAllEvents;
 }
 
 void ClosestDispatchEngineStrategy::dispatchingToHospital(

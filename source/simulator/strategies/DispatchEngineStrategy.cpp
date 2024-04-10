@@ -9,13 +9,33 @@
 #include "file-reader/Stations.hpp"
 #include "file-reader/ODMatrix.hpp"
 
-void DispatchEngineStrategy::assigningAmbulance(
+bool DispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
     /// TODO: code here
+    return false;
+}
+
+void DispatchEngineStrategy::preparingToDispatchToScene(
+    std::mt19937& rnd,
+    std::vector<Ambulance>& ambulances,
+    std::vector<Event>& events,
+    const int eventIndex
+) {
+    int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].gridId,
+        false,
+        events[eventIndex].triageImpression,
+        events[eventIndex].timer
+    );
+
+    events[eventIndex].updateTimer(incrementSeconds);
+
+    events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
 }
 
 void DispatchEngineStrategy::dispatchingToScene(
@@ -29,9 +49,9 @@ void DispatchEngineStrategy::dispatchingToScene(
         events[eventIndex].gridId,
         false,
         events[eventIndex].triageImpression,
-        events[eventIndex].timer
+        events[eventIndex].prevTimer
     );
-    events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_scene");
+    events[eventIndex].metrics["duration_dispatching_to_scene"] += incrementSeconds;
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
 
     ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;

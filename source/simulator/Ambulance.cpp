@@ -6,6 +6,7 @@
 
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
+#include "file-reader/Settings.hpp"
 
 void Ambulance::checkScheduledBreak(const time_t& currentTime) {
     if (!scheduledBreaks.empty() && currentTime >= scheduledBreaks.front()) {
@@ -25,12 +26,19 @@ void Ambulance::setBreak(const int newBreakLength, const time_t& currentTime) {
 bool Ambulance::isAvailable(
     const std::vector<Event>& events,
     const int eventIndex,
-    const time_t& currentTime
+    const time_t& currentTime,
+    const std::string& currentEventTriageImpression
 ) {
-    // if the ambulance is on a break and it is not finished, mark it as unavailable
+    // check if ambulance should start break
     if (breakLenght == 0) {
-        checkScheduledBreak(currentTime);
+        if (assignedEventId == -1) {
+            checkScheduledBreak(currentTime);
+        } else if (!scheduledBreaks.empty() && currentTime >= scheduledBreaks.front()) {
+            return false;
+        }
     }
+
+    // if the ambulance is on a break and it is not finished, mark it as unavailable
     if (breakLenght != 0) {
         if (currentTime >= timeBreakStarted + breakLenght) {
             timeNotWorking += currentTime - timeBreakStarted;
@@ -42,12 +50,23 @@ bool Ambulance::isAvailable(
             return false;
         }
     }
+
     if (assignedEventId == -1) {
         return true;
     }
+
     if (events[eventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
         return true;
     }
+
+    if (events[eventIndex].type == EventType::DISPATCHING_TO_SCENE) {
+        bool shouldPrioritizeHigherTriage = Settings::get<bool>("DISPATCH_STRATEGY_PRIORITIZE_TRIAGE");
+        bool eventIsHigherTriage =  higherTriagePriority(currentEventTriageImpression, events[eventIndex].triageImpression);
+        if (shouldPrioritizeHigherTriage && eventIsHigherTriage) {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -76,4 +95,16 @@ void Ambulance::scheduleBreaks(
 
     scheduledBreaks.push_back(break1Start);
     scheduledBreaks.push_back(break2Start);
+}
+
+bool Ambulance::higherTriagePriority(const std::string& triage, const std::string& triageToCompare) {
+    if (triage == "A" && triageToCompare != "A") {
+        return true;
+    }
+
+    if (triage == "H" && triageToCompare != "A" && triageToCompare != "H") {
+        return true;
+    }
+
+    return false;
 }

@@ -14,15 +14,20 @@
 #include "file-reader/ODMatrix.hpp"
 #include "file-reader/Settings.hpp"
 
-void RandomDispatchEngineStrategy::run(
+bool RandomDispatchEngineStrategy::run(
     std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    bool sortAllEvents = false;
+
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
-            assigningAmbulance(rnd, ambulances, events, eventIndex);
+            sortAllEvents = assigningAmbulance(rnd, ambulances, events, eventIndex);
+            break;
+        case EventType::PREPARING_DISPATCH_TO_SCENE:
+            preparingToDispatchToScene(rnd, ambulances, events, eventIndex);
             break;
         case EventType::DISPATCHING_TO_SCENE:
             dispatchingToScene(rnd, ambulances, events, eventIndex);
@@ -40,18 +45,23 @@ void RandomDispatchEngineStrategy::run(
             reallocating(rnd, ambulances, events, eventIndex);
             break;
     }
+
+    return sortAllEvents;
 }
 
-void RandomDispatchEngineStrategy::assigningAmbulance(
+bool RandomDispatchEngineStrategy::assigningAmbulance(
     std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    bool sortAllEvents = false;
+
     std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
         ambulances,
         events,
-        events[eventIndex].timer
+        events[eventIndex].timer,
+        events[eventIndex].triageImpression
     );
 
     int randomAmbulanceIndex = -1;
@@ -75,18 +85,55 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
                 continue;
             }
 
-            events[currentAmbulanceEventIndex].metrics["duration_dispatching_to_depot"] += ODMatrix::getInstance().getTravelTime(
-                ambulances[randomAmbulanceIndex].currentGridId,
-                ambulanceGridId,
-                true,
-                events[currentAmbulanceEventIndex].triageImpression,
-                events[currentAmbulanceEventIndex].prevTimer
-            );
+            int incrementSeconds;
 
-            events[currentAmbulanceEventIndex].gridId = ambulanceGridId;
+            if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
+                incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                    ambulances[randomAmbulanceIndex].currentGridId,
+                    ambulanceGridId,
+                    true,
+                    events[currentAmbulanceEventIndex].triageImpression,
+                    events[currentAmbulanceEventIndex].prevTimer
+                );
+                events[currentAmbulanceEventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
+
+                events[currentAmbulanceEventIndex].gridId = ambulanceGridId;
+                events[currentAmbulanceEventIndex].type = EventType::NONE;
+            } else if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_SCENE) {
+                incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                    ambulances[randomAmbulanceIndex].currentGridId,
+                    ambulanceGridId,
+                    false,
+                    events[currentAmbulanceEventIndex].triageImpression,
+                    events[currentAmbulanceEventIndex].prevTimer
+                );
+
+                // set old event metrics to resource appointment resetting the event
+                int oldMetrics = events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"];
+                events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"] = 0;
+
+                events[currentAmbulanceEventIndex].metrics["duration_resource_appointment"] += incrementSeconds + oldMetrics;
+
+                events[currentAmbulanceEventIndex].type = EventType::RESOURCE_APPOINTMENT;
+
+                // reset timer
+                int oldEventTravelTime = ODMatrix::getInstance().getTravelTime(
+                    ambulances[randomAmbulanceIndex].currentGridId,
+                    events[currentAmbulanceEventIndex].gridId,
+                    false,
+                    events[currentAmbulanceEventIndex].triageImpression,
+                    events[currentAmbulanceEventIndex].prevTimer
+                );
+
+                events[currentAmbulanceEventIndex].timer -= oldEventTravelTime;
+                events[currentAmbulanceEventIndex].timer += incrementSeconds;
+
+                sortAllEvents = true;
+            }
+
             events[currentAmbulanceEventIndex].assignedAmbulanceIndex = -1;
-            events[currentAmbulanceEventIndex].type = EventType::NONE;
 
+            ambulances[randomAmbulanceIndex].timeUnavailable += incrementSeconds;
             ambulances[randomAmbulanceIndex].currentGridId = ambulanceGridId;
         }
 
@@ -98,17 +145,19 @@ void RandomDispatchEngineStrategy::assigningAmbulance(
     if (availableAmbulanceIndicies.empty()) {
         events[eventIndex].updateTimer(60, "duration_resource_appointment");
 
-        return;
+        return sortAllEvents;
     }
 
     events[eventIndex].assignedAmbulanceIndex = randomAmbulanceIndex;
     ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = events[eventIndex].id;
-    events[eventIndex].type = EventType::DISPATCHING_TO_SCENE;
+    events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
         events[eventIndex].secondsWaitResourcePreparingDeparture,
         "duration_resource_preparing_departure"
     );
     ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitResourcePreparingDeparture;
+
+    return sortAllEvents;
 }
 
 void RandomDispatchEngineStrategy::dispatchingToHospital(
@@ -160,6 +209,21 @@ void RandomDispatchEngineStrategy::reallocating(
     // create a vector of ambulance indices
     std::vector<int> ambulanceIndices(ambulances.size());
     std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
+
+    // remove ambulances from possible reallocation if at correct depot
+    for (size_t depotIndex = 0; depotIndex < depotIndices.size(); depotIndex++) {
+        for (int ambulanceIndex = 0; ambulanceIndex < ambulances.size(); ambulanceIndex++) {
+            if (allocation[depotIndex] <= 0) {
+                break;
+            }
+
+            if (ambulances[ambulanceIndex].allocatedDepotIndex == depotIndex) {
+                ambulanceIndices.erase(std::remove(ambulanceIndices.begin(), ambulanceIndices.end(), ambulanceIndex), ambulanceIndices.end());
+
+                allocation[depotIndex]--;
+            }
+        }
+    }
 
     // shuffle the indicies to adhere to the random strategy
     std::shuffle(ambulanceIndices.begin(), ambulanceIndices.end(), rnd);

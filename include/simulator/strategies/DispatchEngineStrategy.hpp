@@ -15,7 +15,13 @@
 
 class DispatchEngineStrategy {
  protected:
-    static void assigningAmbulance(
+    static bool assigningAmbulance(
+        std::mt19937& rnd,
+        std::vector<Ambulance>& ambulances,
+        std::vector<Event>& events,
+        const int eventIndex
+    );
+    static void preparingToDispatchToScene(
         std::mt19937& rnd,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,
@@ -53,7 +59,7 @@ class DispatchEngineStrategy {
     );
 
  public:
-    static void run(
+    static bool run(
         std::mt19937& rnd,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,

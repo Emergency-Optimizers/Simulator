@@ -26,7 +26,7 @@ std::vector<Event> Simulator::run() {
     int eventIndex = eventHandler.getNextEventIndex();
 
     while (eventIndex != -1) {
-        DispatchEngine::dispatch(
+        const bool sortAllEvents = DispatchEngine::dispatch(
             dispatchStrategy,
             rnd,
             ambulanceAllocator.ambulances,
@@ -34,7 +34,11 @@ std::vector<Event> Simulator::run() {
             eventIndex
         );
 
-        eventHandler.sortEvent(eventIndex);
+        if (sortAllEvents) {
+            eventHandler.sortEvents();
+        } else {
+            eventHandler.sortEvent(eventIndex);
+        }
 
         eventIndex = eventHandler.getNextEventIndex();
     }

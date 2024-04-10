@@ -16,7 +16,7 @@
 
 class DispatchEngine {
  public:
-    static void dispatch(
+    static bool dispatch(
         const DispatchEngineStrategyType strategy,
         std::mt19937& rnd,
         std::vector<Ambulance>& ambulances,

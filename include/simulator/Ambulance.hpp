@@ -8,6 +8,7 @@
 
 /* external libraries */
 #include <vector>
+#include <string>
 /* internal libraries */
 #include "simulator/Event.hpp"
 
@@ -29,7 +30,8 @@ struct Ambulance {
     bool isAvailable(
         const std::vector<Event>& events,
         const int eventIndex,
-        const time_t& currentTime
+        const time_t& currentTime,
+        const std::string& currentEventTriageImpression
     );
 
     void scheduleBreaks(
@@ -38,4 +40,5 @@ struct Ambulance {
         const int depotSize,
         const int depotNum
     );
+    bool higherTriagePriority(const std::string& triage, const std::string& triageToCompare);
 };

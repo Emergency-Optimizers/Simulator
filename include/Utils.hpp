@@ -51,7 +51,8 @@ float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
 std::vector<unsigned> getAvailableAmbulanceIndicies(
     std::vector<Ambulance>& ambulances,
     const std::vector<Event>& events,
-    const time_t& currentTime
+    const time_t& currentTime,
+    const std::string& currentEventTriageImpression
 );
 int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay);
 int weightedLottery(

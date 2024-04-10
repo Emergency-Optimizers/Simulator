@@ -160,7 +160,8 @@ float timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
 std::vector<unsigned> getAvailableAmbulanceIndicies(
     std::vector<Ambulance>& ambulances,
     const std::vector<Event>& events,
-    const time_t& currentTime
+    const time_t& currentTime,
+    const std::string& currentEventTriageImpression
 ) {
     std::vector<unsigned> availableAmbulanceIndicies;
 
@@ -171,7 +172,7 @@ std::vector<unsigned> getAvailableAmbulanceIndicies(
             eventIndex = findEventIndexFromId(events, ambulances[i].assignedEventId);
         }
 
-        if (ambulances[i].isAvailable(events, eventIndex, currentTime)) {
+        if (ambulances[i].isAvailable(events, eventIndex, currentTime, currentEventTriageImpression)) {
             availableAmbulanceIndicies.push_back(i);
         }
     }

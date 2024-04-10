@@ -116,8 +116,10 @@ int main() {
         double avgResponseTimeV1Urban = averageResponseTime(simulatedEvents, "V1", true);
         double avgResponseTimeV1Nonurban = averageResponseTime(simulatedEvents, "V1", false);
 
+        printAmbulanceWorkload(ambulanceAllocator.ambulances);
+
         std::cout
-            << "Goal:" << std::endl
+            << "\nGoal:" << std::endl
             << "\t A, urban: <12 min" << std::endl
             << "\t A, non-urban: <25 min" << std::endl
             << "\t H, urban: <30 min" << std::endl

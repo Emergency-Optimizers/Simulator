@@ -16,7 +16,7 @@
 
 class RandomDispatchEngineStrategy : public DispatchEngineStrategy {
  protected:
-    static void assigningAmbulance(
+    static bool assigningAmbulance(
         std::mt19937& rnd,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,
@@ -36,7 +36,7 @@ class RandomDispatchEngineStrategy : public DispatchEngineStrategy {
     );
 
  public:
-    static void run(
+    static bool run(
         std::mt19937& rnd,
         std::vector<Ambulance>& ambulances,
         std::vector<Event>& events,

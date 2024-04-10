@@ -69,6 +69,7 @@ class Settings {
         {"PARENT_SELECTION_RANK_SELECTION_PRESSURE", &toDouble},
         {"SURVIVOR_SELECTION_RANK_SELECTION_PRESSURE", &toDouble},
         {"SURVIVOR_SELECTION_KEEP_N_BEST", &toInt},
+        {"DISPATCH_STRATEGY_PRIORITIZE_TRIAGE", &toBool},
     };
 
  public:
@@ -125,11 +126,12 @@ class Settings {
     static const T get(const std::string& key) {
         auto it = configValues.find(key);
         if (it == configValues.end()) {
-            throw std::runtime_error("Key not found");
+            throwError("Variable not found in settings.");
         }
 
         const auto& value = it->second;
         if (!std::holds_alternative<T>(value)) {
+            throwError("Requested variable type doesn't match the variable in settings.");
             throw std::bad_variant_access();
         }
 

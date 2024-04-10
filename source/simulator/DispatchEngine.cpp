@@ -9,7 +9,7 @@
 #include "simulator/strategies/RandomDispatchEngineStrategy.hpp"
 #include "simulator/strategies/ClosestDispatchEngineStrategy.hpp"
 
-void DispatchEngine::dispatch(
+bool DispatchEngine::dispatch(
     const DispatchEngineStrategyType strategy,
     std::mt19937& rnd,
     std::vector<Ambulance>& ambulances,
@@ -18,20 +18,18 @@ void DispatchEngine::dispatch(
 ) {
     switch (strategy) {
         case DispatchEngineStrategyType::CLOSEST:
-            ClosestDispatchEngineStrategy::run(
+            return ClosestDispatchEngineStrategy::run(
                 rnd,
                 ambulances,
                 events,
                 eventIndex
             );
-            break;
         default:
-            RandomDispatchEngineStrategy::run(
+            return RandomDispatchEngineStrategy::run(
                 rnd,
                 ambulances,
                 events,
                 eventIndex
             );
-            break;
     }
 }
