@@ -126,6 +126,9 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
 
     std::vector<std::vector<double>> totalIncidentsPerTriage(24, std::vector<double>(3, 0));
     std::vector<double> totalIncidents(24, 0);
+    int dayOfYearFinished = -1;
+
+    std::vector<std::string> triageImpressions = {"A", "H", "V1"};
 
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
@@ -133,25 +136,28 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
             filteredIncidents[i]
         ).value();
 
+        if (timeCallReceived.tm_yday == dayOfYearFinished) {
+            continue;
+        } else {
+            dayOfYearFinished = timeCallReceived.tm_yday;
+        }
+
         int dayDiff = calculateDayDifference(timeCallReceived, month, day);
         double weight = weights[dayDiff];
 
-        std::string triageImpression = Incidents::getInstance().get<std::string>(
-            "triage_impression_during_call",
-            filteredIncidents[i]
-        );
+        for (int indexHour = 0; indexHour < 24; indexHour++) {
+            for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
+                int numIncidents = Incidents::getInstance().get<int>(
+                    "total_" + triageImpressions[indexTriage] + "_incidents_hour_" + std::to_string(indexHour),
+                    filteredIncidents[i]
+                );
 
-        int indexTriage;
-        if (triageImpression == "A") {
-            indexTriage = 0;
-        } else if (triageImpression == "H") {
-            indexTriage = 1;
-        } else if (triageImpression == "V1") {
-            indexTriage = 2;
+                double weightedNum = static_cast<double>(numIncidents) * weight;
+
+                totalIncidentsPerTriage[indexHour][indexTriage] += weightedNum;
+                totalIncidents[indexHour] += weightedNum;
+            }
         }
-
-        totalIncidentsPerTriage[timeCallReceived.tm_hour][indexTriage] += weight;
-        totalIncidents[timeCallReceived.tm_hour] += weight;
     }
 
     for (int indexHour = 0; indexHour < 24; indexHour++) {
@@ -417,7 +423,15 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
 
             for (; hour < 24; hour++) {
                 totalNight += Incidents::getInstance().get<int>(
-                    "total_incidents_hour_" + std::to_string(hour),
+                    "total_A_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+                totalNight += Incidents::getInstance().get<int>(
+                    "total_H_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+                totalNight += Incidents::getInstance().get<int>(
+                    "total_V1_incidents_hour_" + std::to_string(hour),
                     i
                 );
             }
@@ -428,7 +442,15 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
 
             for (int hour = 0; hour < nightShiftEnds + 1; hour++) {
                 totalMorning += Incidents::getInstance().get<int>(
-                    "total_incidents_hour_" + std::to_string(hour),
+                    "total_A_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+                totalMorning += Incidents::getInstance().get<int>(
+                    "total_H_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+                totalMorning += Incidents::getInstance().get<int>(
+                    "total_V1_incidents_hour_" + std::to_string(hour),
                     i
                 );
             }
@@ -439,7 +461,15 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
 
             for (; hour < dayShiftEnds + 1; hour++) {
                 totalDay += Incidents::getInstance().get<int>(
-                    "total_incidents_hour_" + std::to_string(hour),
+                    "total_A_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+                totalDay += Incidents::getInstance().get<int>(
+                    "total_H_incidents_hour_" + std::to_string(hour),
+                    i
+                );
+                totalDay += Incidents::getInstance().get<int>(
+                    "total_V1_incidents_hour_" + std::to_string(hour),
                     i
                 );
             }

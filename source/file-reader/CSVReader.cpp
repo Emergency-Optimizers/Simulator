@@ -15,7 +15,7 @@
 void CSVReader::loadFromFile(const std::string& filename, const std::string& printPrefix) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
+        throwError("Could not open file at path '" + filename + "'.");
     }
 
     // count total lines

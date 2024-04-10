@@ -631,8 +631,6 @@ double averageResponseTime(
 }
 
 double responseTimeViolations(std::vector<Event>& simulatedEvents, const int allocationIndex) {
-    int totalViolations = 0;
-
     int eventIndex = 0;
     int maxEventIndex = simulatedEvents.size();
 
@@ -658,6 +656,7 @@ double responseTimeViolations(std::vector<Event>& simulatedEvents, const int all
     }
 
     double totalEvents = 0.0;
+    double totalViolations = 0.0;
 
     for (; eventIndex < maxEventIndex; eventIndex++) {
         if (simulatedEvents[eventIndex].utility) {
@@ -686,7 +685,7 @@ double responseTimeViolations(std::vector<Event>& simulatedEvents, const int all
         totalEvents++;
     }
 
-    return static_cast<double>(totalViolations) / totalEvents;
+    return totalViolations / totalEvents;
 }
 
 void printTimeSegmentedAllocationTable(

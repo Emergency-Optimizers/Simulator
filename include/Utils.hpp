@@ -99,7 +99,7 @@ void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances);
 void throwError(const std::string& msg);
 
 template <typename T>
-int findIndex(const std::vector<T>& vec, const T& value) {
+const int findIndex(const std::vector<T>& vec, const T& value) {
     auto it = std::find(vec.begin(), vec.end(), value);
 
     if (it != vec.end()) {

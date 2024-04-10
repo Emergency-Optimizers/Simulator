@@ -29,7 +29,7 @@ class CSVReader {
     void printRow(const int index);
 
     template <typename T>
-    T get(const std::string& header, const int index) {
+    T get(const std::string& header, const int index) const {
         return std::get<T>(rows[index][findIndex(headers, header)]);
     }
 };
