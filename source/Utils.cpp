@@ -315,7 +315,8 @@ void writeMetrics(std::vector<Event>& events) {
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as a string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = *std::localtime(&now_time);
+    std::tm bt = {};
+    localtime_s(&bt, &now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
     std::string timestamp = oss.str();
@@ -383,7 +384,8 @@ void saveDistributionToFile(const std::vector<std::vector<double>>& distribution
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = *std::localtime(&now_time);
+    std::tm bt = {};
+    localtime_s(&bt, &now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
 
@@ -414,7 +416,8 @@ void save1dDistributionToFile(const std::vector<double>& distribution, const std
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as a string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = *std::localtime(&now_time);
+    std::tm bt = {};
+    localtime_s(&bt, &now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
 
@@ -437,7 +440,8 @@ void save2dDistributionToFile(const std::vector<std::vector<double>>& distributi
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = *std::localtime(&now_time);
+    std::tm bt = {};
+    localtime_s(&bt, &now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
 
@@ -557,8 +561,9 @@ int findEventIndexFromId(const std::vector<Event>& events, const int id) {
 }
 
 bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd) {
-    std::tm* timeInfo = std::localtime(&eventTimer);
-    int hour = timeInfo->tm_hour;
+    std::tm timeInfo = {};
+    localtime_s(&timeInfo, &eventTimer);
+    int hour = timeInfo.tm_hour;
 
     return hour >= dayShiftStart && hour <= dayShiftEnd;
 }

@@ -39,7 +39,8 @@ void AmbulanceAllocator::allocate(
         }
     }
 
-    std::tm shiftStartTm = *std::localtime(&events[events.size() - 1].timer);
+    std::tm shiftStartTm = {};
+    localtime_s(&shiftStartTm, &events[events.size() - 1].timer);
 
     shiftStartTm.tm_hour = Settings::get<int>("DAY_SHIFT_START");
     shiftStartTm.tm_min = 0;
@@ -102,7 +103,8 @@ void AmbulanceAllocator::allocateAndScheduleBreaks(const time_t& shiftStart, con
                     << ", Depot Size: " << depotSize << std::endl;
 
         for (time_t breakTime : ambulance.scheduledBreaks) {
-            std::tm* ptm = std::localtime(&breakTime);
+            std::tm ptm = {};
+            localtime_s(&ptm, &breakTime);
             std::cout << "Scheduled Break: " << std::put_time(ptm, "%Y-%m-%d %H:%M:%S") << std::endl;
         }*/
     }
