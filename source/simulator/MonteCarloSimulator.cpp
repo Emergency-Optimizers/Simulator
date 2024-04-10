@@ -403,7 +403,6 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
     int totalNight = -1;
 
     for (int i = 0; i < Incidents::getInstance().size(); i++) {
-
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
         mktime(&timeCallReceived);
 

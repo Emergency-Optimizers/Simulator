@@ -92,7 +92,8 @@ void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,
     const std::vector<std::vector<int>>& allocations,
-    std::vector<Event>& simulatedEvents
+    std::vector<Event>& simulatedEvents,
+    const std::vector<double>& allocationsFitness
 );
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances);
 void throwError(const std::string& msg);

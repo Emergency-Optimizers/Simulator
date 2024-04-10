@@ -117,7 +117,13 @@ void PopulationGA::evolve(int generations) {
     // write metrics to file
     writeMetrics(finalIndividual.simulatedEvents);
 
-    printTimeSegmentedAllocationTable(dayShift, numTimeSegments, finalIndividual.genotype, finalIndividual.simulatedEvents);
+    printTimeSegmentedAllocationTable(
+        dayShift,
+        numTimeSegments,
+        finalIndividual.genotype,
+        finalIndividual.simulatedEvents,
+        finalIndividual.allocationsFitness
+    );
 
     // printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }

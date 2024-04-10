@@ -685,7 +685,8 @@ void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,
     const std::vector<std::vector<int>>& allocations,
-    std::vector<Event>& simulatedEvents
+    std::vector<Event>& simulatedEvents,
+    const std::vector<double>& allocationsFitness
 ) {
     std::cout << "\n";
     std::vector<std::string> depotNames;
@@ -712,20 +713,14 @@ void printTimeSegmentedAllocationTable(
         depotNames.push_back(depotName);
     }
 
-    std::vector<double> fitnessValues;
-    for (int allocationsIndex = 0; allocationsIndex < allocations.size(); allocationsIndex++) {
-        // fitnessValues.push_back(averageResponseTime(simulatedEvents, "A", true, allocationsIndex));
-        fitnessValues.push_back(responseTimeViolations(simulatedEvents, allocationsIndex));
-    }
-
     // print header
     std::cout << std::left << std::setw(6) << "Depot" << "|";
     for (int d = 0; d < depotIndicies.size(); ++d) {
-        std::cout << std::right << std::setw(3) << d; // Depot indexes as headers
+        std::cout << std::right << std::setw(3) << d;
     }
-    std::cout << std::setw(8) << " Fitness" << std::endl;
+    std::cout << std::setw(9) << " Fitness" << std::endl;
 
-    std::cout << std::string(6, '-') << "+" << std::string((3 * depotIndicies.size()) + 7, '-') << std::endl;
+    std::cout << std::string(6, '-') << "+" << std::string((3 * depotIndicies.size()) + 9, '-') << std::endl;
 
     // print rows
     for (size_t t = 0; t < allocations.size(); ++t) {
@@ -735,7 +730,7 @@ void printTimeSegmentedAllocationTable(
         }
 
         // print fitness cell
-        std::cout << std::fixed << std::setprecision(2) << std::setw(8) << fitnessValues[t] << std::endl;
+        std::cout << std::fixed << std::setprecision(2) << std::setw(9) << allocationsFitness[t] << std::endl;
     }
 }
 

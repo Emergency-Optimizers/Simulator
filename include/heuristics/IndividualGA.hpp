@@ -31,6 +31,13 @@ class IndividualGA {
     double objectiveAvgResponseTimeRuralH = 0.0;
     double objectiveAvgResponseTimeRuralV1 = 0.0;
     double objectiveNumViolations = 0.0;
+    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanA;
+    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanH;
+    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanV1;
+    std::vector<double> allocationsObjectiveAvgResponseTimeRuralA;
+    std::vector<double> allocationsObjectiveAvgResponseTimeRuralH;
+    std::vector<double> allocationsObjectiveAvgResponseTimeRuralV1;
+    std::vector<double> allocationsObjectiveNumViolations;
 
     void generateGenotype(
         const bool isChild,
@@ -48,6 +55,7 @@ class IndividualGA {
 
  public:
     double fitness = 0.0;
+    std::vector<double> allocationsFitness;
     std::vector<std::vector<int>> genotype;
     std::vector<Event> simulatedEvents;
     std::vector<Ambulance> simulatedAmbulances;

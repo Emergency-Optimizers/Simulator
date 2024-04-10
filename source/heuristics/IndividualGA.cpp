@@ -26,7 +26,15 @@ IndividualGA::IndividualGA(
 ) : rnd(rnd),
     numAmbulances(numAmbulances),
     numAllocations(numAllocations),
-    numDepots(numDepots) {
+    numDepots(numDepots),
+    allocationsObjectiveAvgResponseTimeUrbanA(numAllocations, 0.0),
+    allocationsObjectiveAvgResponseTimeUrbanH(numAllocations, 0.0),
+    allocationsObjectiveAvgResponseTimeUrbanV1(numAllocations, 0.0),
+    allocationsObjectiveAvgResponseTimeRuralA(numAllocations, 0.0),
+    allocationsObjectiveAvgResponseTimeRuralH(numAllocations, 0.0),
+    allocationsObjectiveAvgResponseTimeRuralV1(numAllocations, 0.0),
+    allocationsObjectiveNumViolations(numAllocations, 0.0),
+    allocationsFitness(numAllocations, 0.0) {
     generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
 }
 
@@ -137,6 +145,17 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
     objectiveAvgResponseTimeRuralV1 = averageResponseTime(simulatedEvents, "V1", false);
     objectiveNumViolations = responseTimeViolations(simulatedEvents);
 
+    // update objectives per allocation
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        allocationsObjectiveAvgResponseTimeUrbanA[allocationIndex] = averageResponseTime(simulatedEvents, "A", true, allocationIndex);
+        allocationsObjectiveAvgResponseTimeUrbanH[allocationIndex] = averageResponseTime(simulatedEvents, "H", true, allocationIndex);
+        allocationsObjectiveAvgResponseTimeUrbanV1[allocationIndex] = averageResponseTime(simulatedEvents, "V1", true, allocationIndex);
+        allocationsObjectiveAvgResponseTimeRuralA[allocationIndex] = averageResponseTime(simulatedEvents, "A", false, allocationIndex);
+        allocationsObjectiveAvgResponseTimeRuralH[allocationIndex] = averageResponseTime(simulatedEvents, "H", false, allocationIndex);
+        allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] = averageResponseTime(simulatedEvents, "V1", false, allocationIndex);
+        allocationsObjectiveNumViolations[allocationIndex] = responseTimeViolations(simulatedEvents, allocationIndex);
+    }
+
     // update metrics (fitness, rank, etc.)
     updateMetrics();
 
@@ -145,14 +164,33 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
 }
 
 void IndividualGA::updateMetrics() {
+    const double weightAvgResponseTimeUrbanA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A");
+    const double weightAvgResponseTimeUrbanH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H");
+    const double weightAvgResponseTimeUrbanV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_V1");
+    const double weightAvgResponseTimeRuralA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_A");
+    const double weightAvgResponseTimeRuralH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H");
+    const double weightAvgResponseTimeRuralV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1");
+    const double weightNumViolations = Settings::get<double>("OBJECTIVE_WEIGHT_NUM_VIOLATIONS");
+
     fitness = 0.0;
-    fitness += objectiveAvgResponseTimeUrbanA * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A");
-    fitness += objectiveAvgResponseTimeUrbanH * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H");
-    fitness += objectiveAvgResponseTimeUrbanV1 * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_V1");
-    fitness += objectiveAvgResponseTimeRuralA * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_A");
-    fitness += objectiveAvgResponseTimeRuralH * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H");
-    fitness += objectiveAvgResponseTimeRuralV1 * Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1");
-    fitness += objectiveNumViolations * Settings::get<double>("OBJECTIVE_WEIGHT_NUM_VIOLATIONS");
+    fitness += objectiveAvgResponseTimeUrbanA * weightAvgResponseTimeUrbanA;
+    fitness += objectiveAvgResponseTimeUrbanH * weightAvgResponseTimeUrbanH;
+    fitness += objectiveAvgResponseTimeUrbanV1 * weightAvgResponseTimeUrbanV1;
+    fitness += objectiveAvgResponseTimeRuralA * weightAvgResponseTimeRuralA;
+    fitness += objectiveAvgResponseTimeRuralH * weightAvgResponseTimeRuralH;
+    fitness += objectiveAvgResponseTimeRuralV1 * weightAvgResponseTimeRuralV1;
+    fitness += objectiveNumViolations * weightNumViolations;
+
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        allocationsFitness[allocationIndex] = 0.0;
+        allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeUrbanA[allocationIndex] * weightAvgResponseTimeUrbanA;
+        allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeUrbanH[allocationIndex] * weightAvgResponseTimeUrbanH;
+        allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeUrbanV1[allocationIndex] * weightAvgResponseTimeUrbanV1;
+        allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralA[allocationIndex] * weightAvgResponseTimeRuralA;
+        allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralH[allocationIndex] * weightAvgResponseTimeRuralH;
+        allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] * weightAvgResponseTimeRuralV1;
+        allocationsFitness[allocationIndex] += allocationsObjectiveNumViolations[allocationIndex] * weightNumViolations;
+    }
 }
 
 void IndividualGA::mutate(
