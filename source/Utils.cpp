@@ -660,6 +660,10 @@ double responseTimeViolations(std::vector<Event>& simulatedEvents, const int all
     double totalEvents = 0.0;
 
     for (; eventIndex < maxEventIndex; eventIndex++) {
+        if (simulatedEvents[eventIndex].utility) {
+            continue;
+        }
+
         int responseTime = simulatedEvents[eventIndex].getResponseTime();
 
         bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[eventIndex].incidentGridId];
