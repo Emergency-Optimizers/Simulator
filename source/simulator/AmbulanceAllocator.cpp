@@ -56,7 +56,9 @@ void AmbulanceAllocator::allocate(
         shiftEnd -= shiftLengthSeconds;
     }
 
-    allocateAndScheduleBreaks(shiftStart, shiftEnd);
+    if (Settings::get<bool>("SCHEDULE_BREAKS")) {
+        allocateAndScheduleBreaks(shiftStart, shiftEnd);
+    }
 
     // add reallocation events
     if (allocations.size() > 1) {

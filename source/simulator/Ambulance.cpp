@@ -76,21 +76,25 @@ void Ambulance::scheduleBreaks(
     const int depotSize,
     const int depotNum
 ) {
+    const time_t HALF_HOUR = 1800;
+    const time_t ONE_HOUR = 3600;
+    const time_t FOUR_HOURS = 14400;
+
     time_t shiftLength = shiftEnd - shiftStart;
     // constraints: at least 1 hour after shift starts and 1 hour before shift ends. minimum 4 hours between each break
-    time_t firstHourEnd = shiftStart + 3600;
-    time_t lastHourStart = shiftEnd - 3600;
-    time_t minBreakInterval = 14400;
+    time_t firstHourEnd = shiftStart + ONE_HOUR;
+    time_t lastHourStart = shiftEnd - ONE_HOUR;
+    time_t minBreakInterval = FOUR_HOURS;
 
     time_t break1Start = firstHourEnd + (depotNum % depotSize) * (minBreakInterval / depotSize);
-    if (break1Start > lastHourStart - 1800) {
+    if (break1Start > lastHourStart - HALF_HOUR) {
         break1Start = firstHourEnd;
     }
 
     time_t break2Start = break1Start + minBreakInterval;
 
-    if (break2Start + 1800 > lastHourStart) {
-        break2Start = lastHourStart - 1800;
+    if (break2Start + HALF_HOUR > lastHourStart) {
+        break2Start = lastHourStart - HALF_HOUR;
     }
 
     scheduledBreaks.push_back(break1Start);

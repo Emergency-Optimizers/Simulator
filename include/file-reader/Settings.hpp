@@ -70,6 +70,7 @@ class Settings {
         {"SURVIVOR_SELECTION_RANK_SELECTION_PRESSURE", &toDouble},
         {"SURVIVOR_SELECTION_KEEP_N_BEST", &toInt},
         {"DISPATCH_STRATEGY_PRIORITIZE_TRIAGE", &toBool},
+        {"SCHEDULE_BREAKS", &toBool},
     };
 
  public:
