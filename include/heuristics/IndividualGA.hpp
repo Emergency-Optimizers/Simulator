@@ -24,20 +24,6 @@ class IndividualGA {
     int numAllocations;
     int numDepots;
     bool metricsChecked = false;
-    double objectiveAvgResponseTimeUrbanA = 0.0;
-    double objectiveAvgResponseTimeUrbanH = 0.0;
-    double objectiveAvgResponseTimeUrbanV1 = 0.0;
-    double objectiveAvgResponseTimeRuralA = 0.0;
-    double objectiveAvgResponseTimeRuralH = 0.0;
-    double objectiveAvgResponseTimeRuralV1 = 0.0;
-    double objectiveNumViolations = 0.0;
-    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanA;
-    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanH;
-    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanV1;
-    std::vector<double> allocationsObjectiveAvgResponseTimeRuralA;
-    std::vector<double> allocationsObjectiveAvgResponseTimeRuralH;
-    std::vector<double> allocationsObjectiveAvgResponseTimeRuralV1;
-    std::vector<double> allocationsObjectiveNumViolations;
 
     void generateGenotype(
         const bool isChild,
@@ -49,6 +35,7 @@ class IndividualGA {
     void evenGenotype();
     void redistributeMutation(const double mutationProbability);
     void scrambleMutation(const double mutationProbability);
+    void IndividualGA::neighborDuplicationMutation(const double mutationProbability);
 
  protected:
     virtual void updateMetrics();
@@ -56,6 +43,20 @@ class IndividualGA {
  public:
     double fitness = 0.0;
     std::vector<double> allocationsFitness;
+    double objectiveAvgResponseTimeUrbanA = 0.0;
+    double objectiveAvgResponseTimeUrbanH = 0.0;
+    double objectiveAvgResponseTimeUrbanV1 = 0.0;
+    double objectiveAvgResponseTimeRuralA = 0.0;
+    double objectiveAvgResponseTimeRuralH = 0.0;
+    double objectiveAvgResponseTimeRuralV1 = 0.0;
+    double objectivePercentageViolations = 0.0;
+    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanA;
+    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanH;
+    std::vector<double> allocationsObjectiveAvgResponseTimeUrbanV1;
+    std::vector<double> allocationsObjectiveAvgResponseTimeRuralA;
+    std::vector<double> allocationsObjectiveAvgResponseTimeRuralH;
+    std::vector<double> allocationsObjectiveAvgResponseTimeRuralV1;
+    std::vector<double> allocationsObjectivePercentageViolations;
     std::vector<std::vector<int>> genotype;
     std::vector<Event> simulatedEvents;
     std::vector<Ambulance> simulatedAmbulances;

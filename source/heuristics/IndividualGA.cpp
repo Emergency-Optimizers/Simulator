@@ -33,7 +33,7 @@ IndividualGA::IndividualGA(
     allocationsObjectiveAvgResponseTimeRuralA(numAllocations, 0.0),
     allocationsObjectiveAvgResponseTimeRuralH(numAllocations, 0.0),
     allocationsObjectiveAvgResponseTimeRuralV1(numAllocations, 0.0),
-    allocationsObjectiveNumViolations(numAllocations, 0.0),
+    allocationsObjectivePercentageViolations(numAllocations, 0.0),
     allocationsFitness(numAllocations, 0.0) {
     generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
 }
@@ -143,7 +143,7 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
     objectiveAvgResponseTimeRuralA = averageResponseTime(simulatedEvents, "A", false);
     objectiveAvgResponseTimeRuralH = averageResponseTime(simulatedEvents, "H", false);
     objectiveAvgResponseTimeRuralV1 = averageResponseTime(simulatedEvents, "V1", false);
-    objectiveNumViolations = responseTimeViolations(simulatedEvents);
+    objectivePercentageViolations = responseTimeViolations(simulatedEvents);
 
     // update objectives per allocation
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
@@ -153,7 +153,7 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
         allocationsObjectiveAvgResponseTimeRuralA[allocationIndex] = averageResponseTime(simulatedEvents, "A", false, allocationIndex);
         allocationsObjectiveAvgResponseTimeRuralH[allocationIndex] = averageResponseTime(simulatedEvents, "H", false, allocationIndex);
         allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] = averageResponseTime(simulatedEvents, "V1", false, allocationIndex);
-        allocationsObjectiveNumViolations[allocationIndex] = responseTimeViolations(simulatedEvents, allocationIndex);
+        allocationsObjectivePercentageViolations[allocationIndex] = responseTimeViolations(simulatedEvents, allocationIndex);
     }
 
     // update metrics (fitness, rank, etc.)
@@ -170,7 +170,7 @@ void IndividualGA::updateMetrics() {
     const double weightAvgResponseTimeRuralA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_A");
     const double weightAvgResponseTimeRuralH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H");
     const double weightAvgResponseTimeRuralV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1");
-    const double weightNumViolations = Settings::get<double>("OBJECTIVE_WEIGHT_NUM_VIOLATIONS");
+    const double weightPercentageViolations = Settings::get<double>("OBJECTIVE_WEIGHT_PERCENTAGE_VIOLATIONS");
 
     fitness = 0.0;
     fitness += objectiveAvgResponseTimeUrbanA * weightAvgResponseTimeUrbanA;
@@ -179,7 +179,7 @@ void IndividualGA::updateMetrics() {
     fitness += objectiveAvgResponseTimeRuralA * weightAvgResponseTimeRuralA;
     fitness += objectiveAvgResponseTimeRuralH * weightAvgResponseTimeRuralH;
     fitness += objectiveAvgResponseTimeRuralV1 * weightAvgResponseTimeRuralV1;
-    fitness += objectiveNumViolations * weightNumViolations;
+    fitness += objectivePercentageViolations * weightPercentageViolations;
 
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         allocationsFitness[allocationIndex] = 0.0;
@@ -189,7 +189,7 @@ void IndividualGA::updateMetrics() {
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralA[allocationIndex] * weightAvgResponseTimeRuralA;
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralH[allocationIndex] * weightAvgResponseTimeRuralH;
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] * weightAvgResponseTimeRuralV1;
-        allocationsFitness[allocationIndex] += allocationsObjectiveNumViolations[allocationIndex] * weightNumViolations;
+        allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolations[allocationIndex] * weightPercentageViolations;
     }
 }
 
@@ -205,6 +205,9 @@ void IndividualGA::mutate(
             break;
         case MutationType::SCRAMBLE:
             scrambleMutation(mutationProbability);
+            break;
+        case MutationType::NEIGHBOR_DUPLICATION:
+            neighborDuplicationMutation(mutationProbability);
             break;
     }
 }
@@ -259,6 +262,27 @@ void IndividualGA::scrambleMutation(const double mutationProbability) {
         std::shuffle(subsetToScramble.begin(), subsetToScramble.end(), rnd);
 
         std::copy(subsetToScramble.begin(), subsetToScramble.end(), genotype[allocationIndex].begin() + start);
+    }
+}
+
+void IndividualGA::neighborDuplicationMutation(const double mutationProbability) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        // check if allocation should be mutated
+        if (getRandomDouble(rnd) > mutationProbability) {
+            continue;
+        }
+
+        // check if allocation index before and after is within bounds and replace allocation
+        if (allocationIndex - 1 >= 0) {
+            genotype[allocationIndex - 1] = genotype[allocationIndex];
+        }
+
+        if (allocationIndex + 1 < numAllocations) {
+            genotype[allocationIndex + 1] = genotype[allocationIndex];
+        }
+
+        // skip the next allocation as to not spread the same allocation too much
+        allocationIndex++;
     }
 }
 

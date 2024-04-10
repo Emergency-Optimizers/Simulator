@@ -9,4 +9,5 @@
 enum class CrossoverType {
     SINGLE_POINT,
     SEGMENT_SWAP,
+    BEST_ALLOCATION,
 };

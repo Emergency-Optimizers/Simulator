@@ -63,7 +63,7 @@ void PopulationGA::generatePopulation() {
 
 void PopulationGA::evolve(int generations) {
     // init progress bar
-    ProgressBar progressBar(generations, progressBarPrefix);
+    ProgressBar progressBar(generations, progressBarPrefix, getProgressBarPostfix());
 
     for (int generationIndex = 0; generationIndex < generations; generationIndex++) {
         // create offspring
@@ -125,6 +125,27 @@ void PopulationGA::evolve(int generations) {
         finalIndividual.allocationsFitness
     );
 
+    std::cout
+        << "Goal:" << std::endl
+        << "\t A, urban: <12 min" << std::endl
+        << "\t A, rural: <25 min" << std::endl
+        << "\t H, urban: <30 min" << std::endl
+        << "\t H, rural: <40 min" << std::endl
+        << std::endl
+        << "Avg. response time (A, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanA << "s"
+        << " (" << finalIndividual.objectiveAvgResponseTimeUrbanA  / 60 << "m)" << std::endl
+        << "Avg. response time (A, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralA << "s"
+        << " (" << finalIndividual.objectiveAvgResponseTimeRuralA / 60 << "m)" << std::endl
+        << "Avg. response time (H, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanH << "s"
+        << " (" << finalIndividual.objectiveAvgResponseTimeUrbanH / 60 << "m)" << std::endl
+        << "Avg. response time (H, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralH << "s"
+        << " (" << finalIndividual.objectiveAvgResponseTimeRuralH / 60 << "m)" << std::endl
+        << "Avg. response time (V1, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanV1 << "s"
+        << " (" << finalIndividual.objectiveAvgResponseTimeUrbanV1 / 60 << "m)" << std::endl
+        << "Avg. response time (V1, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralV1 << "s"
+        << " (" << finalIndividual.objectiveAvgResponseTimeRuralV1 / 60 << "m)" << std::endl
+        << "Percentage violations: \t\t\t" << finalIndividual.objectivePercentageViolations * 100 << "%" << std::endl;
+
     // printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }
 
@@ -174,6 +195,12 @@ void PopulationGA::getPossibleMutations() {
         mutationsTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("MUTATION_TICKETS_NEIGHBOR_DUPLICATION");
+    if (tickets > 0.0 && numTimeSegments > 1) {
+        mutations.push_back(MutationType::NEIGHBOR_DUPLICATION);
+        mutationsTickets.push_back(tickets);
+    }
+
     // check if valid
     if (mutations.empty()) {
         throwError("No applicable mutations.");
@@ -195,8 +222,14 @@ void PopulationGA::getPossibleCrossovers() {
     }
 
     tickets = Settings::get<double>("CROSSOVER_TICKETS_SEGMENT_SWAP");
-    if (tickets > 0.0) {
+    if (tickets > 0.0 && numTimeSegments > 1) {
         crossovers.push_back(CrossoverType::SEGMENT_SWAP);
+        crossoversTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("CROSSOVER_TICKETS_BEST_ALLOCATION");
+    if (tickets > 0.0 && numTimeSegments > 1) {
+        crossovers.push_back(CrossoverType::BEST_ALLOCATION);
         crossoversTickets.push_back(tickets);
     }
 
@@ -513,6 +546,14 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
         case CrossoverType::SEGMENT_SWAP:
             offspringGenotypes = segmentSwapCrossover(parent1.genotype, parent2.genotype);
             break;
+        case CrossoverType::BEST_ALLOCATION:
+            offspringGenotypes = bestAllocationCrossover(
+                parent1.genotype,
+                parent2.genotype,
+                parent1.allocationsFitness,
+                parent2.allocationsFitness
+            );
+            break;
     }
 
     const bool isChild = true;
@@ -571,6 +612,33 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::segmentSwapCrossover(
          // swap entire time segments
         if (getRandomBool(rnd)) {
             std::swap(offspring1Genotype[t], offspring2Genotype[t]);
+        }
+    }
+
+    std::vector<std::vector<std::vector<int>>> offspring = {offspring1Genotype, offspring2Genotype};
+
+    return offspring;
+}
+
+std::vector<std::vector<std::vector<int>>> PopulationGA::bestAllocationCrossover(
+    const std::vector<std::vector<int>>& parent1Genotype,
+    const std::vector<std::vector<int>>& parent2Genotype,
+    const std::vector<double>& parent1AllocationsFitness,
+    const std::vector<double>& parent2AllocationsFitness
+) {
+    // initialize offspring genotypes to respective parents
+    std::vector<std::vector<int>> offspring1Genotype = parent1Genotype;
+    std::vector<std::vector<int>> offspring2Genotype = parent2Genotype;
+
+    // iterate over each time segment
+    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
+        // swap to best parent allocation
+        if (getRandomBool(rnd)) {
+            if (parent1AllocationsFitness[allocationIndex] < parent2AllocationsFitness[allocationIndex]) {
+                offspring2Genotype[allocationIndex] = parent1Genotype[allocationIndex];
+            } else {
+                offspring1Genotype[allocationIndex] = parent2Genotype[allocationIndex];
+            }
         }
     }
 

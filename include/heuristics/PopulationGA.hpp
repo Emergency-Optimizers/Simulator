@@ -81,6 +81,12 @@ class PopulationGA {
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype
     );
+    std::vector<std::vector<std::vector<int>>> bestAllocationCrossover(
+        const std::vector<std::vector<int>>& parent1Genotype,
+        const std::vector<std::vector<int>>& parent2Genotype,
+        const std::vector<double>& parent1AllocationsFitness,
+        const std::vector<double>& parent2AllocationsFitness
+    );
     IndividualGA createIndividual(const bool child);
     const IndividualGA getFittest() const;
     const int countUnique() const;
