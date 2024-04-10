@@ -132,19 +132,19 @@ void PopulationGA::evolve(int generations) {
         << "\t H, urban: <30 min" << std::endl
         << "\t H, rural: <40 min" << std::endl
         << std::endl
-        << "Avg. response time (A, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanA << "s"
-        << " (" << finalIndividual.objectiveAvgResponseTimeUrbanA  / 60 << "m)" << std::endl
-        << "Avg. response time (A, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralA << "s"
-        << " (" << finalIndividual.objectiveAvgResponseTimeRuralA / 60 << "m)" << std::endl
-        << "Avg. response time (H, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanH << "s"
-        << " (" << finalIndividual.objectiveAvgResponseTimeUrbanH / 60 << "m)" << std::endl
-        << "Avg. response time (H, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralH << "s"
-        << " (" << finalIndividual.objectiveAvgResponseTimeRuralH / 60 << "m)" << std::endl
+        << "Avg. response time (A, urban): \t\t" << finalIndividual.objectiveAvgResponseTimeUrbanA << "s"
+        << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanA  / 60.0) << "m)" << std::endl
+        << "Avg. response time (A, rural): \t\t" << finalIndividual.objectiveAvgResponseTimeRuralA << "s"
+        << " (" << (finalIndividual.objectiveAvgResponseTimeRuralA / 60.0) << "m)" << std::endl
+        << "Avg. response time (H, urban): \t\t" << finalIndividual.objectiveAvgResponseTimeUrbanH << "s"
+        << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanH / 60.0) << "m)" << std::endl
+        << "Avg. response time (H, rural): \t\t" << finalIndividual.objectiveAvgResponseTimeRuralH << "s"
+        << " (" << (finalIndividual.objectiveAvgResponseTimeRuralH / 60.0) << "m)" << std::endl
         << "Avg. response time (V1, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanV1 << "s"
-        << " (" << finalIndividual.objectiveAvgResponseTimeUrbanV1 / 60 << "m)" << std::endl
+        << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanV1 / 60.0) << "m)" << std::endl
         << "Avg. response time (V1, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralV1 << "s"
-        << " (" << finalIndividual.objectiveAvgResponseTimeRuralV1 / 60 << "m)" << std::endl
-        << "Percentage violations: \t\t\t" << finalIndividual.objectivePercentageViolations * 100 << "%" << std::endl;
+        << " (" << (finalIndividual.objectiveAvgResponseTimeRuralV1 / 60.0) << "m)" << std::endl
+        << "Percentage violations: \t\t\t" << (finalIndividual.objectivePercentageViolations * 100.0) << "%" << std::endl;
 
     // printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }

@@ -41,6 +41,9 @@ class IndividualGA {
     virtual void updateMetrics();
 
  public:
+    std::vector<std::vector<int>> genotype;
+    std::vector<Event> simulatedEvents;
+    std::vector<Ambulance> simulatedAmbulances;
     double fitness = 0.0;
     std::vector<double> allocationsFitness;
     double objectiveAvgResponseTimeUrbanA = 0.0;
@@ -57,9 +60,6 @@ class IndividualGA {
     std::vector<double> allocationsObjectiveAvgResponseTimeRuralH;
     std::vector<double> allocationsObjectiveAvgResponseTimeRuralV1;
     std::vector<double> allocationsObjectivePercentageViolations;
-    std::vector<std::vector<int>> genotype;
-    std::vector<Event> simulatedEvents;
-    std::vector<Ambulance> simulatedAmbulances;
 
     IndividualGA(
         std::mt19937& rnd,
@@ -86,10 +86,26 @@ class IndividualGA {
             numAmbulances = other.numAmbulances;
             numAllocations = other.numAllocations;
             numDepots = other.numDepots;
-            fitness = other.fitness;
+            metricsChecked = other.metricsChecked;
             genotype = other.genotype;
             simulatedEvents = other.simulatedEvents;
             simulatedAmbulances = other.simulatedAmbulances;
+            fitness = other.fitness;
+            allocationsFitness = other.allocationsFitness;
+            objectiveAvgResponseTimeUrbanA = other.objectiveAvgResponseTimeUrbanA;
+            objectiveAvgResponseTimeUrbanH = other.objectiveAvgResponseTimeUrbanH;
+            objectiveAvgResponseTimeUrbanV1 = other.objectiveAvgResponseTimeUrbanV1;
+            objectiveAvgResponseTimeRuralA = other.objectiveAvgResponseTimeRuralA;
+            objectiveAvgResponseTimeRuralH = other.objectiveAvgResponseTimeRuralH;
+            objectiveAvgResponseTimeRuralV1 = other.objectiveAvgResponseTimeRuralV1;
+            objectivePercentageViolations = other.objectivePercentageViolations;
+            allocationsObjectiveAvgResponseTimeUrbanA = other.allocationsObjectiveAvgResponseTimeUrbanA;
+            allocationsObjectiveAvgResponseTimeUrbanH = other.allocationsObjectiveAvgResponseTimeUrbanH;
+            allocationsObjectiveAvgResponseTimeUrbanV1 = other.allocationsObjectiveAvgResponseTimeUrbanV1;
+            allocationsObjectiveAvgResponseTimeRuralA = other.allocationsObjectiveAvgResponseTimeRuralA;
+            allocationsObjectiveAvgResponseTimeRuralH = other.allocationsObjectiveAvgResponseTimeRuralH;
+            allocationsObjectiveAvgResponseTimeRuralV1 = other.allocationsObjectiveAvgResponseTimeRuralV1;
+            allocationsObjectivePercentageViolations = other.allocationsObjectivePercentageViolations;
         }
 
         return *this;
