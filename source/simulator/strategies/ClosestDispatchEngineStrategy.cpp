@@ -211,14 +211,24 @@ void ClosestDispatchEngineStrategy::reallocating(
     // get the new allocation
     std::vector<int> allocation = events[eventIndex].reallocation;
 
-    int sumTest = 0;
-    for (int i = 0; i < allocation.size(); i++) {
-        sumTest += allocation[i];
-    }
-
     // create a vector of ambulance indices
     std::vector<int> ambulanceIndices(ambulances.size());
     std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
+
+    // remove ambulances from possible reallocation if at correct depot
+    for (size_t depotIndex = 0; depotIndex < depotIndices.size(); depotIndex++) {
+        for (int ambulanceIndex = 0; ambulanceIndex < ambulances.size(); ambulanceIndex++) {
+            if (allocation[depotIndex] <= 0) {
+                break;
+            }
+
+            if (ambulances[ambulanceIndex].allocatedDepotIndex == depotIndex) {
+                ambulanceIndices.erase(std::remove(ambulanceIndices.begin(), ambulanceIndices.end(), ambulanceIndex), ambulanceIndices.end());
+
+                allocation[depotIndex]--;
+            }
+        }
+    }
 
     // sort the indicies to adhere to the closest strategy
     std::vector<int> sortedAmbulanceIndices;
