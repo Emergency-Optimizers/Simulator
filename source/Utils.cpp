@@ -748,26 +748,33 @@ void printTimeSegmentedAllocationTable(
 }
 
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {
-    int totalHours = 0;
+    const double TWELVE_HOURS = 43200;
+
+    double totalHours = 0;
     std::vector<int> times;
 
     std::cout << std::endl;
 
     for (int i = 0; i < ambulances.size(); i++) {
-        totalHours += (ambulances[i].timeUnavailable / 60) / 60;
+        totalHours += (static_cast<double>(ambulances[i].timeUnavailable) / 60.0) / 60.0;
         times.push_back(ambulances[i].timeUnavailable);
 
         std::cout
-            << "Ambulance " << i << ": "
-            << "Working: " << (ambulances[i].timeUnavailable / 60) / 60 << " hours"
-            << ", Break: " << (ambulances[i].timeNotWorking / 60) / 60 << " hours"
-            << std::endl;
+            << "Ambulance " << std::setw(3) << (i + 1) << " UHU: "
+            << std::fixed << std::setprecision(2) << std::setw(4)
+            << ((static_cast<double>(ambulances[i].timeUnavailable) / TWELVE_HOURS) * 100.0) << "%";
+
+        if ((i + 1) % 2 == 0 || i >= ambulances.size() - 1) {
+            std::cout << std::endl;
+        } else {
+            std::cout << "  |  ";
+        }
     }
 
     std::cout
-        << "Total: " << totalHours << " hours, "
+        << std::endl << "Total: " << std::setprecision(2) << totalHours << " hours, "
         << "Standard deviation: " << calculateStandardDeviation(times)
-        << std::endl;
+        << std::endl << std::endl;
 }
 
 void throwError(const std::string& msg) {

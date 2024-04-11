@@ -125,6 +125,8 @@ void PopulationGA::evolve(int generations) {
         finalIndividual.allocationsFitness
     );
 
+    printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
+
     std::cout
         << "Goal:" << std::endl
         << "\t A, urban: <12 min" << std::endl

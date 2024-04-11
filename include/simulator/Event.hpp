@@ -44,7 +44,7 @@ struct Event {
     std::vector<int> reallocation;
     bool utility = false;
 
-    void updateTimer(const int increment, const std::string& metric = "");
+    void updateTimer(const int increment, const std::string& metric = "", const bool dontUpdateTimer = false);
     float getResponseTime();
     void removeAssignedAmbulance();
     void assignAmbulance(Ambulance& ambulance);

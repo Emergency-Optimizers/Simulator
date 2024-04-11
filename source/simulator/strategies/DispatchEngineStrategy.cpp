@@ -51,21 +51,20 @@ void DispatchEngineStrategy::dispatchingToScene(
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );
-    events[eventIndex].metrics["duration_dispatching_to_scene"] += incrementSeconds;
-    events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
+
+    const bool dontUpdateTimer = true;
+    events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_scene", dontUpdateTimer);
 
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     if (events[eventIndex].secondsWaitDepartureScene != -1) {
         incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
-        events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
         incrementSeconds = events[eventIndex].secondsWaitAvailable;
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
-        events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
     }
@@ -116,8 +115,8 @@ void DispatchEngineStrategy::finishingEvent(
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );
-    events[eventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
-    events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
+    const bool dontUpdateTimer = true;
+    events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_depot", dontUpdateTimer);
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     // check if ambulance has been reallocated and send it to new depot

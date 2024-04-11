@@ -95,7 +95,8 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                     events[currentAmbulanceEventIndex].triageImpression,
                     events[currentAmbulanceEventIndex].prevTimer
                 );
-                events[currentAmbulanceEventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
+                const bool dontUpdateTimer = true;
+                events[currentAmbulanceEventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_depot", dontUpdateTimer);
 
                 events[currentAmbulanceEventIndex].gridId = ambulanceGridId;
                 events[currentAmbulanceEventIndex].type = EventType::NONE;
@@ -113,6 +114,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"] = 0;
 
                 events[currentAmbulanceEventIndex].metrics["duration_resource_appointment"] += incrementSeconds + oldMetrics;
+                ambulances[randomAmbulanceIndex].timeUnavailable += incrementSeconds;
 
                 events[currentAmbulanceEventIndex].type = EventType::RESOURCE_APPOINTMENT;
 
@@ -133,7 +135,6 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
 
             events[currentAmbulanceEventIndex].removeAssignedAmbulance();
 
-            ambulances[randomAmbulanceIndex].timeUnavailable += incrementSeconds;
             ambulances[randomAmbulanceIndex].currentGridId = ambulanceGridId;
         }
 
@@ -154,7 +155,6 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         events[eventIndex].secondsWaitResourcePreparingDeparture,
         "duration_resource_preparing_departure"
     );
-    events[eventIndex].assignedAmbulance->timeUnavailable += events[eventIndex].secondsWaitResourcePreparingDeparture;
 
     return sortAllEvents;
 }
@@ -178,12 +178,10 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
         events[eventIndex].timer
     );
     events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_hospital");
-    events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable, "duration_at_hospital");
-    events[eventIndex].assignedAmbulance->timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
 }

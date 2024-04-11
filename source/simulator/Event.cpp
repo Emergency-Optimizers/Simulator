@@ -8,12 +8,24 @@
 #include "simulator/Event.hpp"
 #include "simulator/Ambulance.hpp"
 
-void Event::updateTimer(const int increment, const std::string& metric) {
-    prevTimer = timer;
-    timer += increment;
+void Event::updateTimer(const int increment, const std::string& metric, const bool dontUpdateTimer) {
+    if (!dontUpdateTimer) {
+        prevTimer = timer;
+        timer += increment;
+    }
 
     if (!metric.empty()) {
         metrics[metric] += increment;
+
+        bool updateAmbulance = metric == "duration_resource_preparing_departure";
+        updateAmbulance |= metric == "duration_dispatching_to_scene";
+        updateAmbulance |= metric == "duration_at_scene";
+        updateAmbulance |= metric == "duration_dispatching_to_hospital";
+        updateAmbulance |= metric == "duration_at_hospital";
+
+        if (updateAmbulance) {
+            assignedAmbulance->timeUnavailable += increment;
+        }
     }
 }
 
