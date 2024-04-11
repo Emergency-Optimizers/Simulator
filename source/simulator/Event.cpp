@@ -6,6 +6,7 @@
 
 /* internal libraries */
 #include "simulator/Event.hpp"
+#include "simulator/Ambulance.hpp"
 
 void Event::updateTimer(const int increment, const std::string& metric) {
     prevTimer = timer;
@@ -23,4 +24,21 @@ float Event::getResponseTime() {
     responseTime += metrics["duration_dispatching_to_scene"];
 
     return responseTime;
+}
+
+
+void Event::removeAssignedAmbulance() {
+    if (assignedAmbulance != nullptr) {
+        assignedAmbulance->assignedEventId = -1;
+        assignedAmbulance = nullptr;
+    }
+}
+
+void Event::assignAmbulance(Ambulance& ambulance) {
+    if (assignedAmbulance != nullptr) {
+        assignedAmbulance->assignedEventId = -1;
+    }
+
+    assignedAmbulance = &ambulance;
+    assignedAmbulance->assignedEventId = id;
 }

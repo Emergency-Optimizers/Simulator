@@ -14,12 +14,14 @@
 /* internal libraries */
 #include "simulator/EventType.hpp"
 
+struct Ambulance;
+
 struct Event {
     int id = -1;
     EventType type = EventType::RESOURCE_APPOINTMENT;
     std::time_t timer;
     std::time_t prevTimer = 0;
-    int assignedAmbulanceIndex = -1;
+    Ambulance* assignedAmbulance = nullptr;
     std::map<std::string, int> metrics = {
         {"duration_incident_creation", 0},
         {"duration_resource_appointment", 0},
@@ -44,4 +46,6 @@ struct Event {
 
     void updateTimer(const int increment, const std::string& metric = "");
     float getResponseTime();
+    void removeAssignedAmbulance();
+    void assignAmbulance(Ambulance& ambulance);
 };

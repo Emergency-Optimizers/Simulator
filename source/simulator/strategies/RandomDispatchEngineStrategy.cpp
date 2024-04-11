@@ -131,7 +131,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                 sortAllEvents = true;
             }
 
-            events[currentAmbulanceEventIndex].assignedAmbulanceIndex = -1;
+            events[currentAmbulanceEventIndex].removeAssignedAmbulance();
 
             ambulances[randomAmbulanceIndex].timeUnavailable += incrementSeconds;
             ambulances[randomAmbulanceIndex].currentGridId = ambulanceGridId;
@@ -148,14 +148,13 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         return sortAllEvents;
     }
 
-    events[eventIndex].assignedAmbulanceIndex = randomAmbulanceIndex;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = events[eventIndex].id;
+    events[eventIndex].assignAmbulance(ambulances[randomAmbulanceIndex]);
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
         events[eventIndex].secondsWaitResourcePreparingDeparture,
         "duration_resource_preparing_departure"
     );
-    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitResourcePreparingDeparture;
+    events[eventIndex].assignedAmbulance->timeUnavailable += events[eventIndex].secondsWaitResourcePreparingDeparture;
 
     return sortAllEvents;
 }
@@ -172,19 +171,19 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
         events[eventIndex].triageImpression,
         events[eventIndex].timer
     );
     events[eventIndex].updateTimer(incrementSeconds, "duration_dispatching_to_hospital");
-    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
+    events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
-    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
+    events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable, "duration_at_hospital");
-    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += events[eventIndex].secondsWaitAvailable;
+    events[eventIndex].assignedAmbulance->timeUnavailable += events[eventIndex].secondsWaitAvailable;
 
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
 }
@@ -247,12 +246,10 @@ void RandomDispatchEngineStrategy::reallocating(
                 newEvent.type = EventType::PREPARING_DISPATCH_TO_DEPOT;
                 newEvent.timer = events[eventIndex].timer;
                 newEvent.prevTimer = events[eventIndex].timer;
-                newEvent.assignedAmbulanceIndex = ambulanceIndices[currentAmbulanceIndex];
+                newEvent.assignAmbulance(ambulances[ambulanceIndices[currentAmbulanceIndex]]);
                 newEvent.triageImpression = "V1";
                 newEvent.gridId = ambulances[ambulanceIndices[currentAmbulanceIndex]].currentGridId;
                 newEvent.utility = true;
-
-                ambulances[ambulanceIndices[currentAmbulanceIndex]].assignedEventId = newEvent.id;
 
                 events.insert(events.begin() + eventIndex + 1, newEvent);
             }

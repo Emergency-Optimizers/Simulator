@@ -26,7 +26,7 @@ void DispatchEngineStrategy::preparingToDispatchToScene(
     const int eventIndex
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
         events[eventIndex].triageImpression,
@@ -45,27 +45,27 @@ void DispatchEngineStrategy::dispatchingToScene(
     const int eventIndex
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );
     events[eventIndex].metrics["duration_dispatching_to_scene"] += incrementSeconds;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
+    events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
-    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
+    events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     if (events[eventIndex].secondsWaitDepartureScene != -1) {
         incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
-        ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
+        events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
         incrementSeconds = events[eventIndex].secondsWaitAvailable;
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
-        ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
+        events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
 
         events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
     }
@@ -88,11 +88,11 @@ void DispatchEngineStrategy::dispatchingToDepot(
 ) {
     events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
-        ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
+        events[eventIndex].assignedAmbulance->allocatedDepotIndex
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         true,
         events[eventIndex].triageImpression,
@@ -110,30 +110,29 @@ void DispatchEngineStrategy::finishingEvent(
     const int eventIndex
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
-        ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId,
+        events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         true,
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );
     events[eventIndex].metrics["duration_dispatching_to_depot"] += incrementSeconds;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].timeUnavailable += incrementSeconds;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId = events[eventIndex].gridId;
+    events[eventIndex].assignedAmbulance->timeUnavailable += incrementSeconds;
+    events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     // check if ambulance has been reallocated and send it to new depot
     int64_t assignedDepotGridId = Stations::getInstance().get<int64_t>(
         "grid_id",
-        ambulances[events[eventIndex].assignedAmbulanceIndex].allocatedDepotIndex
+        events[eventIndex].assignedAmbulance->allocatedDepotIndex
     );
-    if (ambulances[events[eventIndex].assignedAmbulanceIndex].currentGridId != assignedDepotGridId) {
+    if (events[eventIndex].assignedAmbulance->currentGridId != assignedDepotGridId) {
         events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
 
         return;
     }
 
-    ambulances[events[eventIndex].assignedAmbulanceIndex].assignedEventId = -1;
-    ambulances[events[eventIndex].assignedAmbulanceIndex].checkScheduledBreak(events[eventIndex].timer);
-    events[eventIndex].assignedAmbulanceIndex = -1;
+    events[eventIndex].assignedAmbulance->checkScheduledBreak(events[eventIndex].timer);
+    events[eventIndex].removeAssignedAmbulance();
 
     events[eventIndex].type = EventType::NONE;
 }
