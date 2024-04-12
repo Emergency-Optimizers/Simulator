@@ -50,6 +50,7 @@ PopulationGA::PopulationGA(
     generatePopulation();
     evaluateFitness();
     sortIndividuals();
+    storeGenerationMetrics();
 }
 
 void PopulationGA::generatePopulation() {
