@@ -14,6 +14,7 @@
 #include <random>
 #include <utility>
 #include <unordered_map>
+#include <map>
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
@@ -98,6 +99,11 @@ void printTimeSegmentedAllocationTable(
 );
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances);
 void throwError(const std::string& msg);
+void saveDataToJson(
+    const std::string& dirName,
+    const std::string& fileName,
+    const std::map<std::string, std::vector<std::vector<double>>>& dataMap
+);
 void createDirectory(const std::string& dirName);
 
 template <typename T>

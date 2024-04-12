@@ -785,6 +785,40 @@ void throwError(const std::string& msg) {
     std::exit(0);
 }
 
+void saveDataToJson(
+    const std::string& dirName,
+    const std::string& fileName,
+    const std::map<std::string, std::vector<std::vector<double>>>& dataMap
+) {
+    createDirectory(dirName);
+    std::ofstream outFile("../data/" + dirName + "/" + fileName + ".json");
+
+    // begin JSON object
+    outFile << "{" << std::endl;
+
+    // iterator over map for serialization
+    for (auto it = dataMap.begin(); it != dataMap.end(); ++it) {
+        outFile << "  \"" << it->first << "\": [";
+        for (size_t i = 0; i < it->second.size(); ++i) {
+            outFile << "[";
+            for (size_t j = 0; j < it->second[i].size(); ++j) {
+                outFile << it->second[i][j];
+                if (j < it->second[i].size() - 1) outFile << ", ";
+            }
+            outFile << "]";
+            if (i < it->second.size() - 1) outFile << ", ";
+        }
+        outFile << "]";
+        if (std::next(it) != dataMap.end()) outFile << ",";
+        outFile << std::endl;
+    }
+
+    // end JSON object
+    outFile << "}" << std::endl;
+
+    outFile.close();
+}
+
 void createDirectory(const std::string& dirName) {
     std::filesystem::path dirPath("../data/" + dirName);
 
