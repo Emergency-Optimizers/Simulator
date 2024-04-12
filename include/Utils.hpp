@@ -98,6 +98,7 @@ void printTimeSegmentedAllocationTable(
 );
 void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances);
 void throwError(const std::string& msg);
+void createDirectory(const std::string& dirName);
 
 template <typename T>
 const int findIndex(const std::vector<T>& vec, const T& value) {

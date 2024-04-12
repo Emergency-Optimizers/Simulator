@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <numeric>
 #include <chrono>
+#include <filesystem>
 /* internal libraries */
 #include "Utils.hpp"
 #include "file-reader/ODMatrix.hpp"
@@ -782,4 +783,14 @@ void throwError(const std::string& msg) {
 
     // exit program gracefully (call destructors)
     std::exit(0);
+}
+
+void createDirectory(const std::string& dirName) {
+    std::filesystem::path dirPath("../data/" + dirName);
+
+    if (!std::filesystem::exists(dirPath)) {
+        if (!std::filesystem::create_directories(dirPath)) {
+            throwError("Failed to create directory '../data/" + dirName + "'.");
+        }
+    }
 }

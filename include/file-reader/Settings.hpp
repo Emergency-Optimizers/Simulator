@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <iomanip>
 /* internal libraries */
 #include "Utils.hpp"
 #include "ProgressBar.hpp"
@@ -71,6 +72,7 @@ class Settings {
         {"SURVIVOR_SELECTION_KEEP_N_BEST", &toInt},
         {"DISPATCH_STRATEGY_PRIORITIZE_TRIAGE", &toBool},
         {"SCHEDULE_BREAKS", &toBool},
+        {"UNIQUE_RUN_ID", &toString},
     };
 
  public:
@@ -121,6 +123,22 @@ class Settings {
         }
 
         file.close();
+
+        // add current time as unique run ID for file saving
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+        std::tm bt = {};
+        localtime_s(&bt, &now_time);
+        std::ostringstream oss;
+        oss << std::put_time(&bt, "%Y_%m_%d_%H_%M_%S");
+        std::string timestamp = oss.str();
+
+        // convert and store the value according to the schema
+        auto it = schema.find("UNIQUE_RUN_ID");
+        if (it != schema.end()) {
+            configValues["UNIQUE_RUN_ID"] = it->second(timestamp);
+        }
     }
 
     template<typename T>
