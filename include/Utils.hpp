@@ -77,7 +77,7 @@ int64_t approximateLocation(
     const std::string& triage
 );
 int findEventIndexFromId(const std::vector<Event>& events, const int id);
-void writeMetrics(std::vector<Event>& events);
+void writeMetrics(const std::string& dirName, std::vector<Event>& events);
 void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
 void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);

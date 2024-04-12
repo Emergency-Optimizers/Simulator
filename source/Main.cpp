@@ -7,6 +7,9 @@
 /* external libraries */
 #include <iostream>
 #include <chrono>
+#include <map>
+#include <vector>
+#include <string>
 /* internal libraries */
 #include "Utils.hpp"
 #include "file-reader/Settings.hpp"
@@ -106,7 +109,7 @@ int main() {
         std::vector<Event> simulatedEvents = simulator.run();
 
         // write metrics to file
-        writeMetrics(simulatedEvents);
+        writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID"), simulatedEvents);
 
         // print metrics
         double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);

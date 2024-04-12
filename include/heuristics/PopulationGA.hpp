@@ -12,6 +12,7 @@
 #include <random>
 #include <string>
 #include <utility>
+#include <map>
 /* internal libraries */
 #include "heuristics/IndividualGA.hpp"
 #include "file-reader/Incidents.hpp"
@@ -92,13 +93,26 @@ class PopulationGA {
     const int countUnique() const;
 
  protected:
+    const std::string heuristicName = "GA";
     const std::string progressBarPrefix = "Running GA";
+    std::map<std::string, std::vector<std::vector<double>>> metrics = {
+        {"fitness", {}},
+        {"diversity", {}},
+        {"avg_response_time_urban_a", {}},
+        {"avg_response_time_urban_h", {}},
+        {"avg_response_time_urban_v1", {}},
+        {"avg_response_time_rural_a", {}},
+        {"avg_response_time_rural_h", {}},
+        {"avg_response_time_rural_v1", {}},
+        {"percentage_violations", {}},
+    };
 
     virtual void generatePopulation();
     std::vector<std::pair<int, double>> generateIndexFitnessPair(const int startIndex = 0);
     virtual void evaluateFitness();
     virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;
+    virtual void storeGenerationMetrics();
 
  public:
     PopulationGA::PopulationGA(

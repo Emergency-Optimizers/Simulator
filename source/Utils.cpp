@@ -310,20 +310,9 @@ int getRandomInt(std::mt19937& rnd, const int min, const int max) {
     return dist(rnd);
 }
 
-void writeMetrics(std::vector<Event>& events) {
-    // get current time
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
-
-    // format current time as a string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = {};
-    localtime_s(&bt, &now_time);
-    std::ostringstream oss;
-    oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
-    std::string timestamp = oss.str();
-
-    // construct filename with the current date and time
-    std::string filename = "../data/metrics/metrics_" + timestamp + ".csv";
+void writeMetrics(const std::string& dirName, std::vector<Event>& events) {
+    createDirectory(dirName);
+    std::string filename = "../data/" + dirName + "/" + "events" + ".csv";
     std::ofstream outFile(filename);
 
     // check if the file stream is open before proceeding
@@ -377,6 +366,8 @@ void writeMetrics(std::vector<Event>& events) {
             << std::to_string(event.metrics["duration_at_hospital"]) << ","
             << std::to_string(event.metrics["duration_dispatching_to_depot"]) << std::endl;
     }
+
+    outFile.close();
 }
 
 
@@ -792,6 +783,9 @@ void saveDataToJson(
 ) {
     createDirectory(dirName);
     std::ofstream outFile("../data/" + dirName + "/" + fileName + ".json");
+
+    // set to the classic "C" locale to ensure numbers are formatted without thousands separators
+    outFile.imbue(std::locale("C"));
 
     // begin JSON object
     outFile << "{" << std::endl;

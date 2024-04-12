@@ -109,13 +109,20 @@ void PopulationGA::evolve(int generations) {
 
         // update progress bar
         progressBar.update(generationIndex + 1, getProgressBarPostfix());
+
+        storeGenerationMetrics();
     }
 
     // get best individual
     IndividualGA finalIndividual = getFittest();
 
     // write metrics to file
-    writeMetrics(finalIndividual.simulatedEvents);
+    saveDataToJson(
+        Settings::get<std::string>("UNIQUE_RUN_ID"),
+        heuristicName,
+        metrics
+    );
+    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID"), finalIndividual.simulatedEvents);
 
     printTimeSegmentedAllocationTable(
         dayShift,
@@ -700,4 +707,42 @@ const int PopulationGA::countUnique() const {
     }
 
     return uniqueGenotypes.size();
+}
+
+void PopulationGA::storeGenerationMetrics() {
+    std::vector<double> generationFitness;
+    std::vector<double> generationDiversity;
+    std::vector<double> generationAvgResponseTimeUrbanA;
+    std::vector<double> generationAvgResponseTimeUrbanH;
+    std::vector<double> generationAvgResponseTimeUrbanV1;
+    std::vector<double> generationAvgResponseTimeRuralA;
+    std::vector<double> generationAvgResponseTimeRuralH;
+    std::vector<double> generationAvgResponseTimeRuralV1;
+    std::vector<double> generationPercentageViolations;
+
+    // add individual data
+    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
+        generationFitness.push_back(individuals[individualIndex].fitness);
+        generationAvgResponseTimeUrbanA.push_back(individuals[individualIndex].objectiveAvgResponseTimeUrbanA);
+        generationAvgResponseTimeUrbanH.push_back(individuals[individualIndex].objectiveAvgResponseTimeUrbanH);
+        generationAvgResponseTimeUrbanV1.push_back(individuals[individualIndex].objectiveAvgResponseTimeUrbanV1);
+        generationAvgResponseTimeRuralA.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralA);
+        generationAvgResponseTimeRuralH.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralH);
+        generationAvgResponseTimeRuralV1.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralV1);
+        generationPercentageViolations.push_back(individuals[individualIndex].objectivePercentageViolations);
+    }
+
+    // add global generation data
+    generationDiversity.push_back(static_cast<double>(countUnique()) / static_cast<double>(individuals.size()));
+
+    // add to metrics
+    metrics["fitness"].push_back(generationFitness);
+    metrics["diversity"].push_back(generationDiversity);
+    metrics["avg_response_time_urban_a"].push_back(generationAvgResponseTimeUrbanA);
+    metrics["avg_response_time_urban_h"].push_back(generationAvgResponseTimeUrbanH);
+    metrics["avg_response_time_urban_v1"].push_back(generationAvgResponseTimeUrbanV1);
+    metrics["avg_response_time_rural_a"].push_back(generationAvgResponseTimeRuralA);
+    metrics["avg_response_time_rural_h"].push_back(generationAvgResponseTimeRuralH);
+    metrics["avg_response_time_rural_v1"].push_back(generationAvgResponseTimeRuralV1);
+    metrics["percentage_violations"].push_back(generationPercentageViolations);
 }

@@ -364,7 +364,7 @@ void PopulationNSGA::evolve(int generations) {
     IndividualNSGA finalIndividual = findFittest();
 
     // write metrics to file
-    writeMetrics(finalIndividual.getSimulatedEvents());
+    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID"), finalIndividual.getSimulatedEvents());
 
     printBestScoresForEachObjective();
 }
