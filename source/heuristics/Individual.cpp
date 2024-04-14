@@ -13,8 +13,6 @@
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
-#include "file-reader/Settings.hpp"
-#include "heuristics/ObjectiveTypes.hpp"
 
 Individual::Individual(
     std::mt19937& rnd,
@@ -35,8 +33,7 @@ Individual::Individual(
     allocationsObjectiveAvgResponseTimeRuralH(numAllocations, 0.0),
     allocationsObjectiveAvgResponseTimeRuralV1(numAllocations, 0.0),
     allocationsObjectivePercentageViolations(numAllocations, 0.0),
-    allocationsFitness(numAllocations, 0.0),
-    objectives(Settings::get<std::vector<ObjectiveTypes>>("OBJECTIVES").size(), 0.0) {
+    allocationsFitness(numAllocations, 0.0) {
     generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
 }
 
@@ -166,14 +163,6 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
 }
 
 void Individual::updateMetrics() {
-    const double weightAvgResponseTimeUrbanA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A");
-    const double weightAvgResponseTimeUrbanH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H");
-    const double weightAvgResponseTimeUrbanV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_V1");
-    const double weightAvgResponseTimeRuralA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_A");
-    const double weightAvgResponseTimeRuralH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H");
-    const double weightAvgResponseTimeRuralV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1");
-    const double weightPercentageViolations = Settings::get<double>("OBJECTIVE_WEIGHT_PERCENTAGE_VIOLATIONS");
-
     fitness = 0.0;
     fitness += objectiveAvgResponseTimeUrbanA * weightAvgResponseTimeUrbanA;
     fitness += objectiveAvgResponseTimeUrbanH * weightAvgResponseTimeUrbanH;
@@ -194,7 +183,6 @@ void Individual::updateMetrics() {
         allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolations[allocationIndex] * weightPercentageViolations;
     }
 
-    std::vector<ObjectiveTypes> objectiveTypes = Settings::get<std::vector<ObjectiveTypes>>("OBJECTIVES");
     for (int i = 0; i < objectives.size(); i++) {
         switch (objectiveTypes[i]) {
             case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_A:
