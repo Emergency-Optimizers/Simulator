@@ -222,6 +222,10 @@ void PopulationNSGA2::calculateCrowdingDistance(std::vector<Individual*>& front)
         double maxObjective = front.back()->objectives[m];
         double range = maxObjective - minObjective;
 
+        if (range == 0) {
+            continue;
+        }
+
         for (int i = 1; i < size - 1; i++) {
             front[i]->crowdingDistance += (front[i + 1]->objectives[m] - front[i - 1]->objectives[m]) / range;
         }
@@ -309,7 +313,6 @@ const std::string PopulationNSGA2::getProgressBarPostfix() const {
 }
 
 void PopulationNSGA2::storeGenerationMetrics() {
-    std::vector<double> generationFitness;
     std::vector<double> generationDiversity;
     std::vector<double> generationAvgResponseTimeUrbanA;
     std::vector<double> generationAvgResponseTimeUrbanH;
@@ -323,7 +326,6 @@ void PopulationNSGA2::storeGenerationMetrics() {
 
     // add individual data
     for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
-        generationFitness.push_back(individuals[individualIndex].fitness);
         generationAvgResponseTimeUrbanA.push_back(individuals[individualIndex].objectiveAvgResponseTimeUrbanA);
         generationAvgResponseTimeUrbanH.push_back(individuals[individualIndex].objectiveAvgResponseTimeUrbanH);
         generationAvgResponseTimeUrbanV1.push_back(individuals[individualIndex].objectiveAvgResponseTimeUrbanV1);
@@ -339,7 +341,6 @@ void PopulationNSGA2::storeGenerationMetrics() {
     generationDiversity.push_back(static_cast<double>(countUnique()) / static_cast<double>(individuals.size()));
 
     // add to metrics
-    metrics["fitness"].push_back(generationFitness);
     metrics["diversity"].push_back(generationDiversity);
     metrics["avg_response_time_urban_a"].push_back(generationAvgResponseTimeUrbanA);
     metrics["avg_response_time_urban_h"].push_back(generationAvgResponseTimeUrbanH);

@@ -27,7 +27,6 @@ class PopulationNSGA2 : public PopulationGA {
     const std::string heuristicName = "NSGA-II";
     const std::string progressBarPrefix = "Running NSGA-II";
     std::map<std::string, std::vector<std::vector<double>>> metrics = {
-        {"fitness", {}},
         {"diversity", {}},
         {"avg_response_time_urban_a", {}},
         {"avg_response_time_urban_h", {}},
