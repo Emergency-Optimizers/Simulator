@@ -72,6 +72,7 @@ class Settings {
         {"SURVIVOR_SELECTION_KEEP_N_BEST", &toInt},
         {"DISPATCH_STRATEGY_PRIORITIZE_TRIAGE", &toBool},
         {"SCHEDULE_BREAKS", &toBool},
+        {"OBJECTIVES", &toVectorObjectiveType},
         {"UNIQUE_RUN_ID", &toString},
     };
 

@@ -100,6 +100,64 @@ ValueType toCrossoverType(const std::string& str) {
     }
 }
 
+ValueType toVectorObjectiveType(const std::string& str) {
+    std::vector<ObjectiveTypes> result;
+    std::stringstream ss(str);
+    std::string item;
+
+    while (getline(ss, item, ',')) {
+        item.erase(0, item.find_first_not_of(" \t"));
+        item.erase(item.find_last_not_of(" \t") + 1);
+
+        ObjectiveTypes type = stringToObjectiveType(item);
+        result.push_back(type);
+    }
+
+    return result;
+}
+
+ObjectiveTypes stringToObjectiveType(const std::string& str) {
+    if (str == "AVG_RESPONSE_TIME_URBAN_A") {
+        return ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_A;
+    } else if (str == "AVG_RESPONSE_TIME_URBAN_H") {
+        return ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_H;
+    } else if (str == "AVG_RESPONSE_TIME_URBAN_V1") {
+        return ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_V1;
+    } else if (str == "AVG_RESPONSE_TIME_RURAL_A") {
+        return ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_A;
+    } else if (str == "AVG_RESPONSE_TIME_RURAL_H") {
+        return ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_H;
+    } else if (str == "AVG_RESPONSE_TIME_RURAL_V1") {
+        return ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_V1;
+    } else if (str == "PERCENTAGE_VIOLATIONS") {
+        return ObjectiveTypes::PERCENTAGE_VIOLATIONS;
+    } else {
+        throwError("Unknown objective type: '" + str + "'");
+        return ObjectiveTypes::PERCENTAGE_VIOLATIONS;
+    }
+}
+
+std::string objectiveTypeToString(const ObjectiveTypes objective) {
+    switch (objective) {
+        case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_A:
+            return "AVG_RESPONSE_TIME_URBAN_A";
+        case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_H:
+            return "AVG_RESPONSE_TIME_URBAN_H";
+        case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_V1:
+            return "AVG_RESPONSE_TIME_URBAN_V1";
+        case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_A:
+            return "AVG_RESPONSE_TIME_RURAL_A";
+        case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_H:
+            return "AVG_RESPONSE_TIME_RURAL_H";
+        case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_V1:
+            return "AVG_RESPONSE_TIME_RURAL_V1";
+        case ObjectiveTypes::PERCENTAGE_VIOLATIONS:
+            return "PERCENTAGE_VIOLATIONS";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 std::string tmToString(const std::tm& time) {
     std::stringstream ss;
     ss << std::put_time(&time, "%Y-%m-%d %H:%M:%S");
@@ -147,6 +205,15 @@ std::string valueTypeToString(const ValueType& cell) {
             } else {
                 return "UNKNOWN";
             }
+        } else if constexpr (std::is_same_v<T, std::vector<ObjectiveTypes>>) {
+            std::string result;
+            for (size_t i = 0; i < arg.size(); ++i) {
+                result += objectiveTypeToString(arg[i]);
+                if (i < arg.size() - 1) {
+                    result += ", ";
+                }
+            }
+            return result;
         }
     }, cell);
 }
