@@ -189,11 +189,13 @@ void PopulationNSGA2::nonDominatedSort() {
         fronts.push_back(std::vector<Individual*>());
         for (Individual* ind : tempFronts[f]) {
             fronts[f].push_back(ind);
+            ind->frontNumber = f;
             for (Individual* dominatedInd : ind->dominatedIndividuals) {
                 dominationCounts[dominatedInd - &individuals[0]]--;
                 if (dominationCounts[dominatedInd - &individuals[0]] == 0) {
                     if (f + 1 >= tempFronts.size()) tempFronts.resize(f + 2);
                     tempFronts[f + 1].push_back(dominatedInd);
+                    dominatedInd->frontNumber = f + 1;
                 }
             }
         }
@@ -219,11 +221,6 @@ void PopulationNSGA2::calculateCrowdingDistance(std::vector<Individual*>& front)
         double minObjective = front.front()->objectives[m];
         double maxObjective = front.back()->objectives[m];
         double range = maxObjective - minObjective;
-
-        // if all values are the same, skip this objective as it contributes no diversity.
-        if (range == 0) {
-            continue;
-        }
 
         for (int i = 1; i < size - 1; i++) {
             front[i]->crowdingDistance += (front[i + 1]->objectives[m] - front[i - 1]->objectives[m]) / range;
