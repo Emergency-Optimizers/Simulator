@@ -109,6 +109,7 @@ void saveDataToJson(
     const std::map<std::string, std::vector<std::vector<double>>>& dataMap
 );
 void createDirectory(const std::string& dirName);
+double inverseFitness(const double fitness);
 
 template <typename T>
 const int findIndex(const std::vector<T>& vec, const T& value) {

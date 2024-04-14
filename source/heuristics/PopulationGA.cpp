@@ -48,8 +48,6 @@ PopulationGA::PopulationGA(
     // init population
     generatePopulation();
     evaluateFitness();
-    sortIndividuals();
-    storeGenerationMetrics();
 }
 
 void PopulationGA::generatePopulation() {
@@ -62,6 +60,10 @@ void PopulationGA::generatePopulation() {
 }
 
 void PopulationGA::evolve(int generations) {
+    // sort and store metrics for initial population
+    sortIndividuals();
+    storeGenerationMetrics();
+
     // init progress bar
     ProgressBar progressBar(generations, progressBarPrefix, getProgressBarPostfix());
 
@@ -154,8 +156,6 @@ void PopulationGA::evolve(int generations) {
         << "Avg. response time (V1, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralV1 << "s"
         << " (" << (finalIndividual.objectiveAvgResponseTimeRuralV1 / 60.0) << "m)" << std::endl
         << "Percentage violations: \t\t\t" << (finalIndividual.objectivePercentageViolations * 100.0) << "%" << std::endl;
-
-    // printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 }
 
 void PopulationGA::getPossibleGenotypeInits() {
@@ -429,10 +429,7 @@ std::vector<std::pair<int, double>> PopulationGA::generateIndexFitnessPair(const
     std::vector<std::pair<int, double>> populationIndices;
 
     for (int individualIndex = startIndex; individualIndex < individuals.size(); individualIndex++) {
-        // we inverse the fitness, this allows the selection methods to maximize the fitness
-        double inverseFitness = 1.0 / (individuals[individualIndex].fitness + std::numeric_limits<double>::epsilon());
-
-        populationIndices.push_back({individualIndex, inverseFitness});
+        populationIndices.push_back({individualIndex, inverseFitness(individuals[individualIndex].fitness)});
     }
 
     return populationIndices;
@@ -738,16 +735,6 @@ const Individual PopulationGA::getFittest() const {
     return individuals[0];
 }
 
-const int PopulationGA::countUnique() const {
-    std::set<std::vector<std::vector<int>>> uniqueGenotypes;
-
-    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
-        uniqueGenotypes.insert(individuals[individualIndex].genotype);
-    }
-
-    return uniqueGenotypes.size();
-}
-
 void PopulationGA::storeGenerationMetrics() {
     std::vector<double> generationFitness;
     std::vector<double> generationDiversity;
@@ -784,4 +771,14 @@ void PopulationGA::storeGenerationMetrics() {
     metrics["avg_response_time_rural_h"].push_back(generationAvgResponseTimeRuralH);
     metrics["avg_response_time_rural_v1"].push_back(generationAvgResponseTimeRuralV1);
     metrics["percentage_violations"].push_back(generationPercentageViolations);
+}
+
+const int PopulationGA::countUnique() const {
+    std::set<std::vector<std::vector<int>>> uniqueGenotypes;
+
+    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
+        uniqueGenotypes.insert(individuals[individualIndex].genotype);
+    }
+
+    return uniqueGenotypes.size();
 }

@@ -27,21 +27,12 @@
 
 class PopulationGA {
  private:
-    std::mt19937& rnd;
     const std::vector<Event>& events;
-    const bool dayShift;
     const DispatchEngineStrategyType dispatchStrategy;
-    const int populationSize;
     const int numDepots;
     const int numAmbulances;
-    const double mutationProbability;
-    const double crossoverProbability;
-    const int numTimeSegments;
-    std::vector<Individual> individuals;
     std::vector<GenotypeInitType> genotypeInits;
     std::vector<double> genotypeInitsTickets;
-    std::vector<MutationType> mutations;
-    std::vector<double> mutationsTickets;
     std::vector<CrossoverType> crossovers;
     std::vector<double> crossoversTickets;
     std::vector<SelectionType> parentSelections;
@@ -78,7 +69,6 @@ class PopulationGA {
         const int k,
         const double selectionPressure
     );
-    std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
     std::vector<std::vector<std::vector<int>>> singlePointCrossover(
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype
@@ -93,13 +83,17 @@ class PopulationGA {
         const std::vector<double>& parent1AllocationsFitness,
         const std::vector<double>& parent2AllocationsFitness
     );
-    Individual createIndividual(const bool child);
-    void evaluateFitness();
-    void sortIndividuals();
-    const Individual getFittest() const;
-    const int countUnique() const;
 
  protected:
+    std::mt19937& rnd;
+    std::vector<Individual> individuals;
+    const bool dayShift;
+    const int populationSize;
+    const int numTimeSegments;
+    const double crossoverProbability;
+    const double mutationProbability;
+    std::vector<MutationType> mutations;
+    std::vector<double> mutationsTickets;
     const std::string heuristicName = "GA";
     const std::string progressBarPrefix = "Running GA";
     std::map<std::string, std::vector<std::vector<double>>> metrics = {
@@ -114,8 +108,14 @@ class PopulationGA {
         {"percentage_violations", {}},
     };
 
+    std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
+    void evaluateFitness();
+    Individual createIndividual(const bool child);
+    virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;
+    const Individual getFittest() const;
     virtual void storeGenerationMetrics();
+    const int countUnique() const;
 
  public:
     PopulationGA::PopulationGA(

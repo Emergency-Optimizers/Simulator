@@ -186,25 +186,25 @@ void Individual::updateMetrics() {
     for (int i = 0; i < objectives.size(); i++) {
         switch (objectiveTypes[i]) {
             case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_A:
-                objectives[i] = objectiveAvgResponseTimeUrbanA;
+                objectives[i] = inverseFitness(objectiveAvgResponseTimeUrbanA);
                 break;
             case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_H:
-                objectives[i] = objectiveAvgResponseTimeUrbanH;
+                objectives[i] = inverseFitness(objectiveAvgResponseTimeUrbanH);
                 break;
             case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_V1:
-                objectives[i] = objectiveAvgResponseTimeUrbanV1;
+                objectives[i] = inverseFitness(objectiveAvgResponseTimeUrbanV1);
                 break;
             case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_A:
-                objectives[i] = objectiveAvgResponseTimeRuralA;
+                objectives[i] = inverseFitness(objectiveAvgResponseTimeRuralA);
                 break;
             case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_H:
-                objectives[i] = objectiveAvgResponseTimeRuralA;
+                objectives[i] = inverseFitness(objectiveAvgResponseTimeRuralH);
                 break;
             case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_V1:
-                objectives[i] = objectiveAvgResponseTimeRuralA;
+                objectives[i] = inverseFitness(objectiveAvgResponseTimeRuralV1);
                 break;
             case ObjectiveTypes::PERCENTAGE_VIOLATIONS:
-                objectives[i] = objectivePercentageViolations;
+                objectives[i] = inverseFitness(objectivePercentageViolations);
                 break;
             default:
                 objectives[i] = 0.0;

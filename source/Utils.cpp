@@ -889,3 +889,7 @@ void createDirectory(const std::string& dirName) {
         }
     }
 }
+
+double inverseFitness(const double fitness) {
+    return 1.0 / (fitness + std::numeric_limits<double>::epsilon());
+}
