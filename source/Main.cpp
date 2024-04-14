@@ -20,7 +20,7 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
-#include "heuristics/IndividualGA.hpp"
+#include "heuristics/Individual.hpp"
 #include "heuristics/PopulationGA.hpp"
 #include "heuristics/IndividualNSGA.hpp"
 #include "heuristics/PopulationNSGA.hpp"

@@ -1,5 +1,5 @@
 /**
- * @file IndividualGA.hpp
+ * @file Individual.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -17,7 +17,7 @@
 #include "heuristics/GenotypeInitType.hpp"
 #include "heuristics/MutationType.hpp"
 
-class IndividualGA {
+class Individual {
  private:
     std::mt19937& rnd;
     int numAmbulances;
@@ -35,17 +35,15 @@ class IndividualGA {
     void evenGenotype();
     void redistributeMutation(const double mutationProbability);
     void scrambleMutation(const double mutationProbability);
-    void IndividualGA::neighborDuplicationMutation(const double mutationProbability);
-
- protected:
-    virtual void updateMetrics();
+    void Individual::neighborDuplicationMutation(const double mutationProbability);
+    void updateMetrics();
 
  public:
     std::vector<std::vector<int>> genotype;
     std::vector<Event> simulatedEvents;
     std::vector<Ambulance> simulatedAmbulances;
+
     double fitness = 0.0;
-    std::vector<double> allocationsFitness;
     double objectiveAvgResponseTimeUrbanA = 0.0;
     double objectiveAvgResponseTimeUrbanH = 0.0;
     double objectiveAvgResponseTimeUrbanV1 = 0.0;
@@ -53,6 +51,8 @@ class IndividualGA {
     double objectiveAvgResponseTimeRuralH = 0.0;
     double objectiveAvgResponseTimeRuralV1 = 0.0;
     double objectivePercentageViolations = 0.0;
+
+    std::vector<double> allocationsFitness;
     std::vector<double> allocationsObjectiveAvgResponseTimeUrbanA;
     std::vector<double> allocationsObjectiveAvgResponseTimeUrbanH;
     std::vector<double> allocationsObjectiveAvgResponseTimeUrbanV1;
@@ -61,7 +61,12 @@ class IndividualGA {
     std::vector<double> allocationsObjectiveAvgResponseTimeRuralV1;
     std::vector<double> allocationsObjectivePercentageViolations;
 
-    IndividualGA(
+    std::vector<double> objectives;
+    std::vector<Individual*> dominatedIndividuals;
+    int frontNumber = 0;
+    double crowdingDistance = 0.0;
+
+    Individual(
         std::mt19937& rnd,
         const int numAmbulances,
         const int numAllocations,
@@ -79,8 +84,9 @@ class IndividualGA {
     void repair();
     bool isValid() const;
     void printGenotype() const;
+    bool dominates(const Individual& other) const;
 
-    IndividualGA& IndividualGA::operator=(const IndividualGA& other) {
+    Individual& Individual::operator=(const Individual& other) {
         if (this != &other) {
             rnd = other.rnd;
             numAmbulances = other.numAmbulances;
@@ -91,7 +97,6 @@ class IndividualGA {
             simulatedEvents = other.simulatedEvents;
             simulatedAmbulances = other.simulatedAmbulances;
             fitness = other.fitness;
-            allocationsFitness = other.allocationsFitness;
             objectiveAvgResponseTimeUrbanA = other.objectiveAvgResponseTimeUrbanA;
             objectiveAvgResponseTimeUrbanH = other.objectiveAvgResponseTimeUrbanH;
             objectiveAvgResponseTimeUrbanV1 = other.objectiveAvgResponseTimeUrbanV1;
@@ -99,6 +104,7 @@ class IndividualGA {
             objectiveAvgResponseTimeRuralH = other.objectiveAvgResponseTimeRuralH;
             objectiveAvgResponseTimeRuralV1 = other.objectiveAvgResponseTimeRuralV1;
             objectivePercentageViolations = other.objectivePercentageViolations;
+            allocationsFitness = other.allocationsFitness;
             allocationsObjectiveAvgResponseTimeUrbanA = other.allocationsObjectiveAvgResponseTimeUrbanA;
             allocationsObjectiveAvgResponseTimeUrbanH = other.allocationsObjectiveAvgResponseTimeUrbanH;
             allocationsObjectiveAvgResponseTimeUrbanV1 = other.allocationsObjectiveAvgResponseTimeUrbanV1;
@@ -106,6 +112,10 @@ class IndividualGA {
             allocationsObjectiveAvgResponseTimeRuralH = other.allocationsObjectiveAvgResponseTimeRuralH;
             allocationsObjectiveAvgResponseTimeRuralV1 = other.allocationsObjectiveAvgResponseTimeRuralV1;
             allocationsObjectivePercentageViolations = other.allocationsObjectivePercentageViolations;
+            objectives = other.objectives;
+            dominatedIndividuals = other.dominatedIndividuals;
+            frontNumber = other.frontNumber;
+            crowdingDistance = other.crowdingDistance;
         }
 
         return *this;

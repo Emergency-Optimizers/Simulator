@@ -1,5 +1,5 @@
 /**
- * @file IndividualGA.cpp
+ * @file Individual.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -9,13 +9,14 @@
 #include <numeric>
 #include <iostream>
 /* internal libraries */
-#include "heuristics/IndividualGA.hpp"
+#include "heuristics/Individual.hpp"
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "file-reader/Settings.hpp"
+#include "heuristics/ObjectiveTypes.hpp"
 
-IndividualGA::IndividualGA(
+Individual::Individual(
     std::mt19937& rnd,
     const int numAmbulances,
     const int numAllocations,
@@ -34,11 +35,12 @@ IndividualGA::IndividualGA(
     allocationsObjectiveAvgResponseTimeRuralH(numAllocations, 0.0),
     allocationsObjectiveAvgResponseTimeRuralV1(numAllocations, 0.0),
     allocationsObjectivePercentageViolations(numAllocations, 0.0),
-    allocationsFitness(numAllocations, 0.0) {
+    allocationsFitness(numAllocations, 0.0),
+    objectives(Settings::get<std::vector<ObjectiveTypes>>("OBJECTIVES").size(), 0.0) {
     generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
 }
 
-void IndividualGA::generateGenotype(
+void Individual::generateGenotype(
     const bool isChild,
     const std::vector<GenotypeInitType>& inits,
     const std::vector<double>& tickets
@@ -62,11 +64,11 @@ void IndividualGA::generateGenotype(
     }
 }
 
-void IndividualGA::emptyGenotype() {
+void Individual::emptyGenotype() {
     genotype = std::vector<std::vector<int>>(numAllocations, std::vector<int>(numDepots, 0));
 }
 
-void IndividualGA::randomGenotype() {
+void Individual::randomGenotype() {
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         for (int ambulanceIndex = 0; ambulanceIndex < numAmbulances; ambulanceIndex++) {
             int depotIndex = getRandomInt(rnd, 0, numDepots - 1);
@@ -76,7 +78,7 @@ void IndividualGA::randomGenotype() {
     }
 }
 
-void IndividualGA::evenGenotype() {
+void Individual::evenGenotype() {
     // calculate the base number of ambulances per depot and the remainder
     int baseAmbulancesPerDepot = numAmbulances / numDepots;
     int remainder = numAmbulances % numDepots;
@@ -104,7 +106,7 @@ void IndividualGA::evenGenotype() {
     }
 }
 
-void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy) {
+void Individual::evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy) {
     // branch if metrics is already checked
     if (metricsChecked) {
         return;
@@ -163,7 +165,7 @@ void IndividualGA::evaluate(std::vector<Event> events, const bool dayShift, cons
     metricsChecked = true;
 }
 
-void IndividualGA::updateMetrics() {
+void Individual::updateMetrics() {
     const double weightAvgResponseTimeUrbanA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A");
     const double weightAvgResponseTimeUrbanH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H");
     const double weightAvgResponseTimeUrbanV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_V1");
@@ -191,9 +193,38 @@ void IndividualGA::updateMetrics() {
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] * weightAvgResponseTimeRuralV1;
         allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolations[allocationIndex] * weightPercentageViolations;
     }
+
+    std::vector<ObjectiveTypes> objectiveTypes = Settings::get<std::vector<ObjectiveTypes>>("OBJECTIVES");
+    for (int i = 0; i < objectives.size(); i++) {
+        switch (objectiveTypes[i]) {
+            case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_A:
+                objectives[i] = objectiveAvgResponseTimeUrbanA;
+                break;
+            case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_H:
+                objectives[i] = objectiveAvgResponseTimeUrbanH;
+                break;
+            case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_V1:
+                objectives[i] = objectiveAvgResponseTimeUrbanV1;
+                break;
+            case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_A:
+                objectives[i] = objectiveAvgResponseTimeRuralA;
+                break;
+            case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_H:
+                objectives[i] = objectiveAvgResponseTimeRuralA;
+                break;
+            case ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_V1:
+                objectives[i] = objectiveAvgResponseTimeRuralA;
+                break;
+            case ObjectiveTypes::PERCENTAGE_VIOLATIONS:
+                objectives[i] = objectivePercentageViolations;
+                break;
+            default:
+                objectives[i] = 0.0;
+        }
+    }
 }
 
-void IndividualGA::mutate(
+void Individual::mutate(
     const double mutationProbability,
     const std::vector<MutationType>& mutations,
     const std::vector<double>& tickets
@@ -212,7 +243,7 @@ void IndividualGA::mutate(
     }
 }
 
-void IndividualGA::redistributeMutation(const double mutationProbability) {
+void Individual::redistributeMutation(const double mutationProbability) {
     // fill a vector of possible depot indices
     std::vector<int> depotIndices(numDepots);
     std::iota(depotIndices.begin(), depotIndices.end(), 0);
@@ -244,7 +275,7 @@ void IndividualGA::redistributeMutation(const double mutationProbability) {
     }
 }
 
-void IndividualGA::scrambleMutation(const double mutationProbability) {
+void Individual::scrambleMutation(const double mutationProbability) {
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // check if allocation should be mutated
         if (getRandomDouble(rnd) > mutationProbability) {
@@ -265,7 +296,7 @@ void IndividualGA::scrambleMutation(const double mutationProbability) {
     }
 }
 
-void IndividualGA::neighborDuplicationMutation(const double mutationProbability) {
+void Individual::neighborDuplicationMutation(const double mutationProbability) {
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // check if allocation should be mutated
         if (getRandomDouble(rnd) > mutationProbability) {
@@ -286,7 +317,7 @@ void IndividualGA::neighborDuplicationMutation(const double mutationProbability)
     }
 }
 
-void IndividualGA::repair() {
+void Individual::repair() {
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         int totalAmbulancesInSegment = std::accumulate(genotype[allocationIndex].begin(), genotype[allocationIndex].end(), 0);
 
@@ -308,7 +339,7 @@ void IndividualGA::repair() {
     }
 }
 
-bool IndividualGA::isValid() const {
+bool Individual::isValid() const {
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // sum all ambulances allocated for segment and verify it
         int totalAmbulances = std::accumulate(genotype[allocationIndex].begin(), genotype[allocationIndex].end(), 0);
@@ -319,7 +350,7 @@ bool IndividualGA::isValid() const {
     return true;
 }
 
-void IndividualGA::printGenotype() const {
+void Individual::printGenotype() const {
     std::cout << "Genotype: " << std::endl;
 
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
@@ -331,4 +362,17 @@ void IndividualGA::printGenotype() const {
 
         std::cout << std::endl;
     }
+}
+
+bool Individual::dominates(const Individual& other) const {
+    bool anyBetter = false;
+    for (size_t i = 0; i < objectives.size(); ++i) {
+        if (objectives[i] < other.objectives[i]) {
+            return false;
+        }
+        if (objectives[i] > other.objectives[i]) {
+            anyBetter = true;
+        }
+    }
+    return anyBetter;
 }

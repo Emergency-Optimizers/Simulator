@@ -68,12 +68,12 @@ void PopulationGA::evolve(int generations) {
 
     for (int generationIndex = 0; generationIndex < generations; generationIndex++) {
         // create offspring
-        std::vector<IndividualGA> offspring;
+        std::vector<Individual> offspring;
         while (offspring.size() < populationSize) {
-            std::vector<IndividualGA> parents = parentSelection();
+            std::vector<Individual> parents = parentSelection();
 
             if (getRandomDouble(rnd) < crossoverProbability) {
-                std::vector<IndividualGA> children = crossover(parents[0], parents[1]);
+                std::vector<Individual> children = crossover(parents[0], parents[1]);
 
                 // calculate how many children can be added without exceeding populationSize
                 const size_t spaceLeft = populationSize - offspring.size();
@@ -84,7 +84,7 @@ void PopulationGA::evolve(int generations) {
             } else {
                 // clone one of the parents
                 const bool isChild = true;
-                IndividualGA clonedOffspring = createIndividual(isChild);
+                Individual clonedOffspring = createIndividual(isChild);
 
                 clonedOffspring.genotype = getRandomBool(rnd) ? parents[0].genotype : parents[1].genotype;
 
@@ -115,7 +115,7 @@ void PopulationGA::evolve(int generations) {
     }
 
     // get best individual
-    IndividualGA finalIndividual = getFittest();
+    Individual finalIndividual = getFittest();
 
     // write metrics to file
     saveDataToJson(
@@ -325,7 +325,7 @@ void PopulationGA::getPossibleSurvivorSelections() {
     }
 }
 
-std::vector<IndividualGA> PopulationGA::parentSelection() {
+std::vector<Individual> PopulationGA::parentSelection() {
     // generate population pair holding index and fitness for each individual
     // fitness is inversed so selection methods can maximize fitness
     const std::vector<std::pair<int, double>> populationIndices = generateIndexFitnessPair();
@@ -364,7 +364,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
     }
 
     // return selected individuals
-    std::vector<IndividualGA> selectedParents;
+    std::vector<Individual> selectedParents;
     for (int i = 0; i < selectedIndices.size(); i++) {
         selectedParents.push_back(individuals[selectedIndices[i]]);
     }
@@ -372,7 +372,7 @@ std::vector<IndividualGA> PopulationGA::parentSelection() {
     return selectedParents;
 }
 
-std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
+std::vector<Individual> PopulationGA::survivorSelection(int numSurvivors) {
     // generate population pair holding index and fitness for each individual
     // fitness is inversed so selection methods can maximize fitness
     const int startIndex = Settings::get<int>("SURVIVOR_SELECTION_KEEP_N_BEST");
@@ -412,7 +412,7 @@ std::vector<IndividualGA> PopulationGA::survivorSelection(int numSurvivors) {
     }
 
     // return selected individuals
-    std::vector<IndividualGA> selectedSurvivors;
+    std::vector<Individual> selectedSurvivors;
 
     // add the n best individuals
     for (int i = 0; i < Settings::get<int>("SURVIVOR_SELECTION_KEEP_N_BEST"); i++) {
@@ -546,7 +546,7 @@ std::vector<int> PopulationGA::rankSelection(
     return selected;
 }
 
-std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, const IndividualGA& parent2) {
+std::vector<Individual> PopulationGA::crossover(const Individual& parent1, const Individual& parent2) {
     std::vector<std::vector<std::vector<int>>> offspringGenotypes;
 
     switch(crossovers[weightedLottery(rnd, crossoversTickets, {})]) {
@@ -567,9 +567,9 @@ std::vector<IndividualGA> PopulationGA::crossover(const IndividualGA& parent1, c
     }
 
     const bool isChild = true;
-    std::vector<IndividualGA> offspring;
+    std::vector<Individual> offspring;
     for (int i = 0; i < offspringGenotypes.size(); i++) {
-        IndividualGA child = createIndividual(isChild);
+        Individual child = createIndividual(isChild);
         child.genotype = offspringGenotypes[i];
 
         child.repair();
@@ -657,8 +657,8 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::bestAllocationCrossover
     return offspring;
 }
 
-IndividualGA PopulationGA::createIndividual(const bool child) {
-    IndividualGA individual = IndividualGA(
+Individual PopulationGA::createIndividual(const bool child) {
+    Individual individual = Individual(
         rnd,
         numAmbulances,
         numTimeSegments,
@@ -681,12 +681,12 @@ void PopulationGA::sortIndividuals() {
     std::sort(
         individuals.begin(),
         individuals.end(),
-        [](const IndividualGA &a, const IndividualGA &b) { return a.fitness < b.fitness; }
+        [](const Individual &a, const Individual &b) { return a.fitness < b.fitness; }
     );
 }
 
 const std::string PopulationGA::getProgressBarPostfix() const {
-    IndividualGA fittest = getFittest();
+    Individual fittest = getFittest();
 
     std::ostringstream postfix;
     postfix
@@ -696,7 +696,7 @@ const std::string PopulationGA::getProgressBarPostfix() const {
     return postfix.str();
 }
 
-const IndividualGA PopulationGA::getFittest() const {
+const Individual PopulationGA::getFittest() const {
     return individuals[0];
 }
 

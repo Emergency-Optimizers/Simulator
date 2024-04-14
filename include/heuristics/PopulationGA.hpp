@@ -14,7 +14,7 @@
 #include <utility>
 #include <map>
 /* internal libraries */
-#include "heuristics/IndividualGA.hpp"
+#include "heuristics/Individual.hpp"
 #include "file-reader/Incidents.hpp"
 #include "file-reader/Stations.hpp"
 #include "file-reader/ODMatrix.hpp"
@@ -36,7 +36,7 @@ class PopulationGA {
     const double mutationProbability;
     const double crossoverProbability;
     const int numTimeSegments;
-    std::vector<IndividualGA> individuals;
+    std::vector<Individual> individuals;
     std::vector<GenotypeInitType> genotypeInits;
     std::vector<double> genotypeInitsTickets;
     std::vector<MutationType> mutations;
@@ -53,8 +53,8 @@ class PopulationGA {
     void getPossibleCrossovers();
     void getPossibleParentSelections();
     void getPossibleSurvivorSelections();
-    std::vector<IndividualGA> parentSelection();
-    std::vector<IndividualGA> survivorSelection(int numSurvivors);
+    std::vector<Individual> parentSelection();
+    std::vector<Individual> survivorSelection(int numSurvivors);
     std::vector<int> tournamentSelection(
         const std::vector<std::pair<int, double>>& population,
         const int k,
@@ -73,7 +73,7 @@ class PopulationGA {
         const int k,
         const double selectionPressure
     );
-    std::vector<IndividualGA> crossover(const IndividualGA& parent1, const IndividualGA& parent2);
+    std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
     std::vector<std::vector<std::vector<int>>> singlePointCrossover(
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype
@@ -88,8 +88,8 @@ class PopulationGA {
         const std::vector<double>& parent1AllocationsFitness,
         const std::vector<double>& parent2AllocationsFitness
     );
-    IndividualGA createIndividual(const bool child);
-    const IndividualGA getFittest() const;
+    Individual createIndividual(const bool child);
+    const Individual getFittest() const;
     const int countUnique() const;
 
  protected:
