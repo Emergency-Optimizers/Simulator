@@ -74,6 +74,7 @@ double calculateEuclideanDistance(const double x1, const double y1, const double
 std::pair<int, int> idToUtm(const int64_t& grid_id);
 int64_t utmToId(const std::pair<int, int>& utm, const int cellSize = 1000, const int offset = 2000000);
 int64_t approximateLocation(
+    std::mt19937& rnd,
     const int64_t& startId,
     const int64_t& goalId,
     const time_t& timeAtStart,

@@ -85,6 +85,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
             int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
 
             ambulanceGridId = approximateLocation(
+                rnd,
                 ambulances[availableAmbulanceIndicies[i]].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
                 events[currentAmbulanceEventIndex].prevTimer,
@@ -102,6 +103,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         // std::pair<int, int> utm2 = idToUtm(ambulanceGridId);
         // int travelTime = calculateEuclideanDistance(utm1.first, utm1.second, utm2.first, utm2.second);
         int travelTime = ODMatrix::getInstance().getTravelTime(
+            rnd,
             ambulanceGridId,
             eventGridId,
             false,
@@ -128,6 +130,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
 
         if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
             incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                rnd,
                 ambulances[closestAmbulanceIndex].currentGridId,
                 closestAmbulanceGridId,
                 true,
@@ -141,6 +144,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
             events[currentAmbulanceEventIndex].type = EventType::NONE;
         } else if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_SCENE) {
             incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                rnd,
                 ambulances[closestAmbulanceIndex].currentGridId,
                 closestAmbulanceGridId,
                 false,
@@ -159,6 +163,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
 
             // reset timer
             int oldEventTravelTime = ODMatrix::getInstance().getTravelTime(
+                rnd,
                 ambulances[closestAmbulanceIndex].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
                 false,
@@ -204,6 +209,7 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
             hospitals[i]
         );
         int travelTime = ODMatrix::getInstance().getTravelTime(
+            rnd,
             hospitalGridId,
             eventGridId,
             false,
@@ -222,6 +228,7 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
@@ -287,6 +294,7 @@ void ClosestDispatchEngineStrategy::reallocating(
                 );
 
                 int travelTime = ODMatrix::getInstance().getTravelTime(
+                    rnd,
                     ambulances[ambulanceIndices[ambulanceIndex]].currentGridId,
                     depotGridId,
                     true,

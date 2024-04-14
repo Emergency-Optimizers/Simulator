@@ -572,6 +572,7 @@ int64_t utmToId(const std::pair<int, int>& utm, const int cellSize, const int of
 }
 
 int64_t approximateLocation(
+    std::mt19937& rnd,
     const int64_t& startId,
     const int64_t& goalId,
     const time_t& timeAtStart,
@@ -579,6 +580,7 @@ int64_t approximateLocation(
     const std::string& triage
 ) {
     int timeToReachGoal = ODMatrix::getInstance().getTravelTime(
+        rnd,
         startId,
         goalId,
         true,

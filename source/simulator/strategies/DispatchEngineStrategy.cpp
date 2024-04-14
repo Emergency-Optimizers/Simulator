@@ -26,6 +26,7 @@ void DispatchEngineStrategy::preparingToDispatchToScene(
     const int eventIndex
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
@@ -45,6 +46,7 @@ void DispatchEngineStrategy::dispatchingToScene(
     const int eventIndex
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
@@ -91,6 +93,7 @@ void DispatchEngineStrategy::dispatchingToDepot(
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         true,
@@ -109,6 +112,7 @@ void DispatchEngineStrategy::finishingEvent(
     const int eventIndex
 ) {
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         true,

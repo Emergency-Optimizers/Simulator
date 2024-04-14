@@ -77,6 +77,7 @@ void ODMatrix::loadFromFile(const std::string& filename) {
 }
 
 int ODMatrix::getTravelTime(
+    std::mt19937& rnd,
     const int64_t& id1,
     const int64_t& id2,
     const bool forceTrafficFactor,
@@ -103,6 +104,10 @@ int ODMatrix::getTravelTime(
         double acuteFactor = 0.7953711902650347;
         travelTime *= acuteFactor;
     }
+
+    // add noise
+    double noise = std::max(noiseLower, std::min(noiseUpper, normalDist(rnd)));
+    travelTime *= noise;
 
     return static_cast<int>(floor(travelTime));
 }

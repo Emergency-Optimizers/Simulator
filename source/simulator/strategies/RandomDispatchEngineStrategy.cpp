@@ -73,6 +73,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
             int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[randomAmbulanceIndex].assignedEventId);
 
             int64_t ambulanceGridId = approximateLocation(
+                rnd,
                 ambulances[randomAmbulanceIndex].currentGridId,
                 events[currentAmbulanceEventIndex].gridId,
                 events[currentAmbulanceEventIndex].prevTimer,
@@ -89,6 +90,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
 
             if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
                 incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                    rnd,
                     ambulances[randomAmbulanceIndex].currentGridId,
                     ambulanceGridId,
                     true,
@@ -102,6 +104,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].type = EventType::NONE;
             } else if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_SCENE) {
                 incrementSeconds = ODMatrix::getInstance().getTravelTime(
+                    rnd,
                     ambulances[randomAmbulanceIndex].currentGridId,
                     ambulanceGridId,
                     false,
@@ -120,6 +123,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
 
                 // reset timer
                 int oldEventTravelTime = ODMatrix::getInstance().getTravelTime(
+                    rnd,
                     ambulances[randomAmbulanceIndex].currentGridId,
                     events[currentAmbulanceEventIndex].gridId,
                     false,
@@ -171,6 +175,7 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
     );
 
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
+        rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
         false,
