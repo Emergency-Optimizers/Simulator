@@ -13,6 +13,7 @@
 #include <string>
 #include <utility>
 #include <map>
+#include <thread>
 /* internal libraries */
 #include "heuristics/Individual.hpp"
 #include "file-reader/Incidents.hpp"
@@ -47,7 +48,10 @@ class PopulationGA {
     std::vector<double> parentSelectionsTickets;
     std::vector<SelectionType> survivorSelections;
     std::vector<double> survivorSelectionsTickets;
+    int numThreads = std::thread::hardware_concurrency() - 2;
+    bool multiThread = Settings::get<bool>("MULTI_THREAD");
 
+    void generatePopulation();
     void getPossibleGenotypeInits();
     void getPossibleMutations();
     void getPossibleCrossovers();
@@ -55,6 +59,7 @@ class PopulationGA {
     void getPossibleSurvivorSelections();
     std::vector<Individual> parentSelection();
     std::vector<Individual> survivorSelection(int numSurvivors);
+    std::vector<std::pair<int, double>> generateIndexFitnessPair(const int startIndex = 0);
     std::vector<int> tournamentSelection(
         const std::vector<std::pair<int, double>>& population,
         const int k,
@@ -89,6 +94,8 @@ class PopulationGA {
         const std::vector<double>& parent2AllocationsFitness
     );
     Individual createIndividual(const bool child);
+    void evaluateFitness();
+    void sortIndividuals();
     const Individual getFittest() const;
     const int countUnique() const;
 
@@ -107,10 +114,6 @@ class PopulationGA {
         {"percentage_violations", {}},
     };
 
-    virtual void generatePopulation();
-    std::vector<std::pair<int, double>> generateIndexFitnessPair(const int startIndex = 0);
-    virtual void evaluateFitness();
-    virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;
     virtual void storeGenerationMetrics();
 

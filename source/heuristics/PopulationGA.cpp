@@ -10,7 +10,6 @@
 #include <string>
 #include <iostream>
 #include <set>
-#include <future>
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
@@ -672,8 +671,47 @@ Individual PopulationGA::createIndividual(const bool child) {
 }
 
 void PopulationGA::evaluateFitness() {
-    for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
-        individuals[individualIndex].evaluate(events, dayShift, dispatchStrategy);
+    if (!multiThread || numThreads <= 1) {
+        for (auto& individual : individuals) {
+            individual.evaluate(events, dayShift, dispatchStrategy);
+        }
+    } else {
+        const size_t numIndividuals = individuals.size();
+        const size_t chunkSize = (numIndividuals + static_cast<size_t>(numThreads) - 1) / static_cast<size_t>(numThreads);
+
+        auto evaluateChunk = [this](size_t start, size_t end) {
+            for (size_t i = start; i < end; ++i) {
+                if (i < individuals.size()) {
+                    individuals[i].evaluate(events, dayShift, dispatchStrategy);
+                }
+            }
+        };
+
+        std::vector<std::thread> threads;
+        for (size_t i = 0; i < numIndividuals; i += chunkSize) {
+            // determine the range of indices this thread will handle
+            size_t end = std::min(i + chunkSize, numIndividuals);
+
+            // start a new thread for each chunk
+            threads.emplace_back(evaluateChunk, i, end);
+
+            // if we've reached the maximum number of concurrent threads, wait for them to finish
+            if (threads.size() == static_cast<size_t>(numThreads)) {
+                for (std::thread &th : threads) {
+                    if (th.joinable()) {
+                        th.join();
+                    }
+                }
+                threads.clear();
+            }
+        }
+
+        // join any remaining threads
+        for (std::thread &th : threads) {
+            if (th.joinable()) {
+                th.join();
+            }
+        }
     }
 }
 

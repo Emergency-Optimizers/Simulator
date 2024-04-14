@@ -74,6 +74,7 @@ class Settings {
         {"SCHEDULE_BREAKS", &toBool},
         {"OBJECTIVES", &toVectorObjectiveType},
         {"UNIQUE_RUN_ID", &toString},
+        {"MULTI_THREAD", &toBool},
     };
 
  public:
