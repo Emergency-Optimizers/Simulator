@@ -84,7 +84,6 @@ class Settings {
 
         // count total lines
         size_t totalLines = 0;
-        double progress = 0;
         std::string tempLine;
         while (std::getline(file, tempLine)) {
             totalLines++;

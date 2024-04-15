@@ -72,7 +72,7 @@ void ProgressBar::update(const size_t currentProgress, const std::string& postfi
 std::string ProgressBar::formatDuration(std::chrono::seconds duration) {
     int hours = std::chrono::duration_cast<std::chrono::hours>(duration).count();
     int minutes = std::chrono::duration_cast<std::chrono::minutes>(duration % std::chrono::hours(1)).count();
-    int seconds = std::chrono::duration_cast<std::chrono::seconds>(duration % std::chrono::minutes(1)).count();
+    int64_t seconds = std::chrono::duration_cast<std::chrono::seconds>(duration % std::chrono::minutes(1)).count();
 
     std::stringstream ss;
     // format as hh:mm:ss

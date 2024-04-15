@@ -26,7 +26,6 @@ void ODMatrix::loadFromFile(const std::string& filename) {
 
     // count total lines
     size_t totalLines = 0;
-    double progress = 0;
     std::string tempLine;
     while (std::getline(file, tempLine)) {
         totalLines++;
