@@ -92,9 +92,14 @@ double averageResponseTime(
     std::vector<Event>& simulatedEvents,
     const std::string& triageImpression,
     const bool urban,
-    const int allocationIndex = -1
+    const int allocationIndex = -1,
+    const int depotIndex = -1
 );
-double responseTimeViolations(std::vector<Event>& simulatedEvents, const int allocationIndex = -1);
+double responseTimeViolations(
+    std::vector<Event>& simulatedEvents,
+    const int allocationIndex = -1,
+    const int depotIndex = -1
+);
 void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,

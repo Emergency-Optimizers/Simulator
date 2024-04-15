@@ -25,7 +25,6 @@ class Individual {
     int numAmbulances;
     int numAllocations;
     int numDepots;
-    bool metricsChecked = false;
 
     void generateGenotype(
         const bool isChild,
@@ -44,6 +43,7 @@ class Individual {
     std::vector<std::vector<int>> genotype;
     std::vector<Event> simulatedEvents;
     std::vector<Ambulance> simulatedAmbulances;
+    bool metricsChecked = false;
 
     double weightAvgResponseTimeUrbanA = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_A");
     double weightAvgResponseTimeUrbanH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_URBAN_H");

@@ -53,4 +53,5 @@ void Event::assignAmbulance(Ambulance& ambulance) {
 
     assignedAmbulance = &ambulance;
     assignedAmbulance->assignedEventId = id;
+    depotIndexResponsible = assignedAmbulance->allocatedDepotIndex;
 }

@@ -41,6 +41,7 @@ struct Event {
     float secondsWaitAvailable = -1.0f;
     int64_t gridId = -1i64;
     int64_t incidentGridId = -1i64;
+    int depotIndexResponsible = -1;
     std::vector<int> reallocation;
     bool utility = false;
 

@@ -405,6 +405,7 @@ void writeMetrics(const std::string& dirName, std::vector<Event>& events) {
         << "triage_impression_during_call" << ","
         << "grid_id" << ","
         << "urban" << ","
+        << "dispatched_from_depot_index" << ","
         << "duration_incident_creation" << ","
         << "duration_resource_appointment" << ","
         << "duration_resource_preparing_departure" << ","
@@ -424,6 +425,7 @@ void writeMetrics(const std::string& dirName, std::vector<Event>& events) {
             << event.triageImpression << ","
             << std::to_string(event.incidentGridId) << ","
             << (Incidents::getInstance().gridIdUrban[event.incidentGridId] ? "True" : "False") << ","
+            << std::to_string(event.depotIndexResponsible) << ","
             << std::to_string(event.metrics["duration_incident_creation"]) << ","
             << std::to_string(event.metrics["duration_resource_appointment"]) << ","
             << std::to_string(event.metrics["duration_resource_preparing_departure"]) << ","
@@ -646,7 +648,8 @@ double averageResponseTime(
     std::vector<Event>& simulatedEvents,
     const std::string& triageImpression,
     const bool urban,
-    const int allocationIndex
+    const int allocationIndex,
+    const int depotIndex
 ) {
     int totalEvents = 0;
     float totalResponseTime = 0;
@@ -682,6 +685,10 @@ double averageResponseTime(
             continue;
         }
 
+        if (depotIndex != -1 && event.depotIndexResponsible != depotIndex) {
+            continue;
+        }
+
         if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) {
             continue;
         }
@@ -697,7 +704,11 @@ double averageResponseTime(
     return static_cast<double>(totalResponseTime) / static_cast<double>(totalEvents);
 }
 
-double responseTimeViolations(std::vector<Event>& simulatedEvents, const int allocationIndex) {
+double responseTimeViolations(
+    std::vector<Event>& simulatedEvents,
+    const int allocationIndex,
+    const int depotIndex
+) {
     int eventIndex = 0;
     int maxEventIndex = simulatedEvents.size();
 
@@ -730,6 +741,11 @@ double responseTimeViolations(std::vector<Event>& simulatedEvents, const int all
             continue;
         }
 
+        if (depotIndex != -1 && simulatedEvents[eventIndex].depotIndexResponsible != depotIndex) {
+            totalEvents++;
+            continue;
+        }
+
         int responseTime = simulatedEvents[eventIndex].getResponseTime();
 
         bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[eventIndex].incidentGridId];
@@ -750,6 +766,10 @@ double responseTimeViolations(std::vector<Event>& simulatedEvents, const int all
         }
 
         totalEvents++;
+    }
+
+    if (totalEvents == 0.0) {
+        return 0.0;
     }
 
     return totalViolations / totalEvents;

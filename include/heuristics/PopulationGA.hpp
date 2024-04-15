@@ -27,10 +27,6 @@
 
 class PopulationGA {
  private:
-    const std::vector<Event>& events;
-    const DispatchEngineStrategyType dispatchStrategy;
-    const int numDepots;
-    const int numAmbulances;
     std::vector<GenotypeInitType> genotypeInits;
     std::vector<double> genotypeInitsTickets;
     std::vector<CrossoverType> crossovers;
@@ -48,8 +44,6 @@ class PopulationGA {
     void getPossibleCrossovers();
     void getPossibleParentSelections();
     void getPossibleSurvivorSelections();
-    std::vector<Individual> parentSelection();
-    std::vector<Individual> survivorSelection(int numSurvivors);
     std::vector<std::pair<int, double>> generateIndexFitnessPair(const int startIndex = 0);
     std::vector<int> tournamentSelection(
         const std::vector<std::pair<int, double>>& population,
@@ -86,10 +80,14 @@ class PopulationGA {
 
  protected:
     std::mt19937& rnd;
+    const std::vector<Event>& events;
     std::vector<Individual> individuals;
     const bool dayShift;
     const int populationSize;
+    const int numDepots;
+    const int numAmbulances;
     const int numTimeSegments;
+    const DispatchEngineStrategyType dispatchStrategy;
     const double crossoverProbability;
     const double mutationProbability;
     std::vector<MutationType> mutations;
@@ -108,6 +106,8 @@ class PopulationGA {
         {"percentage_violations", {}},
     };
 
+    std::vector<Individual> parentSelection();
+    std::vector<Individual> survivorSelection(int numSurvivors);
     std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
     void evaluateFitness();
     Individual createIndividual(const bool child);

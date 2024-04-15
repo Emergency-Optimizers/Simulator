@@ -1,7 +1,7 @@
 SEED: 42
 
-// can pick between: GA, NSGA, NONE (just runs the simulator once with static allocation)
-HEURISTIC: NSGA
+// can pick between: GA, NSGA, HYBRID_GA, NONE (just runs the simulator once with static allocation)
+HEURISTIC: HYBRID_GA
 
 CROSSOVER_TICKETS_SINGLE_POINT: 33
 CROSSOVER_TICKETS_SEGMENT_SWAP: 33
