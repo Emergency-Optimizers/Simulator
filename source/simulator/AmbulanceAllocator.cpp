@@ -63,7 +63,7 @@ void AmbulanceAllocator::allocate(
     // add reallocation events
     if (allocations.size() > 1) {
         // calculate the interval between reallocations in seconds
-        int reallocationInterval = shiftLengthSeconds / allocations.size();
+        int reallocationInterval = shiftLengthSeconds / static_cast<int>(allocations.size());
 
         for (size_t reallocationIndex = 1; reallocationIndex < allocations.size(); reallocationIndex++) {
             time_t reallocationTime = shiftStart + reallocationInterval * reallocationIndex;

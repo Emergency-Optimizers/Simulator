@@ -33,7 +33,7 @@ PopulationGA::PopulationGA(
     dayShift(dayShift),
     dispatchStrategy(dispatchStrategy),
     populationSize(populationSize),
-    numDepots(Stations::getInstance().getDepotIndices(dayShift).size()),
+    numDepots(static_cast<int>(Stations::getInstance().getDepotIndices(dayShift).size())),
     numAmbulances(dayShift ? numAmbulancesDuringDay : numAmbulancesDuringNight),
     mutationProbability(mutationProbability),
     crossoverProbability(crossoverProbability),
@@ -77,7 +77,7 @@ void PopulationGA::evolve(int generations) {
                 std::vector<Individual> children = crossover(parents[0], parents[1]);
 
                 // calculate how many children can be added without exceeding populationSize
-                const size_t spaceLeft = populationSize - offspring.size();
+                const size_t spaceLeft = static_cast<size_t>(populationSize) - offspring.size();
                 const size_t childrenToAdd = std::min(children.size(), spaceLeft);
 
                 // add children directly to offspring, ensuring not to exceed populationSize
@@ -446,7 +446,7 @@ std::vector<int> PopulationGA::tournamentSelection(
         double bestFitness = -1.0;
         int bestIndex = -1;
         for (int i = 0; i < tournamentSize; ++i) {
-            int idx = getRandomInt(rnd, 0, population.size() - 1);
+            int idx = getRandomInt(rnd, 0, static_cast<int>(population.size()) - 1);
 
             if (population[idx].second > bestFitness) {
                 bestFitness = population[idx].second;
@@ -509,7 +509,7 @@ std::vector<int> PopulationGA::rankSelection(
 ) {
     std::vector<int> selected;
 
-    const int N = population.size();
+    const int N = static_cast<int>(population.size());
     std::vector<double> probabilities(N);
     std::vector<double> cumulativeProbabilities(N);
 
@@ -588,7 +588,7 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
     // iterate over each time segment
     for (size_t t = 0; t < numTimeSegments; t++) {
         // generate random midpoint for the current time segment's allocation
-        size_t midpoint = getRandomInt(rnd, 1, offspring1Genotype[t].size() - 2);
+        size_t midpoint = getRandomInt(rnd, 1, static_cast<int>(offspring1Genotype[t].size()) - 2);
 
         // perform crossover around this randomly chosen midpoint for the current time segment
         for (size_t i = 0; i < numDepots; i++) {
@@ -780,5 +780,5 @@ const int PopulationGA::countUnique() const {
         uniqueGenotypes.insert(individuals[individualIndex].genotype);
     }
 
-    return uniqueGenotypes.size();
+    return static_cast<int>(uniqueGenotypes.size());
 }

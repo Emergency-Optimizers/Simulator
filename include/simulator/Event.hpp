@@ -46,7 +46,7 @@ struct Event {
     bool utility = false;
 
     void updateTimer(const int increment, const std::string& metric = "", const bool dontUpdateTimer = false);
-    float getResponseTime();
+    int getResponseTime();
     void removeAssignedAmbulance();
     void assignAmbulance(Ambulance& ambulance);
 };

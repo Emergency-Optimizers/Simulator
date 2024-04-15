@@ -77,7 +77,7 @@ const std::vector<ValueType>& CSVReader::operator[](const int index) const {
 }
 
 int CSVReader::size() const {
-    return rows.size();
+    return static_cast<int>(rows.size());
 }
 
 void CSVReader::print() {

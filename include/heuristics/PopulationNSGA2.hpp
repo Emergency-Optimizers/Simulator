@@ -19,7 +19,7 @@ class PopulationNSGA2 : public PopulationGA {
 
     void nonDominatedSort();
     void calculateCrowdingDistance(std::vector<Individual*>& front);
-    std::vector<Individual> selectNextGeneration(const int populationSize);
+    std::vector<Individual> selectNextGeneration(const int selectionSize);
     std::vector<Individual> tournamentSelection(const int k, const int tournamentSize);
     Individual tournamentWinner(Individual& individual1, Individual& individual2);
 

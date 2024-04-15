@@ -43,22 +43,22 @@ MonteCarloSimulator::MonteCarloSimulator(
     generateWaitTimeHistograms();
 }
 
-std::vector<double> MonteCarloSimulator::generateWeights(int windowSize, double sigma) {
-    std::vector<double> weights;
+std::vector<double> MonteCarloSimulator::generateWeights(int weigthSize, double sigma) {
+    std::vector<double> newWeights;
     double centralWeight = std::exp(0);
 
-    for (int i = 0; i <= windowSize; ++i) {
+    for (int i = 0; i <= weigthSize; ++i) {
         double weight = std::exp(-i * i / (2 * sigma * sigma)) / centralWeight;
-        weights.push_back(weight);
+        newWeights.push_back(weight);
     }
 
     // normalize weights so the central day has a weight of 1
-    double normalizationFactor = weights[0];
-    for (double& weight : weights) {
+    double normalizationFactor = newWeights[0];
+    for (double& weight : newWeights) {
         weight /= normalizationFactor;
     }
 
-    return weights;
+    return newWeights;
 }
 
 void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
@@ -188,7 +188,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 
         bool canceled = !Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value();
 
-        int indexTriage;
+        int indexTriage = -1;
         if (triageImpression == "A") {
             indexTriage = 0;
         } else if (triageImpression == "H") {
@@ -197,7 +197,9 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START") && timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END") ? 0 : 1;
+        const bool eventAfterDayShiftStart = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START");
+        const bool eventBeforeDayShiftEnd = timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END");
+        int indexShift = eventAfterDayShiftStart && eventBeforeDayShiftEnd ? 0 : 1;
 
         if (canceled) totalIncidentsPer[indexTriage][indexShift] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
@@ -217,7 +219,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 }
 
 void MonteCarloSimulator::generateLocationProbabilityDistribution() {
-    int gridIdSize = indexToGridIdMapping.size();
+    int gridIdSize = static_cast<int>(indexToGridIdMapping.size());
 
     std::vector<std::vector<std::vector<double>>> newLocationProbabilityDistribution(
         3,
@@ -241,7 +243,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
 
         int64_t gridId = Incidents::getInstance().get<int64_t>("grid_id", i);
 
-        int indexTriage;
+        int indexTriage = -1;
         if (triageImpression == "A") {
             indexTriage = 0;
         } else if (triageImpression == "H") {
@@ -250,7 +252,9 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
             indexTriage = 2;
         }
 
-        int indexShift = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START") && timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END") ? 0 : 1;
+        const bool eventAfterDayShiftStart = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START");
+        const bool eventBeforeDayShiftEnd = timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END");
+        int indexShift = eventAfterDayShiftStart && eventBeforeDayShiftEnd ? 0 : 1;
 
         totalIncidentsPerLocation[indexTriage][indexShift][gridIdToIndexMapping[gridId]] += weight;
         totalIncidents[indexTriage][indexShift] += weight;
@@ -351,7 +355,7 @@ std::map<std::pair<float, float>, double> MonteCarloSimulator::createHistogram(c
         if (value == maxVal) {
             binIndex = numBins - 1;
         } else {
-            binIndex = (value - minVal) / binSize;
+            binIndex = static_cast<int>((value - minVal) / binSize);
         }
 
         float binStart = minVal + binIndex * binSize;
@@ -366,7 +370,7 @@ std::map<std::pair<float, float>, double> MonteCarloSimulator::createHistogram(c
     }
 
     double cumulativeProbability = 0.0;
-    int totalIncidents = data.size();
+    int totalIncidents = static_cast<int>(data.size());
 
     for (const auto& bin : histogram) {
         double probability = bin.second / totalIncidents;
@@ -382,8 +386,7 @@ float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<st
     float start = 0;
     float end = 0;
 
-    std::uniform_real_distribution<> dis(0, 1);
-    double randomValue = dis(rnd);
+    double randomValue = getRandomDouble(rnd);
 
     for (const auto& bin : histogram) {
         if (randomValue <= bin.second) {
@@ -393,8 +396,7 @@ float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<st
         }
     }
 
-    std::uniform_real_distribution<> valueDis(start, end);
-    return valueDis(rnd);
+    return static_cast<float>(getRandomDouble(rnd, static_cast<double>(start), static_cast<double>(end)));
 }
 
 int MonteCarloSimulator::getTotalIncidentsToGenerate() {
@@ -560,8 +562,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.timer = std::mktime(&event.callReceived);
 
         // remove event.secondsWaitAppointingResource
-        event.updateTimer(event.secondsWaitCallAnswered, "duration_incident_creation");
-        event.updateTimer(event.secondsWaitAppointingResource, "duration_resource_appointment");
+        event.updateTimer(static_cast<int>(event.secondsWaitCallAnswered), "duration_incident_creation");
+        event.updateTimer(static_cast<int>(event.secondsWaitAppointingResource), "duration_resource_appointment");
 
         event.incidentGridId = event.gridId;
 

@@ -59,7 +59,7 @@ void PopulationMA::evolve(int generations) {
                 std::vector<Individual> children = crossover(parents[0], parents[1]);
 
                 // calculate how many children can be added without exceeding populationSize
-                const size_t spaceLeft = populationSize - offspring.size();
+                const size_t spaceLeft = static_cast<size_t>(populationSize) - offspring.size();
                 const size_t childrenToAdd = std::min(children.size(), spaceLeft);
 
                 // add children directly to offspring, ensuring not to exceed populationSize
@@ -156,9 +156,9 @@ void PopulationMA::localSearch(Individual& individual) {
 
         while (improved) {
             improved = false;
-            double bestPerformingDepotIndex = -1;
+            int bestPerformingDepotIndex = -1;
             double bestPerformance = std::numeric_limits<double>::max();
-            double worstPerformingDepotIndex = -1;
+            int worstPerformingDepotIndex = -1;
             double worstPerformance = std::numeric_limits<double>::min();
 
             for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {

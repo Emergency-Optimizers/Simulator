@@ -349,7 +349,7 @@ int weightedLottery(
     // generate a random number in the adjusted range
     std::uniform_real_distribution<> dist(0.0, cumulativeWeights.back());
     auto it = std::lower_bound(cumulativeWeights.begin(), cumulativeWeights.end(), dist(rnd));
-    int indexInAdjustedWeights = std::distance(cumulativeWeights.begin(), it);
+    int indexInAdjustedWeights = static_cast<int>(std::distance(cumulativeWeights.begin(), it));
 
     // for the default case (full range), the adjusted index is the final result
     if (ranges.empty()) {
@@ -567,8 +567,8 @@ std::pair<int, int> idToUtm(const int64_t& grid_id) {
 }
 
 int64_t utmToId(const std::pair<int, int>& utm, const int cellSize, const int offset) {
-    int64_t xCorner = std::floor((utm.first + offset) / cellSize) * cellSize - offset;
-    int64_t yCorner = std::floor(utm.second / cellSize) * cellSize;
+    int64_t xCorner = static_cast<int64_t>(std::floor((utm.first + offset) / cellSize) * cellSize - offset);
+    int64_t yCorner = static_cast<int64_t>(std::floor(utm.second / cellSize) * cellSize);
 
     return 20000000000000 + (xCorner * 10000000) + yCorner;
 }
@@ -652,10 +652,10 @@ double averageResponseTime(
     const int depotIndex
 ) {
     int totalEvents = 0;
-    float totalResponseTime = 0;
+    int totalResponseTime = 0;
 
     int eventIndex = 0;
-    int maxEventIndex = simulatedEvents.size();
+    int maxEventIndex = static_cast<int>(simulatedEvents.size());
 
     if (allocationIndex != -1) {
         int allocationCount = 0;
@@ -710,7 +710,7 @@ double responseTimeViolations(
     const int depotIndex
 ) {
     int eventIndex = 0;
-    int maxEventIndex = simulatedEvents.size();
+    int maxEventIndex = static_cast<int>(simulatedEvents.size());
 
     if (allocationIndex != -1) {
         int allocationCount = 0;

@@ -41,7 +41,7 @@ bool Ambulance::isAvailable(
     // if the ambulance is on a break and it is not finished, mark it as unavailable
     if (breakLenght != 0) {
         if (currentTime >= timeBreakStarted + breakLenght) {
-            timeNotWorking += currentTime - timeBreakStarted;
+            timeNotWorking += static_cast<int>(currentTime - timeBreakStarted);
             timeBreakStarted = 0;
             breakLenght = 0;
 
@@ -80,7 +80,6 @@ void Ambulance::scheduleBreaks(
     const time_t ONE_HOUR = 3600;
     const time_t FOUR_HOURS = 14400;
 
-    time_t shiftLength = shiftEnd - shiftStart;
     // constraints: at least 1 hour after shift starts and 1 hour before shift ends. minimum 4 hours between each break
     time_t firstHourEnd = shiftStart + ONE_HOUR;
     time_t lastHourStart = shiftEnd - ONE_HOUR;

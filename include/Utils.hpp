@@ -122,7 +122,7 @@ const int findIndex(const std::vector<T>& vec, const T& value) {
     auto it = std::find(vec.begin(), vec.end(), value);
 
     if (it != vec.end()) {
-        return std::distance(vec.begin(), it);
+        return static_cast<int>(std::distance(vec.begin(), it));
     } else {
         return -1;
     }
@@ -130,7 +130,7 @@ const int findIndex(const std::vector<T>& vec, const T& value) {
 
 template <typename T>
 T getRandomElement(std::mt19937& rnd, const std::vector<T>& vec) {
-    std::uniform_int_distribution<int> rndBetween(0, vec.size() - 1);
+    std::uniform_int_distribution<int> rndBetween(0, static_cast<int>(vec.size()) - 1);
 
     return vec[rndBetween(rnd)];
 }

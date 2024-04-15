@@ -121,10 +121,10 @@ float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const 
     return timeDifferenceInSeconds(time1, time2);
 }
 
-std::vector<int> Incidents::rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize) {
+std::vector<int> Incidents::rowsWithinTimeFrame(const int month, const int day, const int windowSize) {
     std::vector<int> indicies;
 
-    for (std::size_t i = 0; i < rows.size(); ++i) {
+    for (int i = 0; i < rows.size(); i++) {
         std::tm timeCallReceived = get<std::optional<std::tm>>("time_call_received", i).value();
 
         int dayDiff = calculateDayDifference(timeCallReceived, month, day);

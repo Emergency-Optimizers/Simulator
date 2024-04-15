@@ -185,7 +185,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
     events[eventIndex].assignAmbulance(ambulances[closestAmbulanceIndex]);
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
-        events[eventIndex].secondsWaitResourcePreparingDeparture,
+        static_cast<int>(events[eventIndex].secondsWaitResourcePreparingDeparture),
         "duration_resource_preparing_departure"
     );
 
@@ -239,7 +239,7 @@ void ClosestDispatchEngineStrategy::dispatchingToHospital(
 
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
-    events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable, "duration_at_hospital");
+    events[eventIndex].updateTimer(static_cast<int>(events[eventIndex].secondsWaitAvailable), "duration_at_hospital");
 
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
 }
@@ -332,7 +332,7 @@ void ClosestDispatchEngineStrategy::reallocating(
             // branch if it isn't responding to an incident and create an event that transfers the ambulance to the new depot
             if (ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].assignedEventId == -1) {
                 Event newEvent;
-                newEvent.id = events.size();
+                newEvent.id = static_cast<int>(events.size());
                 newEvent.type = EventType::PREPARING_DISPATCH_TO_DEPOT;
                 newEvent.timer = events[eventIndex].timer;
                 newEvent.prevTimer = events[eventIndex].timer;

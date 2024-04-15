@@ -60,12 +60,12 @@ void DispatchEngineStrategy::dispatchingToScene(
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
     if (events[eventIndex].secondsWaitDepartureScene != -1) {
-        incrementSeconds = events[eventIndex].secondsWaitDepartureScene;
+        incrementSeconds = static_cast<int>(events[eventIndex].secondsWaitDepartureScene);
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
 
         events[eventIndex].type = EventType::DISPATCHING_TO_HOSPITAL;
     } else {
-        incrementSeconds = events[eventIndex].secondsWaitAvailable;
+        incrementSeconds = static_cast<int>(events[eventIndex].secondsWaitAvailable);
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
 
         events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;

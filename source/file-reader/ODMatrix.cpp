@@ -55,7 +55,7 @@ void ODMatrix::loadFromFile(const std::string& filename) {
     }
 
     // initialize the matrix now that we know the size
-    int size = idToIndexMap.size();
+    int size = static_cast<int>(idToIndexMap.size());
     matrix.resize(size, std::vector<float>(size));
 
     // read the matrix values

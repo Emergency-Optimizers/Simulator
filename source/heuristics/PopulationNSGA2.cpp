@@ -162,15 +162,15 @@ void PopulationNSGA2::nonDominatedSort() {
     std::vector<std::vector<Individual*>> tempFronts;
     tempFronts.resize(individuals.size());
 
-    for (size_t i = 0; i < individuals.size(); i++) {
+    for (int i = 0; i < individuals.size(); i++) {
         Individual* current = &individuals[i];
         current->dominatedIndividuals.clear();
         current->frontNumber = 0;
     }
 
-    for (size_t i = 0; i < individuals.size(); i++) {
+    for (int i = 0; i < individuals.size(); i++) {
         Individual* current = &individuals[i];
-        for (size_t j = i + 1; j < individuals.size(); j++) {
+        for (int j = i + 1; j < individuals.size(); j++) {
             Individual* other = &individuals[j];
             if (current->dominates(*other)) {
                 current->dominatedIndividuals.push_back(other);
@@ -185,7 +185,7 @@ void PopulationNSGA2::nonDominatedSort() {
         }
     }
 
-    for (size_t f = 0; f < tempFronts.size() && !tempFronts[f].empty(); ++f) {
+    for (int f = 0; f < tempFronts.size() && !tempFronts[f].empty(); f++) {
         fronts.push_back(std::vector<Individual*>());
         for (Individual* ind : tempFronts[f]) {
             fronts[f].push_back(ind);
@@ -203,9 +203,9 @@ void PopulationNSGA2::nonDominatedSort() {
 }
 
 void PopulationNSGA2::calculateCrowdingDistance(std::vector<Individual*>& front) {
-    int size = front.size();
+    int size = static_cast<int>(front.size());
     if (size == 0) return;
-    int numObjectives = front[0]->objectives.size();
+    int numObjectives = static_cast<int>(front[0]->objectives.size());
 
     for (Individual* ind : front) {
         ind->crowdingDistance = 0.0;
@@ -232,20 +232,20 @@ void PopulationNSGA2::calculateCrowdingDistance(std::vector<Individual*>& front)
     }
 }
 
-std::vector<Individual> PopulationNSGA2::selectNextGeneration(const int populationSize) {
+std::vector<Individual> PopulationNSGA2::selectNextGeneration(const int selectionSize) {
     std::vector<Individual> nextGeneration;
     int count = 0;
     for (auto& front : fronts) {
-        if (count + front.size() <= populationSize) {
+        if (count + front.size() <= selectionSize) {
             for (auto& individual : front) {
                 nextGeneration.push_back(*individual);
             }
-            count += front.size();
+            count += static_cast<int>(front.size());
         } else {
             std::sort(front.begin(), front.end(), [](const Individual* a, const Individual* b) {
                 return a->crowdingDistance > b->crowdingDistance;
             });
-            int toAdd = populationSize - count;
+            int toAdd = selectionSize - count;
             for (int i = 0; i < toAdd; ++i) {
                 nextGeneration.push_back(*front[i]);
             }
@@ -258,9 +258,9 @@ std::vector<Individual> PopulationNSGA2::selectNextGeneration(const int populati
 std::vector<Individual> PopulationNSGA2::tournamentSelection(const int k, const int tournamentSize) {
     std::vector<Individual> selected;
     while (selected.size() < k) {
-        Individual winner = individuals[getRandomInt(rnd, 0, individuals.size() - 1)];
+        Individual winner = individuals[getRandomInt(rnd, 0, static_cast<int>(individuals.size()) - 1)];
         for (int i = 1; i < tournamentSize; i++) {
-            Individual contender = individuals[getRandomInt(rnd, 0, individuals.size() - 1)];
+            Individual contender = individuals[getRandomInt(rnd, 0, static_cast<int>(individuals.size()) - 1)];
             winner = tournamentWinner(winner, contender);
         }
         selected.push_back(winner);

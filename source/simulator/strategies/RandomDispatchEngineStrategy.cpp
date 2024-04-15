@@ -66,7 +66,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
 
     int randomAmbulanceIndex = -1;
     while (!availableAmbulanceIndicies.empty()) {
-        int randomAvailableAmbulanceIndex = getRandomInt(rnd, 0, availableAmbulanceIndicies.size() - 1);
+        int randomAvailableAmbulanceIndex = getRandomInt(rnd, 0, static_cast<int>(availableAmbulanceIndicies.size()) - 1);
         randomAmbulanceIndex = availableAmbulanceIndicies[randomAvailableAmbulanceIndex];
 
         if (ambulances[randomAmbulanceIndex].assignedEventId != -1) {
@@ -156,7 +156,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
     events[eventIndex].assignAmbulance(ambulances[randomAmbulanceIndex]);
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
-        events[eventIndex].secondsWaitResourcePreparingDeparture,
+        static_cast<int>(events[eventIndex].secondsWaitResourcePreparingDeparture),
         "duration_resource_preparing_departure"
     );
 
@@ -186,7 +186,7 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
 
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
-    events[eventIndex].updateTimer(events[eventIndex].secondsWaitAvailable, "duration_at_hospital");
+    events[eventIndex].updateTimer(static_cast<int>(events[eventIndex].secondsWaitAvailable), "duration_at_hospital");
 
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_DEPOT;
 }
@@ -245,7 +245,7 @@ void RandomDispatchEngineStrategy::reallocating(
             // branch if it isn't responding to an incident and create an event that transfers the ambulance to the new depot
             if (ambulances[ambulanceIndices[currentAmbulanceIndex]].assignedEventId == -1) {
                 Event newEvent;
-                newEvent.id = events.size();
+                newEvent.id = static_cast<int>(events.size());
                 newEvent.type = EventType::PREPARING_DISPATCH_TO_DEPOT;
                 newEvent.timer = events[eventIndex].timer;
                 newEvent.prevTimer = events[eventIndex].timer;

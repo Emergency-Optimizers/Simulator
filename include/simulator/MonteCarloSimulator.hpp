@@ -59,6 +59,6 @@ class MonteCarloSimulator {
         const bool dayShift,
         const unsigned windowSize
     );
-    std::vector<double> generateWeights(int windowSize, double sigma = 1.0);
+    std::vector<double> generateWeights(int weigthSize, double sigma = 1.0);
     std::vector<Event> generateEvents();
 };

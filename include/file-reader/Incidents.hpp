@@ -27,5 +27,5 @@ class Incidents : public CSVReader {
         return instance;
     }
     float timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, const int index);
-    std::vector<int> rowsWithinTimeFrame(const int month, const int day, const unsigned windowSize);
+    std::vector<int> rowsWithinTimeFrame(const int month, const int day, const int windowSize);
 };

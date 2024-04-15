@@ -29,8 +29,8 @@ void Event::updateTimer(const int increment, const std::string& metric, const bo
     }
 }
 
-float Event::getResponseTime() {
-    float responseTime = metrics["duration_incident_creation"];
+int Event::getResponseTime() {
+    int responseTime = metrics["duration_incident_creation"];
     responseTime += metrics["duration_resource_appointment"];
     responseTime += metrics["duration_resource_preparing_departure"];
     responseTime += metrics["duration_dispatching_to_scene"];
