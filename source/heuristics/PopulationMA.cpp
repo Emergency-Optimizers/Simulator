@@ -1,5 +1,5 @@
 /**
- * @file PopulationNSGA2.cpp
+ * @file PopulationMA.cpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -13,11 +13,11 @@
 #include <algorithm>
 /* internal libraries */
 #include "ProgressBar.hpp"
-#include "heuristics/PopulationHybridGA.hpp"
+#include "heuristics/PopulationMA.hpp"
 #include "file-reader/Settings.hpp"
 #include "Utils.hpp"
 
-PopulationHybridGA::PopulationHybridGA(
+PopulationMA::PopulationMA(
     std::mt19937& rnd,
     const std::vector<Event>& events,
     const bool dayShift,
@@ -41,7 +41,7 @@ PopulationHybridGA::PopulationHybridGA(
     numTimeSegments
 ) { }
 
-void PopulationHybridGA::evolve(int generations) {
+void PopulationMA::evolve(int generations) {
     // sort and store metrics for initial population
     sortIndividuals();
     storeGenerationMetrics();
@@ -145,7 +145,7 @@ void PopulationHybridGA::evolve(int generations) {
         << "Percentage violations: \t\t\t" << (finalIndividual.objectivePercentageViolations * 100.0) << "%" << std::endl;
 }
 
-void PopulationHybridGA::localSearch(Individual& individual) {
+void PopulationMA::localSearch(Individual& individual) {
     bool improved = true;
 
     individual.evaluate(events, dayShift, dispatchStrategy);

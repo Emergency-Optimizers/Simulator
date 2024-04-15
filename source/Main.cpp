@@ -24,7 +24,7 @@
 #include "heuristics/PopulationGA.hpp"
 #include "heuristics/IndividualNSGA.hpp"
 #include "heuristics/PopulationNSGA2.hpp"
-#include "heuristics/PopulationHybridGA.hpp"
+#include "heuristics/PopulationMA.hpp"
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
@@ -80,8 +80,8 @@ int main() {
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
         population.evolve(Settings::get<int>("GENERATION_SIZE"));
-    } else if (heuristic == "HYBRID_GA") {
-        PopulationHybridGA population(
+    } else if (heuristic == "MA") {
+        PopulationMA population(
             rnd,
             events,
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),

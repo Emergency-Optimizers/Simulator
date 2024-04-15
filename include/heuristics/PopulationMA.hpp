@@ -1,5 +1,5 @@
 /**
- * @file PopulationHybridGA.hpp
+ * @file PopulationMA.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -13,16 +13,16 @@
 /* internal libraries */
 #include "heuristics/PopulationGA.hpp"
 
-class PopulationHybridGA : public PopulationGA {
+class PopulationMA : public PopulationGA {
  private:
     void localSearch(Individual& individual);
 
  protected:
-    const std::string heuristicName = "HybridGA";
-    const std::string progressBarPrefix = "Running hybrid GA";
+    const std::string heuristicName = "MA";
+    const std::string progressBarPrefix = "Running MA";
 
  public:
-    PopulationHybridGA::PopulationHybridGA(
+    PopulationMA::PopulationMA(
         std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,
