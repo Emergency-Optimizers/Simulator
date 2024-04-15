@@ -22,7 +22,6 @@
 #include "simulator/MonteCarloSimulator.hpp"
 #include "heuristics/Individual.hpp"
 #include "heuristics/PopulationGA.hpp"
-#include "heuristics/IndividualNSGA.hpp"
 #include "heuristics/PopulationNSGA2.hpp"
 #include "heuristics/PopulationMA.hpp"
 
