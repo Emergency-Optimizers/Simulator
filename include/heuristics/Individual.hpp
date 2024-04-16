@@ -52,6 +52,8 @@ class Individual {
     double weightAvgResponseTimeRuralH = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_H");
     double weightAvgResponseTimeRuralV1 = Settings::get<double>("OBJECTIVE_WEIGHT_AVG_RESPONSE_TIME_RURAL_V1");
     double weightPercentageViolations = Settings::get<double>("OBJECTIVE_WEIGHT_PERCENTAGE_VIOLATIONS");
+    double weightPercentageViolationsUrban = Settings::get<double>("OBJECTIVE_WEIGHT_PERCENTAGE_VIOLATIONS_URBAN");
+    double weightPercentageViolationsRural = Settings::get<double>("OBJECTIVE_WEIGHT_PERCENTAGE_VIOLATIONS_RURAL");
 
     double fitness = 0.0;
     double objectiveAvgResponseTimeUrbanA = 0.0;
@@ -61,6 +63,8 @@ class Individual {
     double objectiveAvgResponseTimeRuralH = 0.0;
     double objectiveAvgResponseTimeRuralV1 = 0.0;
     double objectivePercentageViolations = 0.0;
+    double objectivePercentageViolationsUrban = 0.0;
+    double objectivePercentageViolationsRural = 0.0;
 
     std::vector<double> allocationsFitness;
     std::vector<double> allocationsObjectiveAvgResponseTimeUrbanA;
@@ -70,6 +74,8 @@ class Individual {
     std::vector<double> allocationsObjectiveAvgResponseTimeRuralH;
     std::vector<double> allocationsObjectiveAvgResponseTimeRuralV1;
     std::vector<double> allocationsObjectivePercentageViolations;
+    std::vector<double> allocationsObjectivePercentageViolationsUrban;
+    std::vector<double> allocationsObjectivePercentageViolationsRural;
 
     std::vector<ObjectiveTypes> objectiveTypes = Settings::get<std::vector<ObjectiveTypes>>("OBJECTIVES");
     std::vector<double> objectives = std::vector<double>(objectiveTypes.size(), 0.0);
@@ -114,6 +120,8 @@ class Individual {
             weightAvgResponseTimeRuralH = other.weightAvgResponseTimeRuralH;
             weightAvgResponseTimeRuralV1 = other.weightAvgResponseTimeRuralV1;
             weightPercentageViolations = other.weightPercentageViolations;
+            weightPercentageViolationsUrban = other.weightPercentageViolationsUrban;
+            weightPercentageViolationsRural = other.weightPercentageViolationsRural;
             fitness = other.fitness;
             objectiveAvgResponseTimeUrbanA = other.objectiveAvgResponseTimeUrbanA;
             objectiveAvgResponseTimeUrbanH = other.objectiveAvgResponseTimeUrbanH;
@@ -122,6 +130,8 @@ class Individual {
             objectiveAvgResponseTimeRuralH = other.objectiveAvgResponseTimeRuralH;
             objectiveAvgResponseTimeRuralV1 = other.objectiveAvgResponseTimeRuralV1;
             objectivePercentageViolations = other.objectivePercentageViolations;
+            objectivePercentageViolationsUrban = other.objectivePercentageViolationsUrban;
+            objectivePercentageViolationsRural = other.objectivePercentageViolationsRural;
             allocationsFitness = other.allocationsFitness;
             allocationsObjectiveAvgResponseTimeUrbanA = other.allocationsObjectiveAvgResponseTimeUrbanA;
             allocationsObjectiveAvgResponseTimeUrbanH = other.allocationsObjectiveAvgResponseTimeUrbanH;
@@ -130,6 +140,8 @@ class Individual {
             allocationsObjectiveAvgResponseTimeRuralH = other.allocationsObjectiveAvgResponseTimeRuralH;
             allocationsObjectiveAvgResponseTimeRuralV1 = other.allocationsObjectiveAvgResponseTimeRuralV1;
             allocationsObjectivePercentageViolations = other.allocationsObjectivePercentageViolations;
+            allocationsObjectivePercentageViolationsUrban = other.allocationsObjectivePercentageViolationsUrban;
+            allocationsObjectivePercentageViolationsRural = other.allocationsObjectivePercentageViolationsRural;
             objectiveTypes = other.objectiveTypes;
             objectives = other.objectives;
             dominatedIndividuals = other.dominatedIndividuals;

@@ -726,14 +726,20 @@ void PopulationGA::sortIndividuals() {
 const std::string PopulationGA::getProgressBarPostfix() const {
     const Individual fittest = getFittest();
 
-    const double violations = fittest.objectivePercentageViolations;
+    const double fitness = fittest.fitness;
+    const double violationsUrban = fittest.objectivePercentageViolationsUrban;
+    const double violationsRural = fittest.objectivePercentageViolationsRural;
     const double diversity = static_cast<double>(countUnique()) / static_cast<double>(individuals.size());
 
     std::ostringstream postfix;
     postfix
         << "Generation: " << std::setw(4) << generation
-        << ", Violations: " << std::fixed << std::setprecision(2) << std::setw(6) << (violations * 100.0) << "%"
-        << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6) << (diversity * 100.0) << "%";
+        << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6) << (diversity * 100.0) << "%"
+        << ", Fitness: " << std::fixed << std::setprecision(2) << std::setw(7) << fitness
+        << ", Violations: ("
+        << "Urban: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsUrban * 100.0) << "%"
+        << ", Rural: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsRural * 100.0) << "%"
+        << ")";
 
     return postfix.str();
 }

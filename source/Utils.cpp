@@ -771,6 +771,81 @@ double responseTimeViolations(
     return totalViolations / totalEvents;
 }
 
+double responseTimeViolationsUrban(
+    std::vector<Event>& simulatedEvents,
+    const bool checkUrban,
+    const int allocationIndex,
+    const int depotIndex
+) {
+    int eventIndex = 0;
+    int maxEventIndex = static_cast<int>(simulatedEvents.size());
+
+    if (allocationIndex != -1) {
+        int allocationCount = 0;
+
+        for (int i = 0; i < simulatedEvents.size(); i++) {
+            Event event = simulatedEvents[i];
+
+            if (event.reallocation.empty()) {
+                continue;
+            }
+
+            if (allocationIndex == allocationCount) {
+                maxEventIndex = i + 1;
+
+                break;
+            } else {
+                allocationCount++;
+                eventIndex = i + 1;
+            }
+        }
+    }
+
+    double totalEvents = 0.0;
+    double totalViolations = 0.0;
+
+    for (; eventIndex < maxEventIndex; eventIndex++) {
+        if (simulatedEvents[eventIndex].utility) {
+            continue;
+        }
+
+        bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[eventIndex].incidentGridId];
+        if (urban != checkUrban) {
+            continue;
+        }
+
+        if (depotIndex != -1 && simulatedEvents[eventIndex].depotIndexResponsible != depotIndex) {
+            totalEvents++;
+            continue;
+        }
+
+        int responseTime = simulatedEvents[eventIndex].getResponseTime();
+        std::string triage = simulatedEvents[eventIndex].triageImpression;
+
+        if (triage == "A") {
+            if (urban && responseTime > 720) {
+                totalViolations++;
+            } else if (!urban && responseTime > 1500) {
+                totalViolations++;
+            }
+        } else if (triage == "H") {
+            if (urban && responseTime > 1800) {
+                totalViolations++;
+            } else if (!urban && responseTime > 2400) {
+                totalViolations++;
+            }
+        }
+
+        totalEvents++;
+    }
+
+    if (totalEvents == 0.0) {
+        return 0.0;
+    }
+
+    return totalViolations / totalEvents;
+}
+
 void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,

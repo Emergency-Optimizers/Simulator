@@ -33,6 +33,8 @@ Individual::Individual(
     allocationsObjectiveAvgResponseTimeRuralH(numAllocations, 0.0),
     allocationsObjectiveAvgResponseTimeRuralV1(numAllocations, 0.0),
     allocationsObjectivePercentageViolations(numAllocations, 0.0),
+    allocationsObjectivePercentageViolationsUrban(numAllocations, 0.0),
+    allocationsObjectivePercentageViolationsRural(numAllocations, 0.0),
     allocationsFitness(numAllocations, 0.0) {
     generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
 }
@@ -143,6 +145,8 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
     objectiveAvgResponseTimeRuralH = averageResponseTime(simulatedEvents, "H", false);
     objectiveAvgResponseTimeRuralV1 = averageResponseTime(simulatedEvents, "V1", false);
     objectivePercentageViolations = responseTimeViolations(simulatedEvents);
+    objectivePercentageViolationsUrban = responseTimeViolationsUrban(simulatedEvents, true);
+    objectivePercentageViolationsRural = responseTimeViolationsUrban(simulatedEvents, false);
 
     // update objectives per allocation
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
@@ -153,6 +157,8 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
         allocationsObjectiveAvgResponseTimeRuralH[allocationIndex] = averageResponseTime(simulatedEvents, "H", false, allocationIndex);
         allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] = averageResponseTime(simulatedEvents, "V1", false, allocationIndex);
         allocationsObjectivePercentageViolations[allocationIndex] = responseTimeViolations(simulatedEvents, allocationIndex);
+        allocationsObjectivePercentageViolationsUrban[allocationIndex] = responseTimeViolationsUrban(simulatedEvents, true, allocationIndex);
+        allocationsObjectivePercentageViolationsRural[allocationIndex] = responseTimeViolationsUrban(simulatedEvents, false, allocationIndex);
     }
 
     // update metrics (fitness, rank, etc.)
@@ -171,6 +177,8 @@ void Individual::updateMetrics() {
     fitness += objectiveAvgResponseTimeRuralH * weightAvgResponseTimeRuralH;
     fitness += objectiveAvgResponseTimeRuralV1 * weightAvgResponseTimeRuralV1;
     fitness += objectivePercentageViolations * weightPercentageViolations;
+    fitness += objectivePercentageViolationsUrban * weightPercentageViolationsUrban;
+    fitness += objectivePercentageViolationsRural * weightPercentageViolationsRural;
 
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         allocationsFitness[allocationIndex] = 0.0;
@@ -181,6 +189,8 @@ void Individual::updateMetrics() {
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralH[allocationIndex] * weightAvgResponseTimeRuralH;
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeRuralV1[allocationIndex] * weightAvgResponseTimeRuralV1;
         allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolations[allocationIndex] * weightPercentageViolations;
+        allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolationsUrban[allocationIndex] * weightPercentageViolationsUrban;
+        allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolationsRural[allocationIndex] * weightPercentageViolationsRural;
     }
 
     for (int i = 0; i < objectives.size(); i++) {
@@ -205,6 +215,12 @@ void Individual::updateMetrics() {
                 break;
             case ObjectiveTypes::PERCENTAGE_VIOLATIONS:
                 objectives[i] = inverseFitness(objectivePercentageViolations);
+                break;
+            case ObjectiveTypes::PERCENTAGE_VIOLATIONS_URBAN:
+                objectives[i] = inverseFitness(objectivePercentageViolationsUrban);
+                break;
+            case ObjectiveTypes::PERCENTAGE_VIOLATIONS_RURAL:
+                objectives[i] = inverseFitness(objectivePercentageViolationsRural);
                 break;
             default:
                 objectives[i] = 0.0;

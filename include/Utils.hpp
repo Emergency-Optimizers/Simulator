@@ -104,6 +104,12 @@ double responseTimeViolations(
     const int allocationIndex = -1,
     const int depotIndex = -1
 );
+double responseTimeViolationsUrban(
+    std::vector<Event>& simulatedEvents,
+    const bool checkUrban,
+    const int allocationIndex = -1,
+    const int depotIndex = -1
+);
 void printTimeSegmentedAllocationTable(
     const bool dayShift,
     const int numTimeSegments,
