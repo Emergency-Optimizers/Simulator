@@ -72,6 +72,8 @@ void PopulationGA::evolve(int generations) {
     bool stoppingCriteria = false;
 
     while (!stoppingCriteria) {
+        generation++;
+
         // create offspring
         std::vector<Individual> offspring;
         while (offspring.size() < populationSize) {
@@ -731,12 +733,16 @@ void PopulationGA::sortIndividuals() {
 }
 
 const std::string PopulationGA::getProgressBarPostfix() const {
-    Individual fittest = getFittest();
+    const Individual fittest = getFittest();
+
+    const double violations = fittest.objectivePercentageViolations;
+    const double diversity = static_cast<double>(countUnique()) / static_cast<double>(individuals.size());
 
     std::ostringstream postfix;
     postfix
-        << "Best: " << std::fixed << std::setprecision(2) << std::setw(6) << fittest.fitness
-        << ", Unique: " << std::setw(std::to_string(populationSize).size()) << countUnique();
+        << "Generation: " << std::setw(4) << generation
+        << ", Violations: " << std::fixed << std::setprecision(2) << std::setw(6) << (violations * 100.0) << "%"
+        << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6) << (diversity * 100.0) << "%";
 
     return postfix.str();
 }

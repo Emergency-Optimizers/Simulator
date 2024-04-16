@@ -82,6 +82,7 @@ class PopulationGA {
     std::mt19937& rnd;
     const std::vector<Event>& events;
     std::vector<Individual> individuals;
+    int generation = 0;
     const bool dayShift;
     const int populationSize;
     const int numDepots;
