@@ -799,7 +799,10 @@ bool PopulationGA::shouldStop() {
         std::chrono::duration_cast<std::chrono::seconds>(endRunTimeClock - startRunTimeClock).count()
     );
 
-    stoppingCriteria = runTimeDuration >= maxRunTimeSeconds;
+    stoppingCriteria |= runTimeDuration > maxRunTimeSeconds;
+
+    // check max generations criteria
+    stoppingCriteria |= maxGenerations != -1 && generation >= maxGenerations;
 
     return stoppingCriteria;
 }

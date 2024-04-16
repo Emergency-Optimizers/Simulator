@@ -76,6 +76,7 @@ class Settings {
         {"UNIQUE_RUN_ID", &toString},
         {"MULTI_THREAD", &toBool},
         {"STOPPING_CRITERIA_TIME_MIN", &toFloat},
+        {"STOPPING_CRITERIA_MAX_GENERATIONS", &toInt},
     };
 
  public:

@@ -109,6 +109,7 @@ class PopulationGA {
     const int maxRunTimeSeconds = static_cast<int>(Settings::get<float>("STOPPING_CRITERIA_TIME_MIN") * 60.0f);
     int runTimeDuration = 0;
     std::chrono::steady_clock::time_point startRunTimeClock;
+    const int maxGenerations = Settings::get<int>("STOPPING_CRITERIA_MAX_GENERATIONS");
 
     std::vector<Individual> parentSelection();
     std::vector<Individual> survivorSelection(int numSurvivors);
