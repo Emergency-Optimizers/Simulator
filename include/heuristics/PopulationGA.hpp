@@ -94,7 +94,6 @@ class PopulationGA {
     std::vector<MutationType> mutations;
     std::vector<double> mutationsTickets;
     const std::string heuristicName = "GA";
-    const std::string progressBarPrefix = "Running GA";
     std::map<std::string, std::vector<std::vector<double>>> metrics = {
         {"fitness", {}},
         {"diversity", {}},
@@ -111,6 +110,7 @@ class PopulationGA {
     std::chrono::steady_clock::time_point startRunTimeClock;
     const int maxGenerations = Settings::get<int>("STOPPING_CRITERIA_MAX_GENERATIONS");
 
+    virtual std::vector<Individual> createOffspring();
     std::vector<Individual> parentSelection();
     std::vector<Individual> survivorSelection(int numSurvivors);
     std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
@@ -118,6 +118,7 @@ class PopulationGA {
     Individual createIndividual(const bool child);
     virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;
+    virtual const std::string getHeuristicName() const;
     const Individual getFittest() const;
     virtual void storeGenerationMetrics();
     int countUnique() const;
@@ -136,5 +137,5 @@ class PopulationGA {
         const double crossoverProbability,
         const int numTimeSegments
     );
-    virtual void evolve(int generations);
+    virtual void evolve();
 };

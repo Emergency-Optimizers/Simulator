@@ -64,7 +64,7 @@ int main() {
             Settings::get<float>("CROSSOVER_PROBABILITY"),
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
-        population.evolve(Settings::get<int>("GENERATION_SIZE"));
+        population.evolve();
     } else if (heuristic == "NSGA") {
         PopulationNSGA2 population(
             rnd,
@@ -78,7 +78,7 @@ int main() {
             Settings::get<float>("CROSSOVER_PROBABILITY"),
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
-        population.evolve(Settings::get<int>("GENERATION_SIZE"));
+        population.evolve();
     } else if (heuristic == "MA") {
         PopulationMA population(
             rnd,
@@ -92,7 +92,7 @@ int main() {
             Settings::get<float>("CROSSOVER_PROBABILITY"),
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
-        population.evolve(Settings::get<int>("GENERATION_SIZE"));
+        population.evolve();
     } else if (heuristic == "NONE") {
         // set allocation
         std::vector<std::vector<int>> allocations;

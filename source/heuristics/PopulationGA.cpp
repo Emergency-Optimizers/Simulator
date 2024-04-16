@@ -59,45 +59,20 @@ void PopulationGA::generatePopulation() {
     }
 }
 
-void PopulationGA::evolve(int generations) {
+void PopulationGA::evolve() {
     // sort and store metrics for initial population
     sortIndividuals();
     storeGenerationMetrics();
 
     // init progress bar
-    ProgressBar progressBar(maxRunTimeSeconds, progressBarPrefix, getProgressBarPostfix());
+    ProgressBar progressBar(maxRunTimeSeconds, "Running " + getHeuristicName(), getProgressBarPostfix());
     startRunTimeClock = std::chrono::high_resolution_clock::now();
 
     do {
         generation++;
 
         // create offspring
-        std::vector<Individual> offspring;
-        while (offspring.size() < populationSize) {
-            std::vector<Individual> parents = parentSelection();
-
-            if (getRandomDouble(rnd) < crossoverProbability) {
-                std::vector<Individual> children = crossover(parents[0], parents[1]);
-
-                // calculate how many children can be added without exceeding populationSize
-                const size_t spaceLeft = static_cast<size_t>(populationSize) - offspring.size();
-                const size_t childrenToAdd = std::min(children.size(), spaceLeft);
-
-                // add children directly to offspring, ensuring not to exceed populationSize
-                offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
-            } else {
-                // clone one of the parents
-                const bool isChild = true;
-                Individual clonedOffspring = createIndividual(isChild);
-
-                clonedOffspring.genotype = getRandomBool(rnd) ? parents[0].genotype : parents[1].genotype;
-
-                // apply mutation to the cloned offspring
-                clonedOffspring.mutate(mutationProbability, mutations, mutationsTickets);
-
-                offspring.push_back(clonedOffspring);
-            }
-        }
+        std::vector<Individual> offspring = createOffspring();
 
         // combining existing population with children
         for (int i = 0; i < offspring.size(); i++) {
@@ -325,6 +300,35 @@ void PopulationGA::getPossibleSurvivorSelections() {
     if (survivorSelections.empty()) {
         throwError("No applicable survivor selections.");
     }
+}
+
+std::vector<Individual> PopulationGA::createOffspring() {
+    std::vector<Individual> offspring;
+
+    while (offspring.size() < populationSize) {
+        std::vector<Individual> parents = parentSelection();
+
+        if (getRandomDouble(rnd) < crossoverProbability) {
+            std::vector<Individual> children = crossover(parents[0], parents[1]);
+
+            for (auto& child : children) {
+                offspring.push_back(child);
+            }
+        } else {
+            // clone one of the parents
+            const bool isChild = true;
+            Individual clonedOffspring = createIndividual(isChild);
+
+            clonedOffspring.genotype = getRandomBool(rnd) ? parents[0].genotype : parents[1].genotype;
+
+            // apply mutation to the cloned offspring
+            clonedOffspring.mutate(mutationProbability, mutations, mutationsTickets);
+
+            offspring.push_back(clonedOffspring);
+        }
+    }
+
+    return offspring;
 }
 
 std::vector<Individual> PopulationGA::parentSelection() {
@@ -742,6 +746,10 @@ const std::string PopulationGA::getProgressBarPostfix() const {
         << ")";
 
     return postfix.str();
+}
+
+const std::string PopulationGA::getHeuristicName() const {
+    return heuristicName;
 }
 
 const Individual PopulationGA::getFittest() const {

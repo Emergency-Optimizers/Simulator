@@ -19,7 +19,9 @@ class PopulationMA : public PopulationGA {
 
  protected:
     const std::string heuristicName = "MA";
-    const std::string progressBarPrefix = "Running MA";
+
+    std::vector<Individual> createOffspring() override;
+    const std::string getHeuristicName() const override;
 
  public:
     PopulationMA(
@@ -34,5 +36,4 @@ class PopulationMA : public PopulationGA {
         const double crossoverProbability,
         const int numTimeSegments
     );
-    void evolve(int generations) override;
 };

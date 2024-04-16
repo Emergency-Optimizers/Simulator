@@ -41,7 +41,7 @@ PopulationNSGA2::PopulationNSGA2(
     numTimeSegments
 ) { }
 
-void PopulationNSGA2::evolve(int generations) {
+void PopulationNSGA2::evolve() {
     // sort and store metrics for initial population
     nonDominatedSort();
     for (auto& front : fronts) {
@@ -52,9 +52,9 @@ void PopulationNSGA2::evolve(int generations) {
     storeGenerationMetrics();
 
     // init progress bar
-    ProgressBar progressBar(generations, progressBarPrefix, getProgressBarPostfix());
+    ProgressBar progressBar(Settings::get<int>("GENERATION_SIZE"), progressBarPrefix, getProgressBarPostfix());
 
-    for (int generationIndex = 0; generationIndex < generations; generationIndex++) {
+    for (int generationIndex = 0; generationIndex < Settings::get<int>("GENERATION_SIZE"); generationIndex++) {
         // create offspring
         std::vector<Individual> offspring;
         while (offspring.size() < populationSize) {

@@ -56,5 +56,5 @@ class PopulationNSGA2 : public PopulationGA {
         const double crossoverProbability,
         const int numTimeSegments
     );
-    void evolve(int generations) override;
+    void evolve() override;
 };

@@ -22,7 +22,6 @@ class Settings {
     static inline std::unordered_map<std::string, ValueType> configValues {};
     static inline SchemaMapping schema = {
         {"POPULATION_SIZE", &toInt},
-        {"GENERATION_SIZE", &toInt},
         {"TOTAL_AMBULANCES_DURING_DAY", &toInt},
         {"TOTAL_AMBULANCES_DURING_NIGHT", &toInt},
         {"MUTATION_PROBABILITY", &toFloat},
