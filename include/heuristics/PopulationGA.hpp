@@ -112,9 +112,8 @@ class PopulationGA {
 
     virtual std::vector<Individual> createOffspring();
     std::vector<Individual> parentSelection();
-    std::vector<Individual> survivorSelection(int numSurvivors);
+    std::vector<Individual> survivorSelection();
     std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
-    void evaluateFitness();
     Individual createIndividual(const bool child);
     virtual void sortIndividuals();
     virtual const std::string getProgressBarPostfix() const;

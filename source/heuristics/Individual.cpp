@@ -106,18 +106,15 @@ void Individual::evenGenotype() {
 }
 
 void Individual::evaluate(std::vector<Event> events, const bool dayShift, const DispatchEngineStrategyType dispatchStrategy) {
-    // branch if metrics is already checked
-    if (metricsChecked) {
-        return;
-    }
-
     // allocate ambulances based on genotype
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
     // run simulator and store results
+    std::mt19937 newRnd(Settings::get<int>("SEED"));
+
     Simulator simulator(
-        rnd,
+        newRnd,
         ambulanceAllocator,
         dispatchStrategy,
         events
@@ -163,9 +160,6 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
 
     // update metrics (fitness, rank, etc.)
     updateMetrics();
-
-    // mark as checked to not run simulator again
-    metricsChecked = true;
 }
 
 void Individual::updateMetrics() {

@@ -67,6 +67,10 @@ void PopulationNSGA2::evolve() {
             if (getRandomDouble(rnd) < crossoverProbability) {
                 std::vector<Individual> children = crossover(parents[0], parents[1]);
 
+                for (Individual& child : children) {
+                    child.evaluate(events, dayShift, dispatchStrategy);
+                }
+
                 // calculate how many children can be added without exceeding populationSize
                 const size_t spaceLeft = populationSize - offspring.size();
                 const size_t childrenToAdd = std::min(children.size(), spaceLeft);
@@ -91,9 +95,6 @@ void PopulationNSGA2::evolve() {
         for (int i = 0; i < offspring.size(); i++) {
             individuals.push_back(offspring[i]);
         }
-
-        // get fitness of new individuals
-        evaluateFitness();
 
         // set rank and crowding distance
         nonDominatedSort();

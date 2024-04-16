@@ -47,7 +47,6 @@ PopulationGA::PopulationGA(
 
     // init population
     generatePopulation();
-    evaluateFitness();
 }
 
 void PopulationGA::generatePopulation() {
@@ -55,7 +54,11 @@ void PopulationGA::generatePopulation() {
 
     const bool isChild = false;
     for (int i = 0; i < populationSize; i++) {
-        individuals.push_back(createIndividual(isChild));
+        Individual newIndividual = createIndividual(isChild);
+        newIndividual.evaluate(events, dayShift, dispatchStrategy);
+
+
+        individuals.push_back(newIndividual);
     }
 }
 
@@ -79,12 +82,8 @@ void PopulationGA::evolve() {
             individuals.push_back(offspring[i]);
         }
 
-        // get fitness of new individuals
-        evaluateFitness();
-        sortIndividuals();
-
         // survivor selection
-        individuals = survivorSelection(populationSize);
+        individuals = survivorSelection();
         sortIndividuals();
 
         // update progress bar
@@ -312,6 +311,7 @@ std::vector<Individual> PopulationGA::createOffspring() {
             std::vector<Individual> children = crossover(parents[0], parents[1]);
 
             for (auto& child : children) {
+                child.evaluate(events, dayShift, dispatchStrategy);
                 offspring.push_back(child);
             }
         } else {
@@ -323,6 +323,7 @@ std::vector<Individual> PopulationGA::createOffspring() {
 
             // apply mutation to the cloned offspring
             clonedOffspring.mutate(mutationProbability, mutations, mutationsTickets);
+            clonedOffspring.evaluate(events, dayShift, dispatchStrategy);
 
             offspring.push_back(clonedOffspring);
         }
@@ -378,14 +379,15 @@ std::vector<Individual> PopulationGA::parentSelection() {
     return selectedParents;
 }
 
-std::vector<Individual> PopulationGA::survivorSelection(int numSurvivors) {
+std::vector<Individual> PopulationGA::survivorSelection() {
+    sortIndividuals();
     // generate population pair holding index and fitness for each individual
     // fitness is inversed so selection methods can maximize fitness
     const int startIndex = Settings::get<int>("SURVIVOR_SELECTION_KEEP_N_BEST");
     const std::vector<std::pair<int, double>> populationIndices = generateIndexFitnessPair(startIndex);
 
     // perform selection
-    const int individualsToSelect = std::min(numSurvivors, static_cast<int>(individuals.size()));
+    const int individualsToSelect = std::min(populationSize - startIndex, static_cast<int>(individuals.size()));
     std::vector<int> selectedIndices;
 
     switch(survivorSelections[weightedLottery(rnd, survivorSelectionsTickets, {})]) {
@@ -672,51 +674,6 @@ Individual PopulationGA::createIndividual(const bool child) {
     );
 
     return individual;
-}
-
-void PopulationGA::evaluateFitness() {
-    if (!multiThread || numThreads <= 1) {
-        for (auto& individual : individuals) {
-            individual.evaluate(events, dayShift, dispatchStrategy);
-        }
-    } else {
-        const size_t numIndividuals = individuals.size();
-        const size_t chunkSize = (numIndividuals + static_cast<size_t>(numThreads) - 1) / static_cast<size_t>(numThreads);
-
-        auto evaluateChunk = [this](size_t start, size_t end) {
-            for (size_t i = start; i < end; ++i) {
-                if (i < individuals.size()) {
-                    individuals[i].evaluate(events, dayShift, dispatchStrategy);
-                }
-            }
-        };
-
-        std::vector<std::thread> threads;
-        for (size_t i = 0; i < numIndividuals; i += chunkSize) {
-            // determine the range of indices this thread will handle
-            size_t end = std::min(i + chunkSize, numIndividuals);
-
-            // start a new thread for each chunk
-            threads.emplace_back(evaluateChunk, i, end);
-
-            // if we've reached the maximum number of concurrent threads, wait for them to finish
-            if (threads.size() == static_cast<size_t>(numThreads)) {
-                for (std::thread &th : threads) {
-                    if (th.joinable()) {
-                        th.join();
-                    }
-                }
-                threads.clear();
-            }
-        }
-
-        // join any remaining threads
-        for (std::thread &th : threads) {
-            if (th.joinable()) {
-                th.join();
-            }
-        }
-    }
 }
 
 void PopulationGA::sortIndividuals() {

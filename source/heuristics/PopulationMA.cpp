@@ -97,7 +97,6 @@ void PopulationMA::localSearch(Individual& individual) {
             newIndividual.genotype[allocationIndex][bestPerformingDepotIndex]--;
             newIndividual.genotype[allocationIndex][worstPerformingDepotIndex]++;
 
-            newIndividual.metricsChecked = false;
             newIndividual.evaluate(events, dayShift, dispatchStrategy);
 
             /*std::cout
