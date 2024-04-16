@@ -17,9 +17,7 @@ class ODMatrix {
     std::vector<std::vector<float>> matrix;
     std::unordered_map<int64_t, int> idToIndexMap;
     const double noiseMean = 1.0;
-    const double noiseStddev = 0.10;
-    const double noiseLower = 0.95;
-    const double noiseUpper = 1.05;
+    const double noiseStddev = 0.02;
     std::normal_distribution<> normalDist = std::normal_distribution<>(noiseMean, noiseStddev);
 
     ODMatrix();

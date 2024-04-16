@@ -105,7 +105,7 @@ int ODMatrix::getTravelTime(
     }
 
     // add noise
-    double noise = std::max(noiseLower, std::min(noiseUpper, normalDist(rnd)));
+    double noise = normalDist(rnd);
     travelTime *= noise;
 
     return static_cast<int>(floor(travelTime));
