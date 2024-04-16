@@ -773,7 +773,7 @@ void PopulationGA::storeGenerationMetrics() {
     metrics["percentage_violations"].push_back(generationPercentageViolations);
 }
 
-const int PopulationGA::countUnique() const {
+int PopulationGA::countUnique() const {
     std::set<std::vector<std::vector<int>>> uniqueGenotypes;
 
     for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {

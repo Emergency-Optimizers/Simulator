@@ -39,8 +39,7 @@ void AmbulanceAllocator::allocate(
         }
     }
 
-    std::tm shiftStartTm = {};
-    localtime_s(&shiftStartTm, &events[events.size() - 1].timer);
+    std::tm shiftStartTm = getLocalTime(events[events.size() - 1].timer);
 
     shiftStartTm.tm_hour = Settings::get<int>("DAY_SHIFT_START");
     shiftStartTm.tm_min = 0;
@@ -74,7 +73,7 @@ void AmbulanceAllocator::allocate(
             event.reallocation = allocations[reallocationIndex];
             event.utility = true;
             // define call received for sorting in utility functions
-            localtime_s(&event.callReceived, &reallocationTime);
+            event.callReceived = getLocalTime(reallocationTime);
 
             events.push_back(event);
         }
@@ -105,8 +104,7 @@ void AmbulanceAllocator::allocateAndScheduleBreaks(const time_t& shiftStart, con
                     << ", Depot Size: " << depotSize << std::endl;
 
         for (time_t breakTime : ambulance.scheduledBreaks) {
-            std::tm ptm = {};
-            localtime_s(&ptm, &breakTime);
+            std::tm ptm =  getLocalTime(breakTime);
             std::cout << "Scheduled Break: " << std::put_time(ptm, "%Y-%m-%d %H:%M:%S") << std::endl;
         }*/
     }

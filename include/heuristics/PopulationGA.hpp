@@ -58,7 +58,7 @@ class PopulationGA {
         const std::vector<std::pair<int, double>>& population,
         const int k
     );
-    std::vector<int> PopulationGA::rankSelection(
+    std::vector<int> rankSelection(
         const std::vector<std::pair<int, double>>& population,
         const int k,
         const double selectionPressure
@@ -115,10 +115,10 @@ class PopulationGA {
     virtual const std::string getProgressBarPostfix() const;
     const Individual getFittest() const;
     virtual void storeGenerationMetrics();
-    const int countUnique() const;
+    int countUnique() const;
 
  public:
-    PopulationGA::PopulationGA(
+    PopulationGA(
         std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,

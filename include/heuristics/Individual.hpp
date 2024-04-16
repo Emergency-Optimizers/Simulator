@@ -36,7 +36,7 @@ class Individual {
     void evenGenotype();
     void redistributeMutation(const double mutationProbability);
     void scrambleMutation(const double mutationProbability);
-    void Individual::neighborDuplicationMutation(const double mutationProbability);
+    void neighborDuplicationMutation(const double mutationProbability);
     void updateMetrics();
 
  public:
@@ -97,7 +97,7 @@ class Individual {
     void printGenotype() const;
     bool dominates(const Individual& other) const;
 
-    Individual& Individual::operator=(const Individual& other) {
+    Individual& operator=(const Individual& other) {
         if (this != &other) {
             rnd = other.rnd;
             numAmbulances = other.numAmbulances;

@@ -44,7 +44,7 @@ class PopulationNSGA2 : public PopulationGA {
     void storeGenerationMetrics() override;
 
  public:
-    PopulationNSGA2::PopulationNSGA2(
+    PopulationNSGA2(
         std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,

@@ -15,7 +15,7 @@
 struct Ambulance {
     int id = -1;
     int allocatedDepotIndex = -1;
-    int64_t currentGridId = -1i64;
+    int64_t currentGridId = -1LL;
     int assignedEventId = -1;
     int timeUnavailable = 0;
     int timeNotWorking = 0;

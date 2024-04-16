@@ -99,7 +99,8 @@ int main() {
         allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
 
         if (Settings::get<bool>("SIMULATE_DAY_SHIFT")) {
-            for (int allocationIndex = 0; allocationIndex < allocations.size(); allocationIndex++) {
+            int allocationSize = static_cast<int>(allocations.size());
+            for (int allocationIndex = 0; allocationIndex < allocationSize; allocationIndex++) {
                 allocations[allocationIndex].push_back(0);
                 allocations[allocationIndex].push_back(0);
                 allocations[allocationIndex].push_back(0);

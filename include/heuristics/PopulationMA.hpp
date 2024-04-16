@@ -22,7 +22,7 @@ class PopulationMA : public PopulationGA {
     const std::string progressBarPrefix = "Running MA";
 
  public:
-    PopulationMA::PopulationMA(
+    PopulationMA(
         std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,

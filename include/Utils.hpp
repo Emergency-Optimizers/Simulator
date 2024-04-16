@@ -15,6 +15,10 @@
 #include <utility>
 #include <unordered_map>
 #include <map>
+#include <ctime>
+#ifdef _WIN32
+#include <cstdlib>
+#endif
 /* internal libraries */
 #include "simulator/Ambulance.hpp"
 #include "simulator/Event.hpp"
@@ -117,8 +121,17 @@ void saveDataToJson(
 void createDirectory(const std::string& dirName);
 double inverseFitness(const double fitness);
 
+/**
+ * Get a tm struct from a time_t value in a thread-safe manner.
+ * This function works on both Windows and POSIX systems.
+ *
+ * @param time_val A time_t value representing the time.
+ * @return A tm struct corresponding to the given time_t value.
+ */
+std::tm getLocalTime(const time_t& time_val);
+
 template <typename T>
-const int findIndex(const std::vector<T>& vec, const T& value) {
+int findIndex(const std::vector<T>& vec, const T& value) {
     auto it = std::find(vec.begin(), vec.end(), value);
 
     if (it != vec.end()) {

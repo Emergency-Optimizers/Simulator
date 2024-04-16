@@ -445,8 +445,7 @@ void saveDistributionToFile(const std::vector<std::vector<double>>& distribution
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = {};
-    localtime_s(&bt, &now_time);
+    std::tm bt = getLocalTime(now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
 
@@ -477,8 +476,7 @@ void save1dDistributionToFile(const std::vector<double>& distribution, const std
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as a string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = {};
-    localtime_s(&bt, &now_time);
+    std::tm bt = getLocalTime(now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
 
@@ -501,8 +499,7 @@ void save2dDistributionToFile(const std::vector<std::vector<double>>& distributi
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
     // format current time as string (YYYY-MM-DD_HH-MM-SS)
-    std::tm bt = {};
-    localtime_s(&bt, &now_time);
+    std::tm bt = getLocalTime(now_time);
     std::ostringstream oss;
     oss << std::put_time(&bt, "%Y-%m-%d_%H-%M-%S");
 
@@ -624,8 +621,7 @@ int findEventIndexFromId(const std::vector<Event>& events, const int id) {
 }
 
 bool isDayShift(const time_t& eventTimer, const int dayShiftStart, const int dayShiftEnd) {
-    std::tm timeInfo = {};
-    localtime_s(&timeInfo, &eventTimer);
+    std::tm timeInfo = getLocalTime(eventTimer);
     int hour = timeInfo.tm_hour;
 
     return hour >= dayShiftStart && hour <= dayShiftEnd;
@@ -914,4 +910,16 @@ void createDirectory(const std::string& dirName) {
 
 double inverseFitness(const double fitness) {
     return 1.0 / (fitness + std::numeric_limits<double>::epsilon());
+}
+
+std::tm getLocalTime(const time_t& time_val) {
+    std::tm buf;
+#ifdef _WIN32
+    // Windows-specific thread-safe localtime function
+    localtime_s(&buf, &time_val);
+#else
+    // POSIX-specific thread-safe localtime function
+    localtime_r(&time_val, &buf);
+#endif
+    return buf;
 }

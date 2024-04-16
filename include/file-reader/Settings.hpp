@@ -129,8 +129,7 @@ class Settings {
         std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
         std::time_t now_time = std::chrono::system_clock::to_time_t(now);
 
-        std::tm bt = {};
-        localtime_s(&bt, &now_time);
+        std::tm bt = getLocalTime(now_time);
         std::ostringstream oss;
         oss << std::put_time(&bt, "%Y_%m_%d_%H_%M_%S");
         std::string timestamp = oss.str();

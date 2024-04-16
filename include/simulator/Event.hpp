@@ -39,8 +39,8 @@ struct Event {
     float secondsWaitResourcePreparingDeparture = -1.0f;
     float secondsWaitDepartureScene = -1.0f;
     float secondsWaitAvailable = -1.0f;
-    int64_t gridId = -1i64;
-    int64_t incidentGridId = -1i64;
+    int64_t gridId = -1LL;
+    int64_t incidentGridId = -1LL;
     int depotIndexResponsible = -1;
     std::vector<int> reallocation;
     bool utility = false;

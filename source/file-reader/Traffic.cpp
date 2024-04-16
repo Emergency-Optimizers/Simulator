@@ -24,8 +24,7 @@ Traffic::Traffic() {
 }
 
 double Traffic::getTrafficFactor(const time_t& time) {
-    std::tm localTime = {};
-    localtime_s(&localTime, &time);
+    std::tm localTime = getLocalTime(time);
 
     const char* daysOfWeek[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
