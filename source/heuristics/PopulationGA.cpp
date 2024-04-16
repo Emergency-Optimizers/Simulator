@@ -65,13 +65,10 @@ void PopulationGA::evolve(int generations) {
     storeGenerationMetrics();
 
     // init progress bar
-    int maxRunTimeSeconds = static_cast<int>(Settings::get<float>("STOPPING_CRITERIA_TIME_MIN") * 60.0f);
     ProgressBar progressBar(maxRunTimeSeconds, progressBarPrefix, getProgressBarPostfix());
-    std::chrono::steady_clock::time_point startRunTimeClock = std::chrono::high_resolution_clock::now();
+    startRunTimeClock = std::chrono::high_resolution_clock::now();
 
-    bool stoppingCriteria = false;
-
-    while (!stoppingCriteria) {
+    do {
         generation++;
 
         // create offspring
@@ -116,16 +113,10 @@ void PopulationGA::evolve(int generations) {
         sortIndividuals();
 
         // update progress bar
-        std::chrono::steady_clock::time_point endRunTimeClock = std::chrono::high_resolution_clock::now();
-        int runTimeDuration = static_cast<int>(
-            std::chrono::duration_cast<std::chrono::seconds>(endRunTimeClock - startRunTimeClock).count()
-        );
         progressBar.update(runTimeDuration, getProgressBarPostfix());
 
         storeGenerationMetrics();
-
-        stoppingCriteria = runTimeDuration >= maxRunTimeSeconds;
-    }
+    } while (!shouldStop());
 
     // get best individual
     Individual finalIndividual = getFittest();
@@ -797,4 +788,18 @@ int PopulationGA::countUnique() const {
     }
 
     return static_cast<int>(uniqueGenotypes.size());
+}
+
+bool PopulationGA::shouldStop() {
+    bool stoppingCriteria = false;
+
+    // check run time criteria
+    std::chrono::steady_clock::time_point endRunTimeClock = std::chrono::high_resolution_clock::now();
+    runTimeDuration = static_cast<int>(
+        std::chrono::duration_cast<std::chrono::seconds>(endRunTimeClock - startRunTimeClock).count()
+    );
+
+    stoppingCriteria = runTimeDuration >= maxRunTimeSeconds;
+
+    return stoppingCriteria;
 }

@@ -106,6 +106,9 @@ class PopulationGA {
         {"avg_response_time_rural_v1", {}},
         {"percentage_violations", {}},
     };
+    const int maxRunTimeSeconds = static_cast<int>(Settings::get<float>("STOPPING_CRITERIA_TIME_MIN") * 60.0f);
+    int runTimeDuration = 0;
+    std::chrono::steady_clock::time_point startRunTimeClock;
 
     std::vector<Individual> parentSelection();
     std::vector<Individual> survivorSelection(int numSurvivors);
@@ -117,6 +120,7 @@ class PopulationGA {
     const Individual getFittest() const;
     virtual void storeGenerationMetrics();
     int countUnique() const;
+    bool shouldStop();
 
  public:
     PopulationGA(
