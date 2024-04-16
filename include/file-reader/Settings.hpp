@@ -75,6 +75,7 @@ class Settings {
         {"OBJECTIVES", &toVectorObjectiveType},
         {"UNIQUE_RUN_ID", &toString},
         {"MULTI_THREAD", &toBool},
+        {"STOPPING_CRITERIA_TIME_MIN", &toFloat},
     };
 
  public:

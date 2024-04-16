@@ -65,9 +65,13 @@ void PopulationGA::evolve(int generations) {
     storeGenerationMetrics();
 
     // init progress bar
-    ProgressBar progressBar(generations, progressBarPrefix, getProgressBarPostfix());
+    int maxRunTimeSeconds = static_cast<int>(Settings::get<float>("STOPPING_CRITERIA_TIME_MIN") * 60.0f);
+    ProgressBar progressBar(maxRunTimeSeconds, progressBarPrefix, getProgressBarPostfix());
+    std::chrono::steady_clock::time_point startRunTimeClock = std::chrono::high_resolution_clock::now();
 
-    for (int generationIndex = 0; generationIndex < generations; generationIndex++) {
+    bool stoppingCriteria = false;
+
+    while (!stoppingCriteria) {
         // create offspring
         std::vector<Individual> offspring;
         while (offspring.size() < populationSize) {
@@ -110,9 +114,15 @@ void PopulationGA::evolve(int generations) {
         sortIndividuals();
 
         // update progress bar
-        progressBar.update(generationIndex + 1, getProgressBarPostfix());
+        std::chrono::steady_clock::time_point endRunTimeClock = std::chrono::high_resolution_clock::now();
+        int runTimeDuration = static_cast<int>(
+            std::chrono::duration_cast<std::chrono::seconds>(endRunTimeClock - startRunTimeClock).count()
+        );
+        progressBar.update(runTimeDuration, getProgressBarPostfix());
 
         storeGenerationMetrics();
+
+        stoppingCriteria = runTimeDuration >= maxRunTimeSeconds;
     }
 
     // get best individual
