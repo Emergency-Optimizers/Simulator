@@ -104,6 +104,8 @@ class PopulationGA {
         {"avg_response_time_rural_h", {}},
         {"avg_response_time_rural_v1", {}},
         {"percentage_violations", {}},
+        {"percentage_violations_urban", {}},
+        {"percentage_violations_rural", {}},
     };
     const int maxRunTimeSeconds = static_cast<int>(Settings::get<float>("STOPPING_CRITERIA_TIME_MIN") * 60.0f);
     int runTimeDuration = 0;
@@ -111,8 +113,8 @@ class PopulationGA {
     const int maxGenerations = Settings::get<int>("STOPPING_CRITERIA_MAX_GENERATIONS");
 
     virtual std::vector<Individual> createOffspring();
-    std::vector<Individual> parentSelection();
-    std::vector<Individual> survivorSelection();
+    virtual std::vector<Individual> parentSelection();
+    virtual std::vector<Individual> survivorSelection();
     std::vector<Individual> crossover(const Individual& parent1, const Individual& parent2);
     Individual createIndividual(const bool child);
     virtual void sortIndividuals();

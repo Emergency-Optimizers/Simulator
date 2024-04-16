@@ -65,7 +65,7 @@ int main() {
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
         population.evolve();
-    } else if (heuristic == "NSGA") {
+    } else if (heuristic == "NSGA2") {
         PopulationNSGA2 population(
             rnd,
             events,

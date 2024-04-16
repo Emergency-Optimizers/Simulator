@@ -131,6 +131,10 @@ ObjectiveTypes stringToObjectiveType(const std::string& str) {
         return ObjectiveTypes::AVG_RESPONSE_TIME_RURAL_V1;
     } else if (str == "PERCENTAGE_VIOLATIONS") {
         return ObjectiveTypes::PERCENTAGE_VIOLATIONS;
+    } else if (str == "PERCENTAGE_VIOLATIONS_URBAN") {
+        return ObjectiveTypes::PERCENTAGE_VIOLATIONS_URBAN;
+    } else if (str == "PERCENTAGE_VIOLATIONS_RURAL") {
+        return ObjectiveTypes::PERCENTAGE_VIOLATIONS_RURAL;
     } else {
         throwError("Unknown objective type: '" + str + "'");
         return ObjectiveTypes::PERCENTAGE_VIOLATIONS;
@@ -153,6 +157,10 @@ std::string objectiveTypeToString(const ObjectiveTypes objective) {
             return "AVG_RESPONSE_TIME_RURAL_V1";
         case ObjectiveTypes::PERCENTAGE_VIOLATIONS:
             return "PERCENTAGE_VIOLATIONS";
+        case ObjectiveTypes::PERCENTAGE_VIOLATIONS_URBAN:
+            return "PERCENTAGE_VIOLATIONS_URBAN";
+        case ObjectiveTypes::PERCENTAGE_VIOLATIONS_RURAL:
+            return "PERCENTAGE_VIOLATIONS_RURAL";
         default:
             return "UNKNOWN";
     }

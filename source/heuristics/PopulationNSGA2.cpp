@@ -52,44 +52,16 @@ void PopulationNSGA2::evolve() {
     storeGenerationMetrics();
 
     // init progress bar
-    ProgressBar progressBar(Settings::get<int>("GENERATION_SIZE"), progressBarPrefix, getProgressBarPostfix());
+    ProgressBar progressBar(maxRunTimeSeconds, "Running " + getHeuristicName(), getProgressBarPostfix());
+    startRunTimeClock = std::chrono::high_resolution_clock::now();
 
-    for (int generationIndex = 0; generationIndex < Settings::get<int>("GENERATION_SIZE"); generationIndex++) {
+    bool keepRunning = true;
+
+    while (keepRunning) {
+        generation++;
+
         // create offspring
-        std::vector<Individual> offspring;
-        while (offspring.size() < populationSize) {
-            const int individualsToSelect = 2;
-            std::vector<Individual> parents = tournamentSelection(
-                individualsToSelect,
-                Settings::get<int>("PARENT_SELECTION_TOURNAMENT_SIZE")
-            );
-
-            if (getRandomDouble(rnd) < crossoverProbability) {
-                std::vector<Individual> children = crossover(parents[0], parents[1]);
-
-                for (Individual& child : children) {
-                    child.evaluate(events, dayShift, dispatchStrategy);
-                }
-
-                // calculate how many children can be added without exceeding populationSize
-                const size_t spaceLeft = populationSize - offspring.size();
-                const size_t childrenToAdd = std::min(children.size(), spaceLeft);
-
-                // add children directly to offspring, ensuring not to exceed populationSize
-                offspring.insert(offspring.end(), children.begin(), children.begin() + childrenToAdd);
-            } else {
-                // clone one of the parents
-                const bool isChild = true;
-                Individual clonedOffspring = createIndividual(isChild);
-
-                clonedOffspring.genotype = getRandomBool(rnd) ? parents[0].genotype : parents[1].genotype;
-
-                // apply mutation to the cloned offspring
-                clonedOffspring.mutate(mutationProbability, mutations, mutationsTickets);
-
-                offspring.push_back(clonedOffspring);
-            }
-        }
+        std::vector<Individual> offspring = createOffspring();
 
         // combining existing population with children
         for (int i = 0; i < offspring.size(); i++) {
@@ -103,15 +75,14 @@ void PopulationNSGA2::evolve() {
         }
 
         // survivor selection
-        individuals = selectNextGeneration(populationSize);
-
-        // sort population for metrics
+        individuals = survivorSelection();
         sortIndividuals();
 
         // update progress bar
-        progressBar.update(generationIndex + 1, getProgressBarPostfix());
-
         storeGenerationMetrics();
+
+        keepRunning = !shouldStop();
+        progressBar.update(runTimeDuration, getProgressBarPostfix());
     }
 
     // get best individual
@@ -119,11 +90,11 @@ void PopulationNSGA2::evolve() {
 
     // write metrics to file
     saveDataToJson(
-        Settings::get<std::string>("UNIQUE_RUN_ID"),
-        heuristicName,
+        Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(),
+        "heuristic",
         metrics
     );
-    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID"), finalIndividual.simulatedEvents);
+    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(), finalIndividual.simulatedEvents);
 
     printTimeSegmentedAllocationTable(
         dayShift,
@@ -233,11 +204,21 @@ void PopulationNSGA2::calculateCrowdingDistance(std::vector<Individual*>& front)
     }
 }
 
-std::vector<Individual> PopulationNSGA2::selectNextGeneration(const int selectionSize) {
+std::vector<Individual> PopulationNSGA2::parentSelection() {
+    const int individualsToSelect = 2;
+    std::vector<Individual> selectedParents = tournamentSelection(
+        individualsToSelect,
+        Settings::get<int>("PARENT_SELECTION_TOURNAMENT_SIZE")
+    );
+
+    return selectedParents;
+}
+
+std::vector<Individual> PopulationNSGA2::survivorSelection() {
     std::vector<Individual> nextGeneration;
     int count = 0;
     for (auto& front : fronts) {
-        if (count + front.size() <= selectionSize) {
+        if (count + front.size() <= populationSize) {
             for (auto& individual : front) {
                 nextGeneration.push_back(*individual);
             }
@@ -246,7 +227,7 @@ std::vector<Individual> PopulationNSGA2::selectNextGeneration(const int selectio
             std::sort(front.begin(), front.end(), [](const Individual* a, const Individual* b) {
                 return a->crowdingDistance > b->crowdingDistance;
             });
-            int toAdd = selectionSize - count;
+            int toAdd = populationSize - count;
             for (int i = 0; i < toAdd; ++i) {
                 nextGeneration.push_back(*front[i]);
             }
@@ -300,15 +281,18 @@ void PopulationNSGA2::sortIndividuals() {
 const std::string PopulationNSGA2::getProgressBarPostfix() const {
     const Individual fittest = getFittest();
 
-    const double violations = fittest.objectivePercentageViolations;
+    const double violationsUrban = fittest.objectivePercentageViolationsUrban;
+    const double violationsRural = fittest.objectivePercentageViolationsRural;
     const double diversity = static_cast<double>(countUnique()) / static_cast<double>(individuals.size());
 
     std::ostringstream postfix;
     postfix
-        << "Violations: " << std::fixed << std::setprecision(2) << std::setw(6)
-        << (violations * 100.0) << "%"
-        << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6)
-        << (diversity * 100.0) << "%";
+        << "Generation: " << std::setw(4) << generation
+        << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6) << (diversity * 100.0) << "%"
+        << ", Violations: ("
+        << "Urban: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsUrban * 100.0) << "%"
+        << ", Rural: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsRural * 100.0) << "%"
+        << ")";
 
     return postfix.str();
 }
@@ -322,6 +306,8 @@ void PopulationNSGA2::storeGenerationMetrics() {
     std::vector<double> generationAvgResponseTimeRuralH;
     std::vector<double> generationAvgResponseTimeRuralV1;
     std::vector<double> generationPercentageViolations;
+    std::vector<double> generationPercentageViolationsUrban;
+    std::vector<double> generationPercentageViolationsRural;
     std::vector<double> generationFrontNumber;
     std::vector<double> generationCrowdingDistance;
 
@@ -334,6 +320,8 @@ void PopulationNSGA2::storeGenerationMetrics() {
         generationAvgResponseTimeRuralH.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralH);
         generationAvgResponseTimeRuralV1.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralV1);
         generationPercentageViolations.push_back(individuals[individualIndex].objectivePercentageViolations);
+        generationPercentageViolationsUrban.push_back(individuals[individualIndex].objectivePercentageViolationsUrban);
+        generationPercentageViolationsRural.push_back(individuals[individualIndex].objectivePercentageViolationsRural);
         generationFrontNumber.push_back(individuals[individualIndex].frontNumber);
         generationCrowdingDistance.push_back(individuals[individualIndex].crowdingDistance);
     }
@@ -350,6 +338,12 @@ void PopulationNSGA2::storeGenerationMetrics() {
     metrics["avg_response_time_rural_h"].push_back(generationAvgResponseTimeRuralH);
     metrics["avg_response_time_rural_v1"].push_back(generationAvgResponseTimeRuralV1);
     metrics["percentage_violations"].push_back(generationPercentageViolations);
+    metrics["percentage_violations_urban"].push_back(generationPercentageViolationsUrban);
+    metrics["percentage_violations_rural"].push_back(generationPercentageViolationsRural);
     metrics["front_number"].push_back(generationFrontNumber);
     metrics["crowding_distance"].push_back(generationCrowdingDistance);
+}
+
+const std::string PopulationNSGA2::getHeuristicName() const {
+    return heuristicName;
 }

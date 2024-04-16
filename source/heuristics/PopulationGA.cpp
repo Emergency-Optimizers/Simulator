@@ -71,7 +71,9 @@ void PopulationGA::evolve() {
     ProgressBar progressBar(maxRunTimeSeconds, "Running " + getHeuristicName(), getProgressBarPostfix());
     startRunTimeClock = std::chrono::high_resolution_clock::now();
 
-    do {
+    bool keepRunning = true;
+
+    while (keepRunning) {
         generation++;
 
         // create offspring
@@ -87,21 +89,22 @@ void PopulationGA::evolve() {
         sortIndividuals();
 
         // update progress bar
-        progressBar.update(runTimeDuration, getProgressBarPostfix());
-
         storeGenerationMetrics();
-    } while (!shouldStop());
+
+        keepRunning = !shouldStop();
+        progressBar.update(runTimeDuration, getProgressBarPostfix());
+    }
 
     // get best individual
     Individual finalIndividual = getFittest();
 
     // write metrics to file
     saveDataToJson(
-        Settings::get<std::string>("UNIQUE_RUN_ID"),
-        heuristicName,
+        Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(),
+        "heuristic",
         metrics
     );
-    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID"), finalIndividual.simulatedEvents);
+    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(), finalIndividual.simulatedEvents);
 
     printTimeSegmentedAllocationTable(
         dayShift,
@@ -696,11 +699,11 @@ const std::string PopulationGA::getProgressBarPostfix() const {
     postfix
         << "Generation: " << std::setw(4) << generation
         << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6) << (diversity * 100.0) << "%"
-        << ", Fitness: " << std::fixed << std::setprecision(2) << std::setw(7) << fitness
         << ", Violations: ("
         << "Urban: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsUrban * 100.0) << "%"
         << ", Rural: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsRural * 100.0) << "%"
-        << ")";
+        << ")"
+        << ", Fitness: " << std::fixed << std::setprecision(2) << std::setw(7) << fitness;
 
     return postfix.str();
 }
@@ -723,6 +726,8 @@ void PopulationGA::storeGenerationMetrics() {
     std::vector<double> generationAvgResponseTimeRuralH;
     std::vector<double> generationAvgResponseTimeRuralV1;
     std::vector<double> generationPercentageViolations;
+    std::vector<double> generationPercentageViolationsUrban;
+    std::vector<double> generationPercentageViolationsRural;
 
     // add individual data
     for (int individualIndex = 0; individualIndex < individuals.size(); individualIndex++) {
@@ -734,6 +739,8 @@ void PopulationGA::storeGenerationMetrics() {
         generationAvgResponseTimeRuralH.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralH);
         generationAvgResponseTimeRuralV1.push_back(individuals[individualIndex].objectiveAvgResponseTimeRuralV1);
         generationPercentageViolations.push_back(individuals[individualIndex].objectivePercentageViolations);
+        generationPercentageViolationsUrban.push_back(individuals[individualIndex].objectivePercentageViolationsUrban);
+        generationPercentageViolationsRural.push_back(individuals[individualIndex].objectivePercentageViolationsRural);
     }
 
     // add global generation data
@@ -749,6 +756,8 @@ void PopulationGA::storeGenerationMetrics() {
     metrics["avg_response_time_rural_h"].push_back(generationAvgResponseTimeRuralH);
     metrics["avg_response_time_rural_v1"].push_back(generationAvgResponseTimeRuralV1);
     metrics["percentage_violations"].push_back(generationPercentageViolations);
+    metrics["percentage_violations_urban"].push_back(generationPercentageViolationsUrban);
+    metrics["percentage_violations_rural"].push_back(generationPercentageViolationsRural);
 }
 
 int PopulationGA::countUnique() const {
