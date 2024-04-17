@@ -20,6 +20,10 @@ Stations::Stations() {
         {"latitude", toFloat},
         {"region", toString},
         {"urban_settlement", toBool},
+        {"total_population_radius_2km", toInt},
+        {"total_population_radius_5km", toInt},
+        {"total_incidents_radius_2km", toInt},
+        {"total_incidents_radius_5km", toInt},
     };
 
     loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv", "Loading stations data");

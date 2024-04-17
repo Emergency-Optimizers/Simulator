@@ -42,7 +42,11 @@ class Settings {
         {"SIMULATE_1_HOUR_BEFORE", &toBool},
         {"CROSSOVER", &toCrossoverType},
         {"GENOTYPE_INIT_TICKETS_RANDOM", &toDouble},
-        {"GENOTYPE_INIT_TICKETS_EVEN", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_UNIFORM", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_POPULATION_PROPORTIONATE_2KM", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_POPULATION_PROPORTIONATE_5KM", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_INCIDENT_PROPORTIONATE_2KM", &toDouble},
+        {"GENOTYPE_INIT_TICKETS_INCIDENT_PROPORTIONATE_5KM", &toDouble},
         {"MUTATION_TICKETS_REDISTRIBUTE", &toDouble},
         {"MUTATION_TICKETS_SCRAMBLE", &toDouble},
         {"MUTATION_TICKETS_NEIGHBOR_DUPLICATION", &toDouble},
@@ -148,7 +152,7 @@ class Settings {
     static const T get(const std::string& key) {
         auto it = configValues.find(key);
         if (it == configValues.end()) {
-            throwError("Variable not found in settings.");
+            throwError("Variable not found in settings '" + key + "'.");
         }
 
         const auto& value = it->second;

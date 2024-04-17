@@ -13,6 +13,7 @@
 #include "Utils.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
+#include "file-reader/Stations.hpp"
 
 Individual::Individual(
     std::mt19937& rnd,
@@ -20,6 +21,7 @@ Individual::Individual(
     const int numAllocations,
     const int numDepots,
     const bool isChild,
+    const bool dayShift,
     const std::vector<GenotypeInitType>& genotypeInits,
     const std::vector<double>& genotypeInitsTickets
 ) : rnd(rnd),
@@ -36,11 +38,12 @@ Individual::Individual(
     allocationsObjectivePercentageViolationsUrban(numAllocations, 0.0),
     allocationsObjectivePercentageViolationsRural(numAllocations, 0.0),
     allocationsFitness(numAllocations, 0.0) {
-    generateGenotype(isChild, genotypeInits, genotypeInitsTickets);
+    generateGenotype(isChild, dayShift, genotypeInits, genotypeInitsTickets);
 }
 
 void Individual::generateGenotype(
     const bool isChild,
+    const bool dayShift,
     const std::vector<GenotypeInitType>& inits,
     const std::vector<double>& tickets
 ) {
@@ -57,8 +60,20 @@ void Individual::generateGenotype(
         case GenotypeInitType::RANDOM:
             randomGenotype();
             break;
-        case GenotypeInitType::EVEN:
-            evenGenotype();
+        case GenotypeInitType::UNIFORM:
+            uniformGenotype();
+            break;
+        case GenotypeInitType::POPULATION_PROPORTIONATE_2KM:
+            proportionateGenotype("total_population_radius_2km", dayShift);
+            break;
+        case GenotypeInitType::POPULATION_PROPORTIONATE_5KM:
+            proportionateGenotype("total_population_radius_5km", dayShift);
+            break;
+        case GenotypeInitType::INCIDENT_PROPORTIONATE_2KM:
+            proportionateGenotype("total_incidents_radius_2km", dayShift);
+            break;
+        case GenotypeInitType::INCIDENT_PROPORTIONATE_5KM:
+            proportionateGenotype("total_incidents_radius_5km", dayShift);
             break;
     }
 }
@@ -77,7 +92,7 @@ void Individual::randomGenotype() {
     }
 }
 
-void Individual::evenGenotype() {
+void Individual::uniformGenotype() {
     // calculate the base number of ambulances per depot and the remainder
     int baseAmbulancesPerDepot = numAmbulances / numDepots;
     int remainder = numAmbulances % numDepots;
@@ -100,6 +115,23 @@ void Individual::evenGenotype() {
         // evenly and randomly distribute the remainder ambulances to the depots
         for (int remainderIndex = 0; remainderIndex < remainder; remainderIndex++) {
             int depotIndex = depotIndices[remainderIndex];
+            genotype[allocationIndex][depotIndex]++;
+        }
+    }
+}
+
+void Individual::proportionateGenotype(const std::string& column, const bool dayShift) {
+    std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
+
+    std::vector<double> weights(numDepots, 0.0);
+    for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+        weights[depotIndex] = static_cast<double>(Stations::getInstance().get<int>(column, depotIndices[depotIndex]));
+    }
+
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        for (int ambulanceIndex = 0; ambulanceIndex < numAmbulances; ambulanceIndex++) {
+            int depotIndex = weightedLottery(rnd, weights, {});
+
             genotype[allocationIndex][depotIndex]++;
         }
     }

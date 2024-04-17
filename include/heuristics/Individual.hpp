@@ -10,6 +10,7 @@
 #include <vector>
 #include <numeric>
 #include <random>
+#include <string>
 /* internal libraries */
 #include "simulator/Event.hpp"
 #include "simulator/Ambulance.hpp"
@@ -28,12 +29,14 @@ class Individual {
 
     void generateGenotype(
         const bool isChild,
+        const bool dayShift,
         const std::vector<GenotypeInitType>& inits,
         const std::vector<double>& tickets
     );
     void emptyGenotype();
     void randomGenotype();
-    void evenGenotype();
+    void uniformGenotype();
+    void proportionateGenotype(const std::string& column, const bool dayShift);
     void redistributeMutation(const double mutationProbability);
     void scrambleMutation(const double mutationProbability);
     void neighborDuplicationMutation(const double mutationProbability);
@@ -88,6 +91,7 @@ class Individual {
         const int numAllocations,
         const int numDepots,
         const bool isChild,
+        const bool dayShift,
         const std::vector<GenotypeInitType>& genotypeInits,
         const std::vector<double>& genotypeInitsTickets
     );

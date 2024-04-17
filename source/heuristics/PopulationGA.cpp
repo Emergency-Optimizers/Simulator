@@ -152,9 +152,33 @@ void PopulationGA::getPossibleGenotypeInits() {
         genotypeInitsTickets.push_back(tickets);
     }
 
-    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_EVEN");
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_UNIFORM");
     if (tickets > 0.0) {
-        genotypeInits.push_back(GenotypeInitType::EVEN);
+        genotypeInits.push_back(GenotypeInitType::UNIFORM);
+        genotypeInitsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_POPULATION_PROPORTIONATE_2KM");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::POPULATION_PROPORTIONATE_2KM);
+        genotypeInitsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_POPULATION_PROPORTIONATE_5KM");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::POPULATION_PROPORTIONATE_5KM);
+        genotypeInitsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_INCIDENT_PROPORTIONATE_2KM");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::INCIDENT_PROPORTIONATE_2KM);
+        genotypeInitsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_INCIDENT_PROPORTIONATE_5KM");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::INCIDENT_PROPORTIONATE_5KM);
         genotypeInitsTickets.push_back(tickets);
     }
 
@@ -672,6 +696,7 @@ Individual PopulationGA::createIndividual(const bool child) {
         numTimeSegments,
         numDepots,
         child,
+        dayShift,
         genotypeInits,
         genotypeInitsTickets
     );
