@@ -248,7 +248,7 @@ std::vector<unsigned> getAvailableAmbulanceIndicies(
             eventIndex = findEventIndexFromId(events, ambulances[i].assignedEventId);
         }
 
-        if (ambulances[i].isAvailable(events, eventIndex, currentTime, currentEventTriageImpression)) {
+        if (ambulances[i].isAvailable(events, ambulances, eventIndex, currentTime, currentEventTriageImpression)) {
             availableAmbulanceIndicies.push_back(i);
         }
     }

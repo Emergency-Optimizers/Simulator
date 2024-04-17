@@ -25,6 +25,7 @@ void Ambulance::setBreak(const int newBreakLength, const time_t& currentTime) {
 
 bool Ambulance::isAvailable(
     const std::vector<Event>& events,
+    const std::vector<Ambulance>& ambulances,
     const int eventIndex,
     const time_t& currentTime,
     const std::string& currentEventTriageImpression
@@ -44,9 +45,31 @@ bool Ambulance::isAvailable(
             timeNotWorking += static_cast<int>(currentTime - timeBreakStarted);
             timeBreakStarted = 0;
             breakLenght = 0;
-
-            return true;
         } else {
+            return false;
+        }
+    }
+
+    // if this is the only available ambulance in the depot
+    if (assignedEventId == -1 && currentEventTriageImpression == "A" && Settings::get<bool>("DISPATCH_STRATEGY_RESPONSE_RESTRICTED")) {
+        bool onlyAvailableAmbulance = true;
+
+        for (int ambulanceIndex = 0; ambulanceIndex < ambulances.size(); ambulanceIndex++) {
+            if (ambulances[ambulanceIndex].id == id) {
+                continue;
+            }
+
+            const bool assignedToSameDepot = ambulances[ambulanceIndex].allocatedDepotIndex == allocatedDepotIndex;
+            const bool available = ambulances[ambulanceIndex].assignedEventId == -1;
+
+            if (assignedToSameDepot && available) {
+                onlyAvailableAmbulance = false;
+
+                break;
+            }
+        }
+
+        if (onlyAvailableAmbulance) {
             return false;
         }
     }

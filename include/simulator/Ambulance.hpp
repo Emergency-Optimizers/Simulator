@@ -29,6 +29,7 @@ struct Ambulance {
 
     bool isAvailable(
         const std::vector<Event>& events,
+        const std::vector<Ambulance>& ambulances,
         const int eventIndex,
         const time_t& currentTime,
         const std::string& currentEventTriageImpression
