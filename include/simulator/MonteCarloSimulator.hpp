@@ -42,7 +42,7 @@ class MonteCarloSimulator {
 
  public:
     std::vector<double> hourlyIncidentProbabilityDistribution;
-    std::map<std::pair<std::string, std::string>, std::vector<KDEData>> preProcessedKDEData;
+    std::map<std::pair<std::string, std::string>, std::vector<std::vector<KDEData>>> preProcessedKDEData;
     std::vector<std::vector<double>> triageProbabilityDistribution;
     std::vector<std::vector<double>> canceledProbability;
     std::map<int, int64_t> indexToGridIdMapping;

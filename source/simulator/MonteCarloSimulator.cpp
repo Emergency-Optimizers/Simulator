@@ -281,60 +281,75 @@ void MonteCarloSimulator::generateDurationsData(
     const std::string& toEventColumn,
     const bool filterToCancelledEvents
 ) {
-    preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)] = std::vector<KDEData>(TRIAGES.size());
+    preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)] = std::vector<std::vector<KDEData>>(TRIAGES.size(), std::vector<KDEData>(2));
 
-    for (size_t triageIndex = 0; triageIndex < TRIAGES.size(); triageIndex++) {
-        KDEData kdeData;
+    for (size_t indexTriage = 0; indexTriage < TRIAGES.size(); indexTriage++) {
+        for (size_t indexShift = 0; indexShift < 2; indexShift++) {
+            KDEData kdeData;
 
-        for (size_t filteredIncidentsIndex = 0; filteredIncidentsIndex < filteredIncidents.size(); filteredIncidentsIndex++) {
-            const bool differentTriage = Incidents::getInstance().get<std::string>(
-                "triage_impression_during_call",
-                filteredIncidents[filteredIncidentsIndex]
-            ) != TRIAGES[triageIndex];
+            for (size_t filteredIncidentsIndex = 0; filteredIncidentsIndex < filteredIncidents.size(); filteredIncidentsIndex++) {
+                const bool differentTriage = Incidents::getInstance().get<std::string>(
+                    "triage_impression_during_call",
+                    filteredIncidents[filteredIncidentsIndex]
+                ) != TRIAGES[indexTriage];
 
-            if (differentTriage) {
-                continue;
+                if (differentTriage) {
+                    continue;
+                }
+
+                std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
+                    "time_call_received",
+                    filteredIncidents[filteredIncidentsIndex]
+                ).value();
+
+                const bool eventAfterDayShiftStart = timeCallReceived.tm_hour >= Settings::get<int>("DAY_SHIFT_START");
+                const bool eventBeforeDayShiftEnd = timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END");
+                int eventIndexShift = eventAfterDayShiftStart && eventBeforeDayShiftEnd ? 0 : 1;
+
+                if (eventIndexShift != indexShift) {
+                    continue;
+                }
+
+                const bool noValueInFromEventColumn = !Incidents::getInstance().get<std::optional<std::tm>>(
+                    fromEventColumn,
+                    filteredIncidents[filteredIncidentsIndex]
+                ).has_value();
+
+                if (noValueInFromEventColumn) {
+                    continue;
+                }
+
+                const bool noValueInToEventColumn = !Incidents::getInstance().get<std::optional<std::tm>>(
+                    toEventColumn,
+                    filteredIncidents[filteredIncidentsIndex]
+                ).has_value();
+
+                if (noValueInToEventColumn) {
+                    continue;
+                }
+
+                const bool cancelledEvent = !Incidents::getInstance().get<std::optional<std::tm>>(
+                    "time_ambulance_dispatch_to_hospital",
+                    filteredIncidents[filteredIncidentsIndex]
+                ).has_value();
+
+                if (filterToCancelledEvents && !cancelledEvent) {
+                    continue;
+                }
+
+                double duration = Incidents::getInstance().timeDifferenceBetweenHeaders(
+                    fromEventColumn,
+                    toEventColumn,
+                    filteredIncidents[filteredIncidentsIndex]
+                );
+
+                kdeData.data.push_back(duration);
             }
 
-            const bool noValueInFromEventColumn = !Incidents::getInstance().get<std::optional<std::tm>>(
-                fromEventColumn,
-                filteredIncidents[filteredIncidentsIndex]
-            ).has_value();
+            precomputeKDE(kdeData);
 
-            if (noValueInFromEventColumn) {
-                continue;
-            }
-
-            const bool noValueInToEventColumn = !Incidents::getInstance().get<std::optional<std::tm>>(
-                toEventColumn,
-                filteredIncidents[filteredIncidentsIndex]
-            ).has_value();
-
-            if (noValueInToEventColumn) {
-                continue;
-            }
-
-            const bool cancelledEvent = !Incidents::getInstance().get<std::optional<std::tm>>(
-                "time_ambulance_dispatch_to_hospital",
-                filteredIncidents[filteredIncidentsIndex]
-            ).has_value();
-
-            if (filterToCancelledEvents && !cancelledEvent) {
-                continue;
-            }
-
-            double duration = Incidents::getInstance().timeDifferenceBetweenHeaders(
-                fromEventColumn,
-                toEventColumn,
-                filteredIncidents[filteredIncidentsIndex]
-            );
-
-            kdeData.data.push_back(duration);
+            preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)][indexTriage][indexShift] = std::move(kdeData);
         }
-
-        precomputeKDE(kdeData);
-
-        preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)][triageIndex] = std::move(kdeData);
     }
 }
 
@@ -517,25 +532,25 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
 
         // wait times
         event.secondsWaitCallAnswered = sampleFromData(
-            preProcessedKDEData[std::pair("time_call_received", "time_incident_created")][indexTriage]
+            preProcessedKDEData[std::pair("time_call_received", "time_incident_created")][indexTriage][indexShift]
         );
         event.secondsWaitAppointingResource = sampleFromData(
-            preProcessedKDEData[std::pair("time_incident_created", "time_resource_appointed")][indexTriage]
+            preProcessedKDEData[std::pair("time_incident_created", "time_resource_appointed")][indexTriage][indexShift]
         );
         event.secondsWaitResourcePreparingDeparture = sampleFromData(
-            preProcessedKDEData[std::pair("time_resource_appointed", "time_ambulance_dispatch_to_scene")][indexTriage]
+            preProcessedKDEData[std::pair("time_resource_appointed", "time_ambulance_dispatch_to_scene")][indexTriage][indexShift]
         );
 
         if (!canceled) {
             event.secondsWaitDepartureScene = sampleFromData(
-                preProcessedKDEData[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital")][indexTriage]
+                preProcessedKDEData[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital")][indexTriage][indexShift]
             );
             event.secondsWaitAvailable = sampleFromData(
-                preProcessedKDEData[std::pair("time_ambulance_arrived_at_hospital", "time_ambulance_available")][indexTriage]
+                preProcessedKDEData[std::pair("time_ambulance_arrived_at_hospital", "time_ambulance_available")][indexTriage][indexShift]
             );
         } else {
             event.secondsWaitAvailable = sampleFromData(
-                preProcessedKDEData[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][indexTriage]
+                preProcessedKDEData[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][indexTriage][indexShift]
             );
         }
 
