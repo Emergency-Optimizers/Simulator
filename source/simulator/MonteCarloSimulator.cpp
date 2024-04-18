@@ -310,42 +310,35 @@ void MonteCarloSimulator::generateWaitTimeHistogram(
     }
 }
 
-std::map<std::pair<float, float>, double> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int numBins) {
+std::map<std::pair<float, float>, double> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int desiredBins) {
     auto [minElem, maxElem] = std::minmax_element(data.begin(), data.end());
     float minVal = *minElem;
     float maxVal = *maxElem;
     float range = maxVal - minVal;
-    float binSize = range / numBins;
 
+    // calculate the actual number of bins based on the data distribution
+    int actualBins = std::max(static_cast<int>(std::ceil(range / (maxVal - minVal) * desiredBins)), 1);
+
+    float binSize = range / actualBins;
     std::map<std::pair<float, float>, double> histogram;
 
     for (float value : data) {
-        int binIndex;
-        if (value == maxVal) {
-            binIndex = numBins - 1;
-        } else {
-            binIndex = static_cast<int>((value - minVal) / binSize);
-        }
-
+        int binIndex = static_cast<int>((value - minVal) / binSize);
         float binStart = minVal + binIndex * binSize;
         float binEnd = binStart + binSize;
-
-        if (binIndex == numBins - 1) {
+        if (binIndex == actualBins - 1) {
             binEnd = maxVal;
         }
         std::pair<float, float> binRange(binStart, binEnd);
-
         histogram[binRange]++;
     }
 
     double cumulativeProbability = 0.0;
     int totalIncidents = static_cast<int>(data.size());
-
     for (const auto& bin : histogram) {
         double probability = bin.second / totalIncidents;
         cumulativeProbability += probability;
         histogram[bin.first] = cumulativeProbability;
-        // std::cout << "(" << "<" << bin.first.first << ", " << bin.first.second << ">" << ": " << bin.second << "), ";
     }
 
     return histogram;

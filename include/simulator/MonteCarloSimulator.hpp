@@ -36,7 +36,7 @@ class MonteCarloSimulator {
         const std::string toEventColumn,
         const int binSize
     );
-    std::map<std::pair<float, float>, double> createHistogram(const std::vector<float>& data, int numBins);
+    std::map<std::pair<float, float>, double> createHistogram(const std::vector<float>& data, int desiredBins);
     int getTotalIncidentsToGenerate();
     float generateRandomWaitTimeFromHistogram(const std::map<std::pair<float, float>, double>& histogram);
 
