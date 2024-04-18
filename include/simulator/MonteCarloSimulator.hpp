@@ -27,7 +27,6 @@ class MonteCarloSimulator {
     std::vector<double> weights;
 
     void generateHourlyIncidentProbabilityDistribution();
-    void generateMinuteIncidentProbabilityDistribution();
     void generateTriageProbabilityDistribution();
     void generateCanceledProbabilityDistribution();
     void generateLocationProbabilityDistribution();
@@ -43,7 +42,6 @@ class MonteCarloSimulator {
 
  public:
     std::vector<double> hourlyIncidentProbabilityDistribution;
-    std::vector<std::vector<double>> minuteIncidentProbabilityDistribution;
     std::map<std::pair<std::string, std::string>, std::map<std::string, std::map<std::pair<float, float>, double>>> waitTimesHistograms;
     std::vector<std::vector<double>> triageProbabilityDistribution;
     std::vector<std::vector<double>> canceledProbability;

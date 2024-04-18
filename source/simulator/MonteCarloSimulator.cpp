@@ -36,7 +36,6 @@ MonteCarloSimulator::MonteCarloSimulator(
     }
 
     generateHourlyIncidentProbabilityDistribution();
-    generateMinuteIncidentProbabilityDistribution();
     generateTriageProbabilityDistribution();
     generateCanceledProbabilityDistribution();
     generateLocationProbabilityDistribution();
@@ -89,36 +88,6 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
 
     hourlyIncidentProbabilityDistribution = newHourlyIncidentProbabilityDistribution;
     // save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "hourly_incident_probability_distribution");
-}
-
-void MonteCarloSimulator::generateMinuteIncidentProbabilityDistribution() {
-    std::vector<std::vector<double>> newMinuteIncidentProbabilityDistribution(24, std::vector<double>(60, 0));
-
-    std::vector<std::vector<double>> totalIncidentsPerMinute(24, std::vector<double>(60, 0));
-    std::vector<double> totalIncidents(24, 0);
-
-    for (int i = 0; i < filteredIncidents.size(); i++) {
-        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
-            "time_call_received",
-            filteredIncidents[i]
-        ).value();
-
-        int dayDiff = calculateDayDifference(timeCallReceived, month, day);
-        double weight = weights[dayDiff];
-
-        totalIncidentsPerMinute[timeCallReceived.tm_hour][timeCallReceived.tm_min] += weight;
-        totalIncidents[timeCallReceived.tm_hour] += weight;
-    }
-
-    for (int indexHour = 0; indexHour < 24; indexHour++) {
-        for (int indexMinute = 0; indexMinute < 60; indexMinute++) {
-            double minuteIncidentProbability = totalIncidentsPerMinute[indexHour][indexMinute] / totalIncidents[indexHour];
-            newMinuteIncidentProbabilityDistribution[indexHour][indexMinute] = minuteIncidentProbability;
-        }
-    }
-
-    minuteIncidentProbabilityDistribution = newMinuteIncidentProbabilityDistribution;
-    // save1dDistributionToFile(hourlyIncidentProbabilityDistribution, "minute_incident_probability_distribution");
 }
 
 void MonteCarloSimulator::generateTriageProbabilityDistribution() {
@@ -503,7 +472,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
 
         // get call received
         int callReceivedHour = weightedLottery(rnd, hourlyIncidentProbabilityDistribution, indexRangesHour);
-        int callReceivedMin = weightedLottery(rnd, minuteIncidentProbabilityDistribution[callReceivedHour]);
+        int callReceivedMin = getRandomInt(rnd, 0, 59);
         int callReceivedSec = getRandomInt(rnd, 0, 59);
 
         event.callReceived = {0};
