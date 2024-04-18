@@ -88,13 +88,13 @@ void PopulationNSGA2::evolve() {
     // get best individual
     Individual finalIndividual = getFittest();
 
-    // write metrics to file
+    // write to file
     saveDataToJson(
         Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(),
         "heuristic",
         metrics
     );
-    writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(), finalIndividual.simulatedEvents);
+    writeEvents(Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(), finalIndividual.simulatedEvents);
 
     printTimeSegmentedAllocationTable(
         dayShift,
@@ -287,11 +287,11 @@ const std::string PopulationNSGA2::getProgressBarPostfix() const {
 
     std::ostringstream postfix;
     postfix
-        << "Generation: " << std::setw(4) << generation
-        << ", Diversity: " << std::fixed << std::setprecision(2) << std::setw(6) << (diversity * 100.0) << "%"
-        << ", Violations: ("
-        << "Urban: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsUrban * 100.0) << "%"
-        << ", Rural: " << std::fixed << std::setprecision(2) << std::setw(6) << (violationsRural * 100.0) << "%"
+        << "Gen: " << std::setw(4) << generation
+        << ", Div: " << std::fixed << std::setprecision(2) << std::setw(4) << diversity
+        << ", Vio: ("
+        << "U: " << std::fixed << std::setprecision(2) << std::setw(4) << violationsUrban
+        << ", R: " << std::fixed << std::setprecision(2) << std::setw(4) << violationsRural
         << ")";
 
     return postfix.str();

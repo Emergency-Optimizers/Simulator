@@ -385,7 +385,7 @@ int getRandomInt(std::mt19937& rnd, const int min, const int max) {
     return dist(rnd);
 }
 
-void writeMetrics(const std::string& dirName, std::vector<Event>& events) {
+void writeEvents(const std::string& dirName, std::vector<Event>& events) {
     createDirectory(dirName);
     std::string filename = "../data/" + dirName + "/" + "events" + ".csv";
     std::ofstream outFile(filename);

@@ -124,8 +124,8 @@ int main() {
         );
         std::vector<Event> simulatedEvents = simulator.run();
 
-        // write metrics to file
-        writeMetrics(Settings::get<std::string>("UNIQUE_RUN_ID"), simulatedEvents);
+        // write events to file
+        writeEvents(Settings::get<std::string>("UNIQUE_RUN_ID") + "_NONE", simulatedEvents);
 
         // print metrics
         double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);
