@@ -809,5 +809,8 @@ bool PopulationGA::shouldStop() {
     // check max generations criteria
     stoppingCriteria |= maxGenerations != -1 && generation >= maxGenerations;
 
+    // check min diversity criteria
+    stoppingCriteria |= minDiversity != -1 && countUnique() < minDiversity;
+
     return stoppingCriteria;
 }

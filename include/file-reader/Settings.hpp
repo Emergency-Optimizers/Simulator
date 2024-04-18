@@ -83,6 +83,7 @@ class Settings {
         {"STOPPING_CRITERIA_TIME_MIN", &toFloat},
         {"STOPPING_CRITERIA_MAX_GENERATIONS", &toInt},
         {"DISPATCH_STRATEGY_RESPONSE_RESTRICTED", &toBool},
+        {"STOPPING_CRITERIA_MIN_DIVERSITY", &toInt},
     };
 
  public:

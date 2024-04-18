@@ -111,6 +111,7 @@ class PopulationGA {
     int runTimeDuration = 0;
     std::chrono::steady_clock::time_point startRunTimeClock;
     const int maxGenerations = Settings::get<int>("STOPPING_CRITERIA_MAX_GENERATIONS");
+    const int minDiversity = Settings::get<int>("STOPPING_CRITERIA_MIN_DIVERSITY");
 
     virtual std::vector<Individual> createOffspring();
     virtual std::vector<Individual> parentSelection();
