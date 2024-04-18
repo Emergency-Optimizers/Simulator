@@ -22,6 +22,7 @@ void Event::updateTimer(const int increment, const std::string& metric, const bo
         updateAmbulance |= metric == "duration_at_scene";
         updateAmbulance |= metric == "duration_dispatching_to_hospital";
         updateAmbulance |= metric == "duration_at_hospital";
+        updateAmbulance |= metric == "duration_dispatching_to_depot";
 
         if (updateAmbulance) {
             assignedAmbulance->timeUnavailable += increment;
