@@ -34,11 +34,11 @@ struct Event {
     };
     std::string triageImpression;
     std::tm callReceived;
-    float secondsWaitCallAnswered = -1.0f;
-    float secondsWaitAppointingResource = -1.0f;
-    float secondsWaitResourcePreparingDeparture = -1.0f;
-    float secondsWaitDepartureScene = -1.0f;
-    float secondsWaitAvailable = -1.0f;
+    double secondsWaitCallAnswered = -1.0;
+    double secondsWaitAppointingResource = -1.0;
+    double secondsWaitResourcePreparingDeparture = -1.0;
+    double secondsWaitDepartureScene = -1.0;
+    double secondsWaitAvailable = -1.0;
     int64_t gridId = -1LL;
     int64_t incidentGridId = -1LL;
     int depotIndexResponsible = -1;

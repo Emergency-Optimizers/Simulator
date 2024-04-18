@@ -7,8 +7,12 @@
 /* external libraries */
 #include <algorithm>
 #include <iomanip>
+#include <numeric>
 /* internal libraries */
 #include "simulator/MonteCarloSimulator.hpp"
+#include "Constants.hpp"
+#include "ProgressBar.hpp"
+#include "Utils.hpp"
 #include "file-reader/Settings.hpp"
 #include "file-reader/Incidents.hpp"
 
@@ -20,7 +24,11 @@ MonteCarloSimulator::MonteCarloSimulator(
     const bool dayShift,
     const unsigned windowSize
 ) : rnd(rnd), windowSize(windowSize), year(year), month(month), day(day), dayShift(dayShift) {
+    ProgressBar progressBar(12, "Generating MCS");
+    size_t progress = 0;
+
     filteredIncidents = Incidents::getInstance().rowsWithinTimeFrame(month, day, windowSize);
+    progressBar.update(++progress);
 
     weights = generateWeights(windowSize);
     for (int i = 0, indexGridId = 0; i < Incidents::getInstance().size(); i++) {
@@ -34,12 +42,38 @@ MonteCarloSimulator::MonteCarloSimulator(
 
         indexGridId++;
     }
+    progressBar.update(++progress);
 
     generateHourlyIncidentProbabilityDistribution();
+    progressBar.update(++progress);
+
     generateTriageProbabilityDistribution();
+    progressBar.update(++progress);
+
     generateCanceledProbabilityDistribution();
+    progressBar.update(++progress);
+
     generateLocationProbabilityDistribution();
-    generateWaitTimeHistograms();
+    progressBar.update(++progress);
+
+    generateDurationsData("time_call_received", "time_incident_created");
+    progressBar.update(++progress);
+
+    generateDurationsData("time_incident_created", "time_resource_appointed");
+    progressBar.update(++progress);
+
+    generateDurationsData("time_resource_appointed", "time_ambulance_dispatch_to_scene");
+    progressBar.update(++progress);
+
+    generateDurationsData("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital");
+    progressBar.update(++progress);
+
+    generateDurationsData("time_ambulance_arrived_at_hospital", "time_ambulance_available");
+    progressBar.update(++progress);
+
+    const bool filterToCancelledEvents = true;
+    generateDurationsData("time_ambulance_arrived_at_scene", "time_ambulance_available", filterToCancelledEvents);
+    progressBar.update(++progress);
 }
 
 std::vector<double> MonteCarloSimulator::generateWeights(int weigthSize, double sigma) {
@@ -242,123 +276,107 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
     locationProbabilityDistribution = newLocationProbabilityDistribution;
 }
 
-void MonteCarloSimulator::generateWaitTimeHistograms() {
-    generateWaitTimeHistogram("time_call_received", "time_incident_created", 100);
-    generateWaitTimeHistogram("time_incident_created", "time_resource_appointed", 100);
-    generateWaitTimeHistogram("time_resource_appointed", "time_ambulance_dispatch_to_scene", 100);
-    generateWaitTimeHistogram("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital", 100);
-    generateWaitTimeHistogram("time_ambulance_arrived_at_hospital", "time_ambulance_available", 100);
-
-    // custom histogram for cancelled incidents
-    std::vector<std::string> triageImpressions = { "A", "H", "V1" };
-
-    for (std::string triageImpression : triageImpressions) {
-        std::vector<float> data;
-
-        for (int i = 0; i < filteredIncidents.size(); i++) {
-            // filter by triage impression
-            if (Incidents::getInstance().get<std::string>("triage_impression_during_call", filteredIncidents[i]) != triageImpression) {
-                continue;
-            }
-            // filter out rows not cancelled
-            if (!Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", filteredIncidents[i]).has_value()) {
-                continue;
-            }
-
-            float timeDiff = Incidents::getInstance().timeDifferenceBetweenHeaders(
-                "time_ambulance_arrived_at_scene",
-                "time_ambulance_available",
-                filteredIncidents[i]
-            );
-            data.push_back(timeDiff);
-        }
-        waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][triageImpression] = createHistogram(data, 100);
-    }
-}
-
-void MonteCarloSimulator::generateWaitTimeHistogram(
-    const std::string fromEventColumn,
-    const std::string toEventColumn,
-    const int binSize
+void MonteCarloSimulator::generateDurationsData(
+    const std::string& fromEventColumn,
+    const std::string& toEventColumn,
+    const bool filterToCancelledEvents
 ) {
-    std::vector<std::string> triageImpressions = { "A", "H", "V1" };
+    preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)] = std::vector<KDEData>(TRIAGES.size());
 
-    for (std::string triageImpression : triageImpressions) {
-        std::vector<float> data;
+    for (size_t triageIndex = 0; triageIndex < TRIAGES.size(); triageIndex++) {
+        KDEData kdeData;
 
-        for (int i = 0; i < filteredIncidents.size(); i++) {
-            // filter by triage impression
-            if (Incidents::getInstance().get<std::string>("triage_impression_during_call", filteredIncidents[i]) != triageImpression) {
-                continue;
-            }
-            // filter out rows with NaN values
-            if (!Incidents::getInstance().get<std::optional<std::tm>>(fromEventColumn, filteredIncidents[i]).has_value()) {
-                continue;
-            }
-            if (!Incidents::getInstance().get<std::optional<std::tm>>(toEventColumn, filteredIncidents[i]).has_value()) {
+        for (size_t filteredIncidentsIndex = 0; filteredIncidentsIndex < filteredIncidents.size(); filteredIncidentsIndex++) {
+            const bool differentTriage = Incidents::getInstance().get<std::string>(
+                "triage_impression_during_call",
+                filteredIncidents[filteredIncidentsIndex]
+            ) != TRIAGES[triageIndex];
+
+            if (differentTriage) {
                 continue;
             }
 
-            float timeDiff = Incidents::getInstance().timeDifferenceBetweenHeaders(
+            const bool noValueInFromEventColumn = !Incidents::getInstance().get<std::optional<std::tm>>(
+                fromEventColumn,
+                filteredIncidents[filteredIncidentsIndex]
+            ).has_value();
+
+            if (noValueInFromEventColumn) {
+                continue;
+            }
+
+            const bool noValueInToEventColumn = !Incidents::getInstance().get<std::optional<std::tm>>(
+                toEventColumn,
+                filteredIncidents[filteredIncidentsIndex]
+            ).has_value();
+
+            if (noValueInToEventColumn) {
+                continue;
+            }
+
+            const bool cancelledEvent = !Incidents::getInstance().get<std::optional<std::tm>>(
+                "time_ambulance_dispatch_to_hospital",
+                filteredIncidents[filteredIncidentsIndex]
+            ).has_value();
+
+            if (filterToCancelledEvents && !cancelledEvent) {
+                continue;
+            }
+
+            double duration = Incidents::getInstance().timeDifferenceBetweenHeaders(
                 fromEventColumn,
                 toEventColumn,
-                filteredIncidents[i]
+                filteredIncidents[filteredIncidentsIndex]
             );
-            data.push_back(timeDiff);
+
+            kdeData.data.push_back(duration);
         }
-        waitTimesHistograms[std::pair(fromEventColumn, toEventColumn)][triageImpression] = createHistogram(data, binSize);
+
+        precomputeKDE(kdeData);
+
+        preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)][triageIndex] = std::move(kdeData);
     }
 }
 
-std::map<std::pair<float, float>, double> MonteCarloSimulator::createHistogram(const std::vector<float>& data, int desiredBins) {
-    auto [minElem, maxElem] = std::minmax_element(data.begin(), data.end());
-    float minVal = *minElem;
-    float maxVal = *maxElem;
-    float range = maxVal - minVal;
+void MonteCarloSimulator::precomputeKDE(KDEData& kdeData) {
+    const auto& data = kdeData.data;
+    if (data.empty()) {
+        return;
+    }
 
-    // calculate the actual number of bins based on the data distribution
-    int actualBins = std::max(static_cast<int>(std::ceil(range / (maxVal - minVal) * desiredBins)), 1);
+    double std_dev = std::sqrt(
+        std::inner_product(
+            data.begin(), data.end(), data.begin(), 0.0
+        ) / data.size() - pow(
+            std::accumulate(data.begin(), data.end(), 0.0) / data.size(), 2
+        )
+    );
+    double bandwidth = 1.06 * std_dev * pow(data.size(), -1.0 / 5.0);
 
-    float binSize = range / actualBins;
-    std::map<std::pair<float, float>, double> histogram;
+    double min_val = *std::min_element(data.begin(), data.end());
+    double max_val = *std::max_element(data.begin(), data.end());
 
-    for (float value : data) {
-        int binIndex = static_cast<int>((value - minVal) / binSize);
-        float binStart = minVal + binIndex * binSize;
-        float binEnd = binStart + binSize;
-        if (binIndex == actualBins - 1) {
-            binEnd = maxVal;
+    for (double i = min_val; i <= max_val; i += 1.0) {
+        kdeData.points.push_back(i);
+    }
+
+    kdeData.densities.resize(kdeData.points.size(), 0.0);
+    for (size_t i = 0; i < kdeData.points.size(); ++i) {
+        for (const double& val : data) {
+            kdeData.densities[i] += gaussian_kernel(kdeData.points[i], val, bandwidth);
         }
-        std::pair<float, float> binRange(binStart, binEnd);
-        histogram[binRange]++;
+        kdeData.densities[i] /= data.size();
     }
-
-    double cumulativeProbability = 0.0;
-    int totalIncidents = static_cast<int>(data.size());
-    for (const auto& bin : histogram) {
-        double probability = bin.second / totalIncidents;
-        cumulativeProbability += probability;
-        histogram[bin.first] = cumulativeProbability;
-    }
-
-    return histogram;
 }
 
-float MonteCarloSimulator::generateRandomWaitTimeFromHistogram(const std::map<std::pair<float, float>, double>& histogram) {
-    float start = 0;
-    float end = 0;
-
-    double randomValue = getRandomDouble(rnd);
-
-    for (const auto& bin : histogram) {
-        if (randomValue <= bin.second) {
-            start = bin.first.first;
-            end = bin.first.second;
-            break;
-        }
+double MonteCarloSimulator::sampleFromData(const KDEData& kdeData) {
+    if (kdeData.points.empty()) {
+        return 0.0;
     }
 
-    return static_cast<float>(getRandomDouble(rnd, static_cast<double>(start), static_cast<double>(end)));
+    std::discrete_distribution<> dist(kdeData.densities.begin(), kdeData.densities.end());
+
+    return kdeData.points[dist(rnd)];
 }
 
 int MonteCarloSimulator::getTotalIncidentsToGenerate() {
@@ -458,6 +476,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         std::vector<std::pair<int, int>>{{Settings::get<int>("DAY_SHIFT_START") - warmupHour, Settings::get<int>("DAY_SHIFT_END")}} :
         std::vector<std::pair<int, int>>{{0, Settings::get<int>("DAY_SHIFT_START") - 1}, {Settings::get<int>("DAY_SHIFT_END") + 1 - warmupHour, 23}};
 
+    ProgressBar progressBar(totalEvents, "Generating events");
     for (int i = 0; i < totalEvents; i++) {
         Event event;
 
@@ -497,26 +516,26 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.gridId = indexToGridIdMapping[weightedLottery(rnd, locationProbabilityDistribution[indexTriage][indexShift])];
 
         // wait times
-        event.secondsWaitCallAnswered = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_call_received", "time_incident_created")][event.triageImpression]
+        event.secondsWaitCallAnswered = sampleFromData(
+            preProcessedKDEData[std::pair("time_call_received", "time_incident_created")][indexTriage]
         );
-        event.secondsWaitAppointingResource = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_incident_created", "time_resource_appointed")][event.triageImpression]
+        event.secondsWaitAppointingResource = sampleFromData(
+            preProcessedKDEData[std::pair("time_incident_created", "time_resource_appointed")][indexTriage]
         );
-        event.secondsWaitResourcePreparingDeparture = generateRandomWaitTimeFromHistogram(
-            waitTimesHistograms[std::pair("time_resource_appointed", "time_ambulance_dispatch_to_scene")][event.triageImpression]
+        event.secondsWaitResourcePreparingDeparture = sampleFromData(
+            preProcessedKDEData[std::pair("time_resource_appointed", "time_ambulance_dispatch_to_scene")][indexTriage]
         );
 
         if (!canceled) {
-            event.secondsWaitDepartureScene = generateRandomWaitTimeFromHistogram(
-                waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital")][event.triageImpression]
+            event.secondsWaitDepartureScene = sampleFromData(
+                preProcessedKDEData[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_dispatch_to_hospital")][indexTriage]
             );
-            event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
-                waitTimesHistograms[std::pair("time_ambulance_arrived_at_hospital", "time_ambulance_available")][event.triageImpression]
+            event.secondsWaitAvailable = sampleFromData(
+                preProcessedKDEData[std::pair("time_ambulance_arrived_at_hospital", "time_ambulance_available")][indexTriage]
             );
         } else {
-            event.secondsWaitAvailable = generateRandomWaitTimeFromHistogram(
-                waitTimesHistograms[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][event.triageImpression]
+            event.secondsWaitAvailable = sampleFromData(
+                preProcessedKDEData[std::pair("time_ambulance_arrived_at_scene", "time_ambulance_available")][indexTriage]
             );
         }
 
@@ -530,6 +549,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.incidentGridId = event.gridId;
 
         events.push_back(event);
+
+        progressBar.update(i + 1);
     }
 
     return events;

@@ -15,6 +15,7 @@
 #include <filesystem>
 /* internal libraries */
 #include "Utils.hpp"
+#include "Constants.hpp"
 #include "file-reader/ODMatrix.hpp"
 #include "file-reader/Incidents.hpp"
 #include "file-reader/Stations.hpp"
@@ -226,11 +227,11 @@ std::string valueTypeToString(const ValueType& cell) {
     }, cell);
 }
 
-float timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
+double timeDifferenceInSeconds(std::tm& time1, std::tm& time2) {
     time_t t1 = std::mktime(&time1);
     time_t t2 = std::mktime(&time2);
 
-    return static_cast<float>(std::difftime(t2, t1));
+    return std::difftime(t2, t1);
 }
 
 std::vector<unsigned> getAvailableAmbulanceIndicies(
@@ -1005,4 +1006,8 @@ std::tm getLocalTime(const time_t& time_val) {
     localtime_r(&time_val, &buf);
 #endif
     return buf;
+}
+
+double gaussian_kernel(const double x, const double mu, const double sigma) {
+    return exp(-0.5 * pow((x - mu) / sigma, 2)) / (sigma * sqrt(2.0 * PI));
 }

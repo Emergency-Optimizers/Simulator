@@ -56,7 +56,7 @@ ValueType toVectorObjectiveType(const std::string& str);
 ObjectiveTypes stringToObjectiveType(const std::string& str);
 std::string tmToString(const std::tm& time);
 std::string valueTypeToString(const ValueType& cell);
-float timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
+double timeDifferenceInSeconds(std::tm& time1, std::tm& time2);
 std::vector<unsigned> getAvailableAmbulanceIndicies(
     std::vector<Ambulance>& ambulances,
     const std::vector<Event>& events,
@@ -126,6 +126,7 @@ void saveDataToJson(
 );
 void createDirectory(const std::string& dirName);
 double inverseFitness(const double fitness);
+double gaussian_kernel(const double x, const double mu, const double sigma);
 
 /**
  * Get a tm struct from a time_t value in a thread-safe manner.

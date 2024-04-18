@@ -14,6 +14,7 @@
 #include <string>
 /* internal libraries */
 #include "simulator/Event.hpp"
+#include "simulator/KDEData.hpp"
 
 class MonteCarloSimulator {
  private:
@@ -30,19 +31,18 @@ class MonteCarloSimulator {
     void generateTriageProbabilityDistribution();
     void generateCanceledProbabilityDistribution();
     void generateLocationProbabilityDistribution();
-    void generateWaitTimeHistograms();
-    void generateWaitTimeHistogram(
-        const std::string fromEventColumn,
-        const std::string toEventColumn,
-        const int binSize
-    );
-    std::map<std::pair<float, float>, double> createHistogram(const std::vector<float>& data, int desiredBins);
     int getTotalIncidentsToGenerate();
-    float generateRandomWaitTimeFromHistogram(const std::map<std::pair<float, float>, double>& histogram);
+    void generateDurationsData(
+        const std::string& fromEventColumn,
+        const std::string& toEventColumn,
+        const bool filterToCancelledEvents = false
+    );
+    void precomputeKDE(KDEData& kdeData);
+    double sampleFromData(const KDEData& kdeData);
 
  public:
     std::vector<double> hourlyIncidentProbabilityDistribution;
-    std::map<std::pair<std::string, std::string>, std::map<std::string, std::map<std::pair<float, float>, double>>> waitTimesHistograms;
+    std::map<std::pair<std::string, std::string>, std::vector<KDEData>> preProcessedKDEData;
     std::vector<std::vector<double>> triageProbabilityDistribution;
     std::vector<std::vector<double>> canceledProbability;
     std::map<int, int64_t> indexToGridIdMapping;

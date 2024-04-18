@@ -114,7 +114,7 @@ Incidents::Incidents() {
     }
 }
 
-float Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, const int index) {
+double Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const std::string& header2, const int index) {
     std::tm time1 = get<std::optional<std::tm>>(header1, index).value();
     std::tm time2 = get<std::optional<std::tm>>(header2, index).value();
 
