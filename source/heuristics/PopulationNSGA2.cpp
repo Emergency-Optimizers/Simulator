@@ -268,13 +268,7 @@ void PopulationNSGA2::sortIndividuals() {
     std::sort(
         individuals.begin(),
         individuals.end(),
-        [](const Individual &a, const Individual &b) {
-            if (a.frontNumber == b.frontNumber) {
-                return a.crowdingDistance > b.crowdingDistance;
-            }
-
-            return a.frontNumber < b.frontNumber;
-        }
+        [](const Individual &a, const Individual &b) { return a.objectivePercentageViolations < b.objectivePercentageViolations; }
     );
 }
 
