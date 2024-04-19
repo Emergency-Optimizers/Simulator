@@ -13,7 +13,7 @@
 /* internal libraries */
 #include "heuristics/PopulationGA.hpp"
 
-class PopulationNSGA2 : public PopulationGA {
+class PopulationNSGA2 : virtual public PopulationGA {
  private:
     std::vector<std::vector<Individual*>> fronts;
 

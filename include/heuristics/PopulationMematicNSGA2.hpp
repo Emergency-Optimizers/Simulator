@@ -1,5 +1,5 @@
 /**
- * @file PopulationMA.hpp
+ * @file PopulationMematicNSGA2.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -11,20 +11,23 @@
 #include <string>
 #include <map>
 /* internal libraries */
-#include "heuristics/PopulationGA.hpp"
+#include "heuristics/PopulationNSGA2.hpp"
+#include "heuristics/PopulationMA.hpp"
 
-class PopulationMA : virtual public PopulationGA {
- private:
-    void localSearch(Individual& individual);
-
+class PopulationMematicNSGA2 : public PopulationNSGA2, public PopulationMA {
  protected:
-    const std::string heuristicName = "MA";
+    const std::string heuristicName = "MematicNSGA2";
 
-    std::vector<Individual> createOffspring() override;
+    using PopulationMA::createOffspring;
+    using PopulationNSGA2::parentSelection;
+    using PopulationNSGA2::survivorSelection;
+    using PopulationNSGA2::sortIndividuals;
+    using PopulationNSGA2::getProgressBarPostfix;
     const std::string getHeuristicName() const override;
+    using PopulationNSGA2::storeGenerationMetrics;
 
  public:
-    PopulationMA(
+    PopulationMematicNSGA2(
         std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,
@@ -36,4 +39,5 @@ class PopulationMA : virtual public PopulationGA {
         const double crossoverProbability,
         const int numTimeSegments
     );
+    using PopulationNSGA2::evolve;
 };
