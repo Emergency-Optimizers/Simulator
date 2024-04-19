@@ -52,65 +52,55 @@ std::vector<Individual> PopulationMA::createOffspring() {
 }
 
 void PopulationMA::localSearch(Individual& individual) {
-    bool improved = true;
+    const int allocationIndex = getRandomInt(rnd, 0, numTimeSegments - 1);
 
-    individual.evaluate(events, dayShift, dispatchStrategy);
+    // double oldFitness = individual.fitness;
 
-    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
-        improved = true;
-        // std::cout << std::endl;
+    int worstPerformingDepotIndex = -1;
+    double worstPerformance = std::numeric_limits<double>::min();
 
-        while (improved) {
-            improved = false;
-            int bestPerformingDepotIndex = -1;
-            double bestPerformance = std::numeric_limits<double>::max();
-            int worstPerformingDepotIndex = -1;
-            double worstPerformance = std::numeric_limits<double>::min();
+    for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+        double depotPerformance = responseTimeViolations(
+            individual.simulatedEvents,
+            allocationIndex,
+            depotIndex
+        );
 
-            for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
-                if (individual.genotype[allocationIndex][depotIndex] < 1) {
-                    continue;
-                }
-
-                double depotPerformance = responseTimeViolations(
-                    individual.simulatedEvents,
-                    allocationIndex,
-                    depotIndex
-                );
-
-                if (depotPerformance < bestPerformance) {
-                    bestPerformingDepotIndex = depotIndex;
-                    bestPerformance = depotPerformance;
-                } else if (depotPerformance > worstPerformance) {
-                    worstPerformingDepotIndex = depotIndex;
-                    worstPerformance = depotPerformance;
-                }
-            }
-
-            const bool depotIndexNotFound = bestPerformingDepotIndex == -1 || worstPerformingDepotIndex == -1;
-            const bool noImprovementToBeMade = bestPerformance == 0.0 && worstPerformance == 0.0;
-            if (depotIndexNotFound || noImprovementToBeMade) {
-                break;
-            }
-
-            Individual newIndividual = individual;
-            newIndividual.genotype[allocationIndex][bestPerformingDepotIndex]--;
-            newIndividual.genotype[allocationIndex][worstPerformingDepotIndex]++;
-
-            newIndividual.evaluate(events, dayShift, dispatchStrategy);
-
-            /*std::cout
-                << individual.fitness << " (best: " << bestPerformance << ", worst: " << worstPerformance << ") -> " << newIndividual.fitness
-                << " (best: " << responseTimeViolations(newIndividual.simulatedEvents, allocationIndex, bestPerformingDepotIndex)
-                << ", worst: " << responseTimeViolations(newIndividual.simulatedEvents, allocationIndex, worstPerformingDepotIndex) << ")\n";*/
-
-            if (newIndividual.fitness < individual.fitness) {
-                individual = newIndividual;
-                improved = true;
-            }
+        if (worstPerformingDepotIndex == -1 || depotPerformance > worstPerformance) {
+            worstPerformingDepotIndex = depotIndex;
+            worstPerformance = depotPerformance;
         }
     }
-    // std::cout << "DONE: " << individual.fitness << "\n\n";
+
+    for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+        if (individual.genotype[allocationIndex][depotIndex] < 1) {
+            continue;
+        }
+
+        if (depotIndex == worstPerformingDepotIndex) {
+            continue;
+        }
+
+        Individual newIndividual = individual;
+        newIndividual.genotype[allocationIndex][depotIndex]--;
+        newIndividual.genotype[allocationIndex][worstPerformingDepotIndex]++;
+
+        newIndividual.evaluate(events, dayShift, dispatchStrategy);
+
+        /*std::cout
+            << individual.fitness << " (current: " << responseTimeViolations(individual.simulatedEvents, allocationIndex, depotIndex)
+            << ", worst: " << worstPerformance << ") -> " << newIndividual.fitness
+            << " (current: " << responseTimeViolations(newIndividual.simulatedEvents, allocationIndex, depotIndex)
+            << ", worst: " << responseTimeViolations(newIndividual.simulatedEvents, allocationIndex, worstPerformingDepotIndex) << ")\n";*/
+
+        if (newIndividual.fitness < individual.fitness) {
+            individual = newIndividual;
+
+            break;
+        }
+    }
+
+    // std::cout << "DONE: "<< oldFitness << " -> " << individual.fitness << "\n\n";
 }
 
 const std::string PopulationMA::getHeuristicName() const {
