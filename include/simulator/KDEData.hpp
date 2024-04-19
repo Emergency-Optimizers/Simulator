@@ -11,6 +11,7 @@
 
 struct KDEData {
     std::vector<double> data;
+    std::vector<double> weights;
     std::vector<double> points;
     std::vector<double> densities;
 };

@@ -343,7 +343,10 @@ void MonteCarloSimulator::generateDurationsData(
                     filteredIncidents[filteredIncidentsIndex]
                 );
 
+                int dayDiff = calculateDayDifference(timeCallReceived, month, day);
+
                 kdeData.data.push_back(duration);
+                kdeData.weights.push_back(weights[dayDiff]);
             }
 
             precomputeKDE(kdeData);
@@ -355,6 +358,7 @@ void MonteCarloSimulator::generateDurationsData(
 
 void MonteCarloSimulator::precomputeKDE(KDEData& kdeData) {
     const auto& data = kdeData.data;
+    const auto& kdeWeights = kdeData.weights;
     if (data.empty()) {
         return;
     }
@@ -368,19 +372,21 @@ void MonteCarloSimulator::precomputeKDE(KDEData& kdeData) {
     );
     double bandwidth = 1.06 * std_dev * pow(data.size(), -1.0 / 5.0);
 
-    double min_val = *std::min_element(data.begin(), data.end());
-    double max_val = *std::max_element(data.begin(), data.end());
+    double minVal = *std::min_element(data.begin(), data.end());
+    double maxVal = *std::max_element(data.begin(), data.end());
+    double total_weight = std::accumulate(kdeWeights.begin(), kdeWeights.end(), 0.0);
 
-    for (double i = min_val; i <= max_val; i += 1.0) {
+    for (double i = minVal; i <= maxVal; i += 1.0) {
         kdeData.points.push_back(i);
     }
 
     kdeData.densities.resize(kdeData.points.size(), 0.0);
-    for (size_t i = 0; i < kdeData.points.size(); ++i) {
-        for (const double& val : data) {
-            kdeData.densities[i] += gaussian_kernel(kdeData.points[i], val, bandwidth);
+    for (size_t i = 0; i < kdeData.points.size(); i++) {
+        double weighted_sum = 0.0;
+        for (size_t j = 0; j < data.size(); j++) {
+            weighted_sum += kdeWeights[j] * gaussian_kernel(kdeData.points[i], data[j], bandwidth);
         }
-        kdeData.densities[i] /= data.size();
+        kdeData.densities[i] = weighted_sum / total_weight;
     }
 }
 
