@@ -36,6 +36,8 @@ int main() {
     Incidents::getInstance();
     ODMatrix::getInstance();
 
+    std::cout << std::endl;
+
     std::mt19937 rnd(Settings::get<int>("SEED"));
 
     // generate events
@@ -48,6 +50,8 @@ int main() {
         Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
     );
     std::vector<Event> events = monteCarloSim.generateEvents();
+
+    std::cout << std::endl;
 
     // run heuristic
     std::string heuristic = Settings::get<std::string>("HEURISTIC");
