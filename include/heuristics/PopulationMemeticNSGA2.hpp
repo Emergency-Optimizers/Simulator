@@ -1,5 +1,5 @@
 /**
- * @file PopulationMematicNSGA2.hpp
+ * @file PopulationMemeticNSGA2.hpp
  *
  * @copyright Copyright (c) 2024 Emergency-Optimizers
  */
@@ -14,9 +14,9 @@
 #include "heuristics/PopulationNSGA2.hpp"
 #include "heuristics/PopulationMA.hpp"
 
-class PopulationMematicNSGA2 : public PopulationNSGA2, public PopulationMA {
+class PopulationMemeticNSGA2 : public PopulationNSGA2, public PopulationMA {
  protected:
-    const std::string heuristicName = "MematicNSGA2";
+    const std::string heuristicName = "MemeticNSGA2";
 
     using PopulationMA::createOffspring;
     using PopulationNSGA2::parentSelection;
@@ -27,7 +27,7 @@ class PopulationMematicNSGA2 : public PopulationNSGA2, public PopulationMA {
     using PopulationNSGA2::storeGenerationMetrics;
 
  public:
-    PopulationMematicNSGA2(
+    PopulationMemeticNSGA2(
         std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,

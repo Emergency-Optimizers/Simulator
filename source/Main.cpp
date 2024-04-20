@@ -24,7 +24,7 @@
 #include "heuristics/PopulationGA.hpp"
 #include "heuristics/PopulationNSGA2.hpp"
 #include "heuristics/PopulationMA.hpp"
-#include "heuristics/PopulationMematicNSGA2.hpp"
+#include "heuristics/PopulationMemeticNSGA2.hpp"
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
@@ -98,8 +98,8 @@ int main() {
             Settings::get<int>("NUM_TIME_SEGMENTS")
         );
         population.evolve();
-    } else if (heuristic == "MEMATIC_NSGA2") {
-        PopulationMematicNSGA2 population(
+    } else if (heuristic == "MEMETIC_NSGA2") {
+        PopulationMemeticNSGA2 population(
             rnd,
             events,
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),

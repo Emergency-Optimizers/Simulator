@@ -7,9 +7,9 @@
 /* external libraries */
 #include <string>
 /* internal libraries */
-#include "heuristics/PopulationMematicNSGA2.hpp"
+#include "heuristics/PopulationMemeticNSGA2.hpp"
 
-PopulationMematicNSGA2::PopulationMematicNSGA2(
+PopulationMemeticNSGA2::PopulationMemeticNSGA2(
     std::mt19937& rnd,
     const std::vector<Event>& events,
     const bool dayShift,
@@ -55,6 +55,6 @@ PopulationMematicNSGA2::PopulationMematicNSGA2(
     numTimeSegments
 ) { }
 
-const std::string PopulationMematicNSGA2::getHeuristicName() const {
+const std::string PopulationMemeticNSGA2::getHeuristicName() const {
     return heuristicName;
 }

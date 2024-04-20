@@ -20,7 +20,7 @@ void Ambulance::checkScheduledBreak(const time_t& currentTime) {
 
 void Ambulance::setBreak(const int newBreakLength, const time_t& currentTime) {
     timeBreakStarted = currentTime;
-    breakLenght = newBreakLength;
+    breakLength = newBreakLength;
 }
 
 bool Ambulance::isAvailable(
@@ -31,7 +31,7 @@ bool Ambulance::isAvailable(
     const std::string& currentEventTriageImpression
 ) {
     // check if ambulance should start break
-    if (breakLenght == 0) {
+    if (breakLength == 0) {
         if (assignedEventId == -1) {
             checkScheduledBreak(currentTime);
         } else if (!scheduledBreaks.empty() && currentTime >= scheduledBreaks.front()) {
@@ -40,11 +40,11 @@ bool Ambulance::isAvailable(
     }
 
     // if the ambulance is on a break and it is not finished, mark it as unavailable
-    if (breakLenght != 0) {
-        if (currentTime >= timeBreakStarted + breakLenght) {
+    if (breakLength != 0) {
+        if (currentTime >= timeBreakStarted + breakLength) {
             timeNotWorking += static_cast<int>(currentTime - timeBreakStarted);
             timeBreakStarted = 0;
-            breakLenght = 0;
+            breakLength = 0;
         } else {
             return false;
         }

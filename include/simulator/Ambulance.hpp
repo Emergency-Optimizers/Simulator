@@ -20,7 +20,7 @@ struct Ambulance {
     int timeUnavailable = 0;
     int timeNotWorking = 0;
     time_t timeBreakStarted = 0;
-    int breakLenght = 0;
+    int breakLength = 0;
     std::vector<time_t> scheduledBreaks;
 
     void checkScheduledBreak(const time_t& currentTime);
