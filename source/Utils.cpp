@@ -922,7 +922,7 @@ void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {
 
         std::cout
             << "Ambulance " << std::setw(3) << (i + 1) << " UHU: "
-            << std::fixed << std::setprecision(2) << std::setw(4)
+            << std::fixed << std::setprecision(2) << std::setw(6)
             << ((static_cast<double>(ambulances[i].timeUnavailable) / TWELVE_HOURS) * 100.0) << "%";
 
         if ((i + 1) % 2 == 0 || i >= ambulances.size() - 1) {
