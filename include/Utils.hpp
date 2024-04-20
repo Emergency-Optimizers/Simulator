@@ -83,7 +83,8 @@ int64_t approximateLocation(
     const int64_t& goalId,
     const time_t& timeAtStart,
     const time_t& timeNow,
-    const std::string& triage
+    const std::string& triage,
+    const EventType eventType
 );
 int findEventIndexFromId(const std::vector<Event>& events, const int id);
 void writeEvents(const std::string& dirName, std::vector<Event>& events);

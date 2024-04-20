@@ -234,6 +234,7 @@ std::vector<Individual> PopulationNSGA2::survivorSelection() {
             break;
         }
     }
+
     return nextGeneration;
 }
 

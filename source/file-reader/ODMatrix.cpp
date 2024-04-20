@@ -90,15 +90,18 @@ int ODMatrix::getTravelTime(
 
     double travelTime = static_cast<double>(matrix[idToIndexMap[id1]][idToIndexMap[id2]]);
 
+    // set to 60 seconds if no travel time is given
     if (travelTime == 0) {
         travelTime = 60.0;
     }
 
+    // branch if triage is V1 or ambulance is driving to depot
     if (forceTrafficFactor || triage == "V1") {
         double trafficFactor = Traffic::getInstance().getTrafficFactor(time);
-        travelTime = round(travelTime * trafficFactor);
+        travelTime *= trafficFactor;
     }
 
+    // branch if triage is A and ambulance is not driving to depot
     if (!forceTrafficFactor && triage == "A") {
         double acuteFactor = 0.7953711902650347;
         travelTime *= acuteFactor;

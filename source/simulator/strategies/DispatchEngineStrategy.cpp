@@ -25,11 +25,12 @@ void DispatchEngineStrategy::preparingToDispatchToScene(
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    const bool forceTrafficFactor = false;
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
-        false,
+        forceTrafficFactor,
         events[eventIndex].triageImpression,
         events[eventIndex].timer
     );
@@ -45,11 +46,12 @@ void DispatchEngineStrategy::dispatchingToScene(
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    const bool forceTrafficFactor = false;
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
-        false,
+        forceTrafficFactor,
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );
@@ -59,7 +61,8 @@ void DispatchEngineStrategy::dispatchingToScene(
 
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
-    if (events[eventIndex].secondsWaitDepartureScene != -1) {
+    const bool cancelledEvent = events[eventIndex].secondsWaitDepartureScene == -1;
+    if (!cancelledEvent) {
         incrementSeconds = static_cast<int>(events[eventIndex].secondsWaitDepartureScene);
         events[eventIndex].updateTimer(incrementSeconds, "duration_at_scene");
 
@@ -92,11 +95,12 @@ void DispatchEngineStrategy::dispatchingToDepot(
         events[eventIndex].assignedAmbulance->allocatedDepotIndex
     );
 
+    const bool forceTrafficFactor = true;
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
-        true,
+        forceTrafficFactor,
         events[eventIndex].triageImpression,
         events[eventIndex].timer
     );
@@ -111,11 +115,12 @@ void DispatchEngineStrategy::finishingEvent(
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    const bool forceTrafficFactor = true;
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
-        true,
+        forceTrafficFactor,
         events[eventIndex].triageImpression,
         events[eventIndex].prevTimer
     );

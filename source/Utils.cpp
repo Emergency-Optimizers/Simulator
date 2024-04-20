@@ -245,6 +245,7 @@ std::vector<unsigned> getAvailableAmbulanceIndicies(
     for (unsigned i = 0; i < ambulances.size(); i++) {
         int eventIndex = -1;
 
+        // find event index if ambulance is assigned to an event
         if (ambulances[i].assignedEventId != -1) {
             eventIndex = findEventIndexFromId(events, ambulances[i].assignedEventId);
         }
@@ -585,13 +586,20 @@ int64_t approximateLocation(
     const int64_t& goalId,
     const time_t& timeAtStart,
     const time_t& timeNow,
-    const std::string& triage
+    const std::string& triage,
+    const EventType eventType
 ) {
+    // if ambulance is dispatching to depot, apply traffic, otherwise check triage
+    bool forceTrafficFactor = true;
+    if (eventType == EventType::DISPATCHING_TO_SCENE) {
+        forceTrafficFactor = false;
+    }
+
     int timeToReachGoal = ODMatrix::getInstance().getTravelTime(
         rnd,
         startId,
         goalId,
-        true,
+        forceTrafficFactor,
         triage,
         timeAtStart
     );
@@ -741,6 +749,11 @@ double responseTimeViolations(
     double totalEvents = 0.0;
     double totalViolations = 0.0;
 
+    const int urbanAcuteResponseTimeGoalSeconds = 720;
+    const int ruralAcuteResponseTimeGoalSeconds = 1500;
+    const int urbanUrgentResponseTimeGoalSeconds = 1800;
+    const int ruralUrgentResponseTimeGoalSeconds = 2400;
+
     for (; eventIndex < maxEventIndex; eventIndex++) {
         if (simulatedEvents[eventIndex].utility) {
             continue;
@@ -757,15 +770,15 @@ double responseTimeViolations(
         std::string triage = simulatedEvents[eventIndex].triageImpression;
 
         if (triage == "A") {
-            if (urban && responseTime > 720) {
+            if (urban && responseTime > urbanAcuteResponseTimeGoalSeconds) {
                 totalViolations++;
-            } else if (!urban && responseTime > 1500) {
+            } else if (!urban && responseTime > ruralAcuteResponseTimeGoalSeconds) {
                 totalViolations++;
             }
         } else if (triage == "H") {
-            if (urban && responseTime > 1800) {
+            if (urban && responseTime > urbanUrgentResponseTimeGoalSeconds) {
                 totalViolations++;
-            } else if (!urban && responseTime > 2400) {
+            } else if (!urban && responseTime > ruralUrgentResponseTimeGoalSeconds) {
                 totalViolations++;
             }
         }
@@ -813,6 +826,11 @@ double responseTimeViolationsUrban(
     double totalEvents = 0.0;
     double totalViolations = 0.0;
 
+    const int urbanAcuteResponseTimeGoalSeconds = 720;
+    const int ruralAcuteResponseTimeGoalSeconds = 1500;
+    const int urbanUrgentResponseTimeGoalSeconds = 1800;
+    const int ruralUrgentResponseTimeGoalSeconds = 2400;
+
     for (; eventIndex < maxEventIndex; eventIndex++) {
         if (simulatedEvents[eventIndex].utility) {
             continue;
@@ -832,15 +850,15 @@ double responseTimeViolationsUrban(
         std::string triage = simulatedEvents[eventIndex].triageImpression;
 
         if (triage == "A") {
-            if (urban && responseTime > 720) {
+            if (urban && responseTime > urbanAcuteResponseTimeGoalSeconds) {
                 totalViolations++;
-            } else if (!urban && responseTime > 1500) {
+            } else if (!urban && responseTime > ruralAcuteResponseTimeGoalSeconds) {
                 totalViolations++;
             }
         } else if (triage == "H") {
-            if (urban && responseTime > 1800) {
+            if (urban && responseTime > urbanUrgentResponseTimeGoalSeconds) {
                 totalViolations++;
-            } else if (!urban && responseTime > 2400) {
+            } else if (!urban && responseTime > ruralUrgentResponseTimeGoalSeconds) {
                 totalViolations++;
             }
         }

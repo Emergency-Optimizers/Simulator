@@ -10,9 +10,9 @@
 
 void Ambulance::checkScheduledBreak(const time_t& currentTime) {
     if (!scheduledBreaks.empty() && currentTime >= scheduledBreaks.front()) {
-        int breakLength = 30 * 60;
+        const int MIN_30 = 30 * 60;
 
-        setBreak(breakLength, currentTime);
+        setBreak(MIN_30, currentTime);
 
         scheduledBreaks.erase(scheduledBreaks.begin());
     }

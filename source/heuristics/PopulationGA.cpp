@@ -57,7 +57,6 @@ void PopulationGA::generatePopulation() {
         Individual newIndividual = createIndividual(isChild);
         newIndividual.evaluate(events, dayShift, dispatchStrategy);
 
-
         individuals.push_back(newIndividual);
     }
 }

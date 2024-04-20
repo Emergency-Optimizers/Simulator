@@ -69,6 +69,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         int randomAvailableAmbulanceIndex = getRandomInt(rnd, 0, static_cast<int>(availableAmbulanceIndicies.size()) - 1);
         randomAmbulanceIndex = availableAmbulanceIndicies[randomAvailableAmbulanceIndex];
 
+        // branch if the randomly selected ambulance is assigned to an event, and perform extra checks
         if (ambulances[randomAmbulanceIndex].assignedEventId != -1) {
             int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[randomAmbulanceIndex].assignedEventId);
 
@@ -78,7 +79,8 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].gridId,
                 events[currentAmbulanceEventIndex].prevTimer,
                 events[eventIndex].timer,
-                events[currentAmbulanceEventIndex].triageImpression
+                events[currentAmbulanceEventIndex].triageImpression,
+                events[currentAmbulanceEventIndex].type
             );
 
             if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
@@ -89,11 +91,12 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
             int incrementSeconds;
 
             if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
+                const bool forceTrafficFactor = true;
                 incrementSeconds = ODMatrix::getInstance().getTravelTime(
                     rnd,
                     ambulances[randomAmbulanceIndex].currentGridId,
                     ambulanceGridId,
-                    true,
+                    forceTrafficFactor,
                     events[currentAmbulanceEventIndex].triageImpression,
                     events[currentAmbulanceEventIndex].prevTimer
                 );
@@ -103,11 +106,12 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].gridId = ambulanceGridId;
                 events[currentAmbulanceEventIndex].type = EventType::NONE;
             } else if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_SCENE) {
+                const bool forceTrafficFactor = false;
                 incrementSeconds = ODMatrix::getInstance().getTravelTime(
                     rnd,
                     ambulances[randomAmbulanceIndex].currentGridId,
                     ambulanceGridId,
-                    false,
+                    forceTrafficFactor,
                     events[currentAmbulanceEventIndex].triageImpression,
                     events[currentAmbulanceEventIndex].prevTimer
                 );
@@ -174,11 +178,12 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
         getRandomElement(rnd, Stations::getInstance().getHospitalIndices())
     );
 
+    const bool forceTrafficFactor = false;
     int incrementSeconds = ODMatrix::getInstance().getTravelTime(
         rnd,
         events[eventIndex].assignedAmbulance->currentGridId,
         events[eventIndex].gridId,
-        false,
+        forceTrafficFactor,
         events[eventIndex].triageImpression,
         events[eventIndex].timer
     );
