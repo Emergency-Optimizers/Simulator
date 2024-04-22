@@ -10,20 +10,20 @@
 #include <random>
 #include <vector>
 /* internal libraries */
+#include "file-reader/Settings.hpp"
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/EventHandler.hpp"
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
 
 class Simulator {
  private:
-    std::mt19937 rnd;
+    std::mt19937 rnd = std::mt19937(Settings::get<int>("SEED"));
     AmbulanceAllocator& ambulanceAllocator;
     EventHandler eventHandler;
     DispatchEngineStrategyType dispatchStrategy;
 
  public:
     Simulator(
-        std::mt19937 rnd,
         AmbulanceAllocator& ambulanceAllocator,
         DispatchEngineStrategyType dispatchStrategy,
         std::vector<Event> events

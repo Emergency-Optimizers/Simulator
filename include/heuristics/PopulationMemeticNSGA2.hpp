@@ -28,7 +28,6 @@ class PopulationMemeticNSGA2 : public PopulationNSGA2, public PopulationMA {
 
  public:
     PopulationMemeticNSGA2(
-        std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,
         const DispatchEngineStrategyType dispatchStrategy,

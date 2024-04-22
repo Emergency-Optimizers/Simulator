@@ -39,11 +39,8 @@ int main() {
 
     std::cout << std::endl;
 
-    std::mt19937 rnd(Settings::get<int>("SEED"));
-
     // generate events
     MonteCarloSimulator monteCarloSim(
-        rnd,
         Settings::get<int>("SIMULATE_YEAR"),
         Settings::get<int>("SIMULATE_MONTH"),
         Settings::get<int>("SIMULATE_DAY"),
@@ -58,7 +55,6 @@ int main() {
     std::string heuristic = Settings::get<std::string>("HEURISTIC");
     if (heuristic == "GA") {
         PopulationGA population(
-            rnd,
             events,
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
@@ -72,7 +68,6 @@ int main() {
         population.evolve();
     } else if (heuristic == "NSGA2") {
         PopulationNSGA2 population(
-            rnd,
             events,
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
@@ -86,7 +81,6 @@ int main() {
         population.evolve();
     } else if (heuristic == "MA") {
         PopulationMA population(
-            rnd,
             events,
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
@@ -100,7 +94,6 @@ int main() {
         population.evolve();
     } else if (heuristic == "MEMETIC_NSGA2") {
         PopulationMemeticNSGA2 population(
-            rnd,
             events,
             Settings::get<bool>("SIMULATE_DAY_SHIFT"),
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
@@ -136,7 +129,6 @@ int main() {
 
         // simulate events
         Simulator simulator(
-            rnd,
             ambulanceAllocator,
             Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
             events

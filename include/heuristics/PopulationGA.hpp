@@ -16,6 +16,7 @@
 #include <thread>
 /* internal libraries */
 #include "heuristics/Individual.hpp"
+#include "file-reader/Settings.hpp"
 #include "file-reader/Incidents.hpp"
 #include "file-reader/Stations.hpp"
 #include "file-reader/ODMatrix.hpp"
@@ -79,7 +80,7 @@ class PopulationGA {
     );
 
  protected:
-    std::mt19937& rnd;
+    std::mt19937 rnd = std::mt19937(Settings::get<int>("SEED"));
     const std::vector<Event>& events;
     std::vector<Individual> individuals;
     int generation = 0;
@@ -128,7 +129,6 @@ class PopulationGA {
 
  public:
     PopulationGA(
-        std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,
         const DispatchEngineStrategyType dispatchStrategy,

@@ -142,11 +142,7 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
-    // run simulator and store results
-    std::mt19937 newRnd(Settings::get<int>("SEED"));
-
     Simulator simulator(
-        newRnd,
         ambulanceAllocator,
         dispatchStrategy,
         events

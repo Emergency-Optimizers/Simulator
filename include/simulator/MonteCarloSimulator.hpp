@@ -13,12 +13,13 @@
 #include <utility>
 #include <string>
 /* internal libraries */
+#include "file-reader/Settings.hpp"
 #include "simulator/Event.hpp"
 #include "simulator/KDEData.hpp"
 
 class MonteCarloSimulator {
  private:
-    std::mt19937& rnd;
+    std::mt19937 rnd = std::mt19937(Settings::get<int>("SEED"));
     std::vector<int> filteredIncidents;
     const int windowSize;
     const int year;
@@ -50,7 +51,6 @@ class MonteCarloSimulator {
     std::vector<std::vector<std::vector<double>>> locationProbabilityDistribution;
 
     MonteCarloSimulator(
-        std::mt19937& rnd,
         const int year,
         const int month,
         const int day,

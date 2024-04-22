@@ -48,7 +48,6 @@ class PopulationNSGA2 : virtual public PopulationGA {
 
  public:
     PopulationNSGA2(
-        std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,
         const DispatchEngineStrategyType dispatchStrategy,

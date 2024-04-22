@@ -25,7 +25,6 @@ class PopulationMA : virtual public PopulationGA {
 
  public:
     PopulationMA(
-        std::mt19937& rnd,
         const std::vector<Event>& events,
         const bool dayShift,
         const DispatchEngineStrategyType dispatchStrategy,

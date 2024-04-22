@@ -18,7 +18,6 @@
 #include "Utils.hpp"
 
 PopulationMA::PopulationMA(
-    std::mt19937& rnd,
     const std::vector<Event>& events,
     const bool dayShift,
     const DispatchEngineStrategyType dispatchStrategy,
@@ -29,7 +28,6 @@ PopulationMA::PopulationMA(
     const double crossoverProbability,
     const int numTimeSegments
 ) : PopulationGA(
-    rnd,
     events,
     dayShift,
     dispatchStrategy,

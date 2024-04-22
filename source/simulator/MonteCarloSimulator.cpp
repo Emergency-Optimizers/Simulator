@@ -13,17 +13,15 @@
 #include "Constants.hpp"
 #include "ProgressBar.hpp"
 #include "Utils.hpp"
-#include "file-reader/Settings.hpp"
 #include "file-reader/Incidents.hpp"
 
 MonteCarloSimulator::MonteCarloSimulator(
-    std::mt19937& rnd,
     const int year,
     const int month,
     const int day,
     const bool dayShift,
     const unsigned windowSize
-) : rnd(rnd), windowSize(windowSize), year(year), month(month), day(day), dayShift(dayShift) {
+) : windowSize(windowSize), year(year), month(month), day(day), dayShift(dayShift) {
     ProgressBar progressBar(12, "Generating MCS");
     size_t progress = 0;
 

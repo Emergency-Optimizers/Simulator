@@ -13,12 +13,10 @@
 /* internal libraries */
 #include "ProgressBar.hpp"
 #include "heuristics/PopulationGA.hpp"
-#include "file-reader/Settings.hpp"
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
 PopulationGA::PopulationGA(
-    std::mt19937& rnd,
     const std::vector<Event>& events,
     const bool dayShift,
     const DispatchEngineStrategyType dispatchStrategy,
@@ -28,8 +26,7 @@ PopulationGA::PopulationGA(
     const double mutationProbability,
     const double crossoverProbability,
     const int numTimeSegments
-) : rnd(rnd),
-    events(events),
+) : events(events),
     dayShift(dayShift),
     dispatchStrategy(dispatchStrategy),
     populationSize(populationSize),

@@ -13,12 +13,10 @@
 #include "simulator/DispatchEngine.hpp"
 
 Simulator::Simulator(
-    std::mt19937 rnd,
     AmbulanceAllocator& ambulanceAllocator,
     DispatchEngineStrategyType dispatchStrategy,
     std::vector<Event> events
-) : rnd(rnd),
-    ambulanceAllocator(ambulanceAllocator),
+) : ambulanceAllocator(ambulanceAllocator),
     dispatchStrategy(dispatchStrategy),
     eventHandler(events) { }
 

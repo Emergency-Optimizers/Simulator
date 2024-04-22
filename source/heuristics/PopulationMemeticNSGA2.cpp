@@ -10,7 +10,6 @@
 #include "heuristics/PopulationMemeticNSGA2.hpp"
 
 PopulationMemeticNSGA2::PopulationMemeticNSGA2(
-    std::mt19937& rnd,
     const std::vector<Event>& events,
     const bool dayShift,
     const DispatchEngineStrategyType dispatchStrategy,
@@ -21,7 +20,6 @@ PopulationMemeticNSGA2::PopulationMemeticNSGA2(
     const double crossoverProbability,
     const int numTimeSegments
 ) : PopulationGA(
-    rnd,
     events,
     dayShift,
     dispatchStrategy,
@@ -32,7 +30,6 @@ PopulationMemeticNSGA2::PopulationMemeticNSGA2(
     crossoverProbability,
     numTimeSegments
 ), PopulationNSGA2(
-    rnd,
     events,
     dayShift,
     dispatchStrategy,
@@ -43,7 +40,6 @@ PopulationMemeticNSGA2::PopulationMemeticNSGA2(
     crossoverProbability,
     numTimeSegments
 ), PopulationMA(
-    rnd,
     events,
     dayShift,
     dispatchStrategy,
