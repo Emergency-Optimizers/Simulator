@@ -40,13 +40,7 @@ int main() {
     std::cout << std::endl;
 
     // generate events
-    MonteCarloSimulator monteCarloSim(
-        Settings::get<int>("SIMULATE_YEAR"),
-        Settings::get<int>("SIMULATE_MONTH"),
-        Settings::get<int>("SIMULATE_DAY"),
-        Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-        Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE")
-    );
+    MonteCarloSimulator monteCarloSim;
     std::vector<Event> events = monteCarloSim.generateEvents();
 
     std::cout << std::endl;
@@ -54,56 +48,20 @@ int main() {
     // run heuristic
     std::string heuristic = Settings::get<std::string>("HEURISTIC");
     if (heuristic == "GA") {
-        PopulationGA population(
-            events,
-            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-            Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT"),
-            Settings::get<int>("POPULATION_SIZE"),
-            Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<int>("NUM_TIME_SEGMENTS")
-        );
+        PopulationGA population(events);
+
         population.evolve();
     } else if (heuristic == "NSGA2") {
-        PopulationNSGA2 population(
-            events,
-            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-            Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT"),
-            Settings::get<int>("POPULATION_SIZE"),
-            Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<int>("NUM_TIME_SEGMENTS")
-        );
+        PopulationNSGA2 population(events);
+
         population.evolve();
     } else if (heuristic == "MA") {
-        PopulationMA population(
-            events,
-            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-            Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT"),
-            Settings::get<int>("POPULATION_SIZE"),
-            Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<int>("NUM_TIME_SEGMENTS")
-        );
+        PopulationMA population(events);
+
         population.evolve();
     } else if (heuristic == "MEMETIC_NSGA2") {
-        PopulationMemeticNSGA2 population(
-            events,
-            Settings::get<bool>("SIMULATE_DAY_SHIFT"),
-            Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY"),
-            Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT"),
-            Settings::get<int>("POPULATION_SIZE"),
-            Settings::get<float>("MUTATION_PROBABILITY"),
-            Settings::get<float>("CROSSOVER_PROBABILITY"),
-            Settings::get<int>("NUM_TIME_SEGMENTS")
-        );
+        PopulationMemeticNSGA2 population(events);
+
         population.evolve();
     } else if (heuristic == "NONE") {
         // set allocation

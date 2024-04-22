@@ -47,16 +47,6 @@ class PopulationNSGA2 : virtual public PopulationGA {
     const std::string getHeuristicName() const override;
 
  public:
-    PopulationNSGA2(
-        const std::vector<Event>& events,
-        const bool dayShift,
-        const DispatchEngineStrategyType dispatchStrategy,
-        const int numAmbulancesDuringDay,
-        const int numAmbulancesDuringNight,
-        const int populationSize,
-        const double mutationProbability,
-        const double crossoverProbability,
-        const int numTimeSegments
-    );
+    explicit PopulationNSGA2(const std::vector<Event>& events);
     void evolve() override;
 };

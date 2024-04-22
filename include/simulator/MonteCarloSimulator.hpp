@@ -21,11 +21,11 @@ class MonteCarloSimulator {
  private:
     std::mt19937 rnd = std::mt19937(Settings::get<int>("SEED"));
     std::vector<int> filteredIncidents;
-    const int windowSize;
-    const int year;
-    const int month;
-    const int day;
-    const bool dayShift;
+    const int windowSize = Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE");
+    const int year = Settings::get<int>("SIMULATE_YEAR");
+    const int month = Settings::get<int>("SIMULATE_MONTH");
+    const int day = Settings::get<int>("SIMULATE_DAY");
+    const bool dayShift = Settings::get<bool>("SIMULATE_DAY_SHIFT");
     std::vector<double> weights;
 
     void generateHourlyIncidentProbabilityDistribution();
@@ -50,13 +50,7 @@ class MonteCarloSimulator {
     std::map<int64_t, int> gridIdToIndexMapping;
     std::vector<std::vector<std::vector<double>>> locationProbabilityDistribution;
 
-    MonteCarloSimulator(
-        const int year,
-        const int month,
-        const int day,
-        const bool dayShift,
-        const unsigned windowSize
-    );
+    MonteCarloSimulator();
     std::vector<double> generateWeights(int weigthSize, double sigma = 1.0);
     std::vector<Event> generateEvents();
 };

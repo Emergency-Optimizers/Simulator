@@ -84,14 +84,15 @@ class PopulationGA {
     const std::vector<Event>& events;
     std::vector<Individual> individuals;
     int generation = 0;
-    const bool dayShift;
-    const int populationSize;
-    const int numDepots;
-    const int numAmbulances;
-    const int numTimeSegments;
-    const DispatchEngineStrategyType dispatchStrategy;
-    const double crossoverProbability;
-    const double mutationProbability;
+    const bool dayShift = Settings::get<bool>("SIMULATE_DAY_SHIFT");
+    const int populationSize = Settings::get<int>("POPULATION_SIZE");
+    const int numDepots = static_cast<int>(Stations::getInstance().getDepotIndices(dayShift).size());
+    const int numAmbulances = dayShift ?
+        Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY") : Settings::get<int>("TOTAL_AMBULANCES_DURING_NIGHT");
+    const int numTimeSegments = Settings::get<int>("NUM_TIME_SEGMENTS");
+    const DispatchEngineStrategyType dispatchStrategy = Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY");
+    const double crossoverProbability = Settings::get<float>("CROSSOVER_PROBABILITY");
+    const double mutationProbability = Settings::get<float>("MUTATION_PROBABILITY");
     std::vector<MutationType> mutations;
     std::vector<double> mutationsTickets;
     const std::string heuristicName = "GA";
@@ -128,16 +129,6 @@ class PopulationGA {
     bool shouldStop();
 
  public:
-    PopulationGA(
-        const std::vector<Event>& events,
-        const bool dayShift,
-        const DispatchEngineStrategyType dispatchStrategy,
-        const int numAmbulancesDuringDay,
-        const int numAmbulancesDuringNight,
-        const int populationSize,
-        const double mutationProbability,
-        const double crossoverProbability,
-        const int numTimeSegments
-    );
+    explicit PopulationGA(const std::vector<Event>& events);
     virtual void evolve();
 };

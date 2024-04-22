@@ -16,25 +16,7 @@
 #include "Utils.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
-PopulationGA::PopulationGA(
-    const std::vector<Event>& events,
-    const bool dayShift,
-    const DispatchEngineStrategyType dispatchStrategy,
-    const int numAmbulancesDuringDay,
-    const int numAmbulancesDuringNight,
-    const int populationSize,
-    const double mutationProbability,
-    const double crossoverProbability,
-    const int numTimeSegments
-) : events(events),
-    dayShift(dayShift),
-    dispatchStrategy(dispatchStrategy),
-    populationSize(populationSize),
-    numDepots(static_cast<int>(Stations::getInstance().getDepotIndices(dayShift).size())),
-    numAmbulances(dayShift ? numAmbulancesDuringDay : numAmbulancesDuringNight),
-    mutationProbability(mutationProbability),
-    crossoverProbability(crossoverProbability),
-    numTimeSegments(numTimeSegments) {
+PopulationGA::PopulationGA(const std::vector<Event>& events) : events(events) {
     // generate list of possible genotype inits, mutations, crossovers
     getPossibleGenotypeInits();
     getPossibleMutations();

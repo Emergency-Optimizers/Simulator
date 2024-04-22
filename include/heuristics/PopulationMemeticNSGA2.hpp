@@ -27,16 +27,6 @@ class PopulationMemeticNSGA2 : public PopulationNSGA2, public PopulationMA {
     using PopulationNSGA2::storeGenerationMetrics;
 
  public:
-    PopulationMemeticNSGA2(
-        const std::vector<Event>& events,
-        const bool dayShift,
-        const DispatchEngineStrategyType dispatchStrategy,
-        const int numAmbulancesDuringDay,
-        const int numAmbulancesDuringNight,
-        const int populationSize,
-        const double mutationProbability,
-        const double crossoverProbability,
-        const int numTimeSegments
-    );
+    explicit PopulationMemeticNSGA2(const std::vector<Event>& events);
     using PopulationNSGA2::evolve;
 };

@@ -17,27 +17,7 @@
 #include "file-reader/Settings.hpp"
 #include "Utils.hpp"
 
-PopulationMA::PopulationMA(
-    const std::vector<Event>& events,
-    const bool dayShift,
-    const DispatchEngineStrategyType dispatchStrategy,
-    const int numAmbulancesDuringDay,
-    const int numAmbulancesDuringNight,
-    const int populationSize,
-    const double mutationProbability,
-    const double crossoverProbability,
-    const int numTimeSegments
-) : PopulationGA(
-    events,
-    dayShift,
-    dispatchStrategy,
-    numAmbulancesDuringDay,
-    numAmbulancesDuringNight,
-    populationSize,
-    mutationProbability,
-    crossoverProbability,
-    numTimeSegments
-) { }
+PopulationMA::PopulationMA(const std::vector<Event>& events) : PopulationGA(events) { }
 
 std::vector<Individual> PopulationMA::createOffspring() {
     std::vector<Individual> offspring = PopulationGA::createOffspring();
