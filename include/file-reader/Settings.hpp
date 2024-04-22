@@ -32,7 +32,7 @@ class Settings {
         {"SIMULATION_GENERATION_WINDOW_SIZE", &toInt},
         {"DAY_SHIFT_START", &toInt},
         {"DAY_SHIFT_END", &toInt},
-        {"HEURISTIC", &toString},
+        {"HEURISTIC", &toHeuristicType},
         {"USE_NSGA_FRONTS", &toBool},
         {"NSGA_WEIGHTS", &toVectorFloat},
         {"DISPATCH_STRATEGY", &toDispatchEngineStrategyType},

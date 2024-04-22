@@ -25,6 +25,7 @@
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
 #include "heuristics/CrossoverType.hpp"
 #include "heuristics/ObjectiveTypes.hpp"
+#include "heuristics/HeuristicType.hpp"
 
 using ValueType = std::variant<
     int,
@@ -37,7 +38,8 @@ using ValueType = std::variant<
     std::vector<float>,
     DispatchEngineStrategyType,
     CrossoverType,
-    std::vector<ObjectiveTypes>
+    std::vector<ObjectiveTypes>,
+    HeuristicType
 >;
 using ToValueType = ValueType(*)(const std::string&);
 using SchemaMapping = std::unordered_map<std::string, ToValueType>;
@@ -53,6 +55,7 @@ ValueType toVectorFloat(const std::string& str);
 ValueType toDispatchEngineStrategyType(const std::string& str);
 ValueType toCrossoverType(const std::string& str);
 ValueType toVectorObjectiveType(const std::string& str);
+ValueType toHeuristicType(const std::string& str);
 ObjectiveTypes stringToObjectiveType(const std::string& str);
 std::string tmToString(const std::tm& time);
 std::string valueTypeToString(const ValueType& cell);

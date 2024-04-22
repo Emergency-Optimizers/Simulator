@@ -25,6 +25,8 @@
 #include "heuristics/PopulationNSGA2.hpp"
 #include "heuristics/PopulationMA.hpp"
 #include "heuristics/PopulationMemeticNSGA2.hpp"
+#include "heuristics/HeuristicType.hpp"
+#include "heuristics/Programs.hpp"
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
@@ -46,82 +48,32 @@ int main() {
     std::cout << std::endl;
 
     // run heuristic
-    std::string heuristic = Settings::get<std::string>("HEURISTIC");
-    if (heuristic == "GA") {
-        PopulationGA population(events);
+    const HeuristicType heuristic = Settings::get<HeuristicType>("HEURISTIC");
+    switch (heuristic) {
+        case HeuristicType::NONE:
+            runSimulatorOnce(events);
 
-        population.evolve();
-    } else if (heuristic == "NSGA2") {
-        PopulationNSGA2 population(events);
+            break;
+        case HeuristicType::GA:
+            runGeneticAlgorithm(events);
 
-        population.evolve();
-    } else if (heuristic == "MA") {
-        PopulationMA population(events);
+            break;
+        case HeuristicType::NSGA2:
+            runNSGA2(events);
 
-        population.evolve();
-    } else if (heuristic == "MEMETIC_NSGA2") {
-        PopulationMemeticNSGA2 population(events);
+            break;
+        case HeuristicType::MA:
+            runMemeticAlgorithm(events);
 
-        population.evolve();
-    } else if (heuristic == "NONE") {
-        // set allocation
-        std::vector<std::vector<int>> allocations;
-        allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
+            break;
+        case HeuristicType::MEMETIC_NSGA2:
+            runMemeticNSGA2(events);
 
-        if (Settings::get<bool>("SIMULATE_DAY_SHIFT")) {
-            int allocationSize = static_cast<int>(allocations.size());
-            for (int allocationIndex = 0; allocationIndex < allocationSize; allocationIndex++) {
-                allocations[allocationIndex].push_back(0);
-                allocations[allocationIndex].push_back(0);
-                allocations[allocationIndex].push_back(0);
-                allocations[allocationIndex].push_back(0);
-            }
-        }
+            break;
+        case HeuristicType::CUSTOM:
+            /* code */
 
-        AmbulanceAllocator ambulanceAllocator;
-        ambulanceAllocator.allocate(
-            events,
-            allocations,
-            Settings::get<bool>("SIMULATE_DAY_SHIFT")
-        );
-
-        // simulate events
-        Simulator simulator(
-            ambulanceAllocator,
-            Settings::get<DispatchEngineStrategyType>("DISPATCH_STRATEGY"),
-            events
-        );
-        std::vector<Event> simulatedEvents = simulator.run();
-
-        // write events to file
-        writeEvents(Settings::get<std::string>("UNIQUE_RUN_ID") + "_NONE", simulatedEvents);
-
-        // print metrics
-        double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);
-        double avgResponseTimeANonurban = averageResponseTime(simulatedEvents, "A", false);
-        double avgResponseTimeHUrban = averageResponseTime(simulatedEvents, "H", true);
-        double avgResponseTimeHNonurban = averageResponseTime(simulatedEvents, "H", false);
-        double avgResponseTimeV1Urban = averageResponseTime(simulatedEvents, "V1", true);
-        double avgResponseTimeV1Nonurban = averageResponseTime(simulatedEvents, "V1", false);
-
-        printAmbulanceWorkload(ambulanceAllocator.ambulances);
-
-        std::cout
-            << "\nGoal:" << std::endl
-            << "\t A, urban: <12 min" << std::endl
-            << "\t A, non-urban: <25 min" << std::endl
-            << "\t H, urban: <30 min" << std::endl
-            << "\t H, non-urban: <40 min" << std::endl
-            << std::endl
-            << "Avg. response time (A, urban): \t\t" << avgResponseTimeAUrban << "s (" << avgResponseTimeAUrban / 60 << "m)" << std::endl
-            << "Avg. response time (A, non-urban): \t" << avgResponseTimeANonurban << "s (" << avgResponseTimeANonurban / 60 << "m)" << std::endl
-            << "Avg. response time (H, urban): \t\t" << avgResponseTimeHUrban << "s (" << avgResponseTimeHUrban / 60 << "m)" << std::endl
-            << "Avg. response time (H, non-urban): \t" << avgResponseTimeHNonurban << "s (" << avgResponseTimeHNonurban / 60 << "m)" << std::endl
-            << "Avg. response time (V1, urban): \t" << avgResponseTimeV1Urban << "s (" << avgResponseTimeV1Urban / 60 << "m)" << std::endl
-            << "Avg. response time (V1, non-urban): \t" << avgResponseTimeV1Nonurban << "s (" << avgResponseTimeV1Nonurban / 60 << "m)" << std::endl
-            << "Percentage violations: \t\t\t" << responseTimeViolations(simulatedEvents) * 100 << "%" << std::endl;
-    } else {
-        std::cout << "Unknown heuristic given." << std::endl;
+            break;
     }
 
     auto end = std::chrono::high_resolution_clock::now();
