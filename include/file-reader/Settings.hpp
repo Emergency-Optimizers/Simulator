@@ -165,4 +165,19 @@ class Settings {
 
         return std::get<T>(value);
     }
+
+    template<typename T>
+    static void update(const std::string& key, const T& newValue) {
+        auto it = configValues.find(key);
+        if (it == configValues.end()) {
+            throwError("Variable '" + key + "' not found in settings.");
+        }
+
+        // Check if the current type in the map matches the new type provided
+        if (!std::holds_alternative<T>(it->second)) {
+            throwError("Type mismatch for variable '" + key + "'. Expected another type.");
+        }
+
+        it->second = newValue;
+    }
 };
