@@ -67,7 +67,16 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
     /// TODO: Add some time before checking again (maybe 1 second after next event
     /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
-        events[eventIndex].updateTimer(60, "duration_resource_appointment");
+        int waitTime = 60;
+
+        const bool noEventsLeft = eventIndex + 1 >= events.size();
+        if (!noEventsLeft) {
+            int durationUntilNextEvent = static_cast<int>(events[eventIndex + 1].timer - events[eventIndex].timer);
+
+            waitTime = durationUntilNextEvent + 1;
+        }
+
+        events[eventIndex].updateTimer(waitTime, "duration_resource_appointment");
 
         return sortAllEvents;
     }
@@ -126,7 +135,16 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
     }
 
     if (closestAmbulanceIndex == -1) {
-        events[eventIndex].updateTimer(60, "duration_resource_appointment");
+        int waitTime = 60;
+
+        const bool noEventsLeft = eventIndex + 1 >= events.size();
+        if (!noEventsLeft) {
+            int durationUntilNextEvent = static_cast<int>(events[eventIndex + 1].timer - events[eventIndex].timer);
+
+            waitTime = durationUntilNextEvent + 1;
+        }
+
+        events[eventIndex].updateTimer(waitTime, "duration_resource_appointment");
 
         return sortAllEvents;
     }
