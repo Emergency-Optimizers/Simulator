@@ -85,6 +85,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
     int closestAmbulanceIndex = -1;
     int64_t closestAmbulanceGridId = -1;
     int closestAmbulanceTravelTime = std::numeric_limits<int>::max();
+    int closestAmbulanceWorkedTime = std::numeric_limits<int>::max();
     int64_t eventGridId = events[eventIndex].gridId;
     // std::pair<int, int> utm1 = idToUtm(eventGridId);
     for (int i = 0; i < availableAmbulanceIndicies.size(); i++) {
@@ -127,10 +128,17 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
             static_cast<double>(utm2.second)
         );*/
 
-        if (travelTime < closestAmbulanceTravelTime) {
+        const int ambulanceWorkedTime = ambulances[availableAmbulanceIndicies[i]].timeUnavailable;
+
+        const bool closer = travelTime < closestAmbulanceTravelTime;
+        const bool equallyClose = travelTime == closestAmbulanceTravelTime;
+        const bool workedLess = ambulanceWorkedTime < closestAmbulanceWorkedTime;
+
+        if (closer || (equallyClose && workedLess)) {
             closestAmbulanceIndex = availableAmbulanceIndicies[i];
             closestAmbulanceGridId = ambulanceGridId;
             closestAmbulanceTravelTime = travelTime;
+            closestAmbulanceWorkedTime = ambulanceWorkedTime;
         }
     }
 
