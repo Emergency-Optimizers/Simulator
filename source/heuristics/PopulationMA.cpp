@@ -23,7 +23,9 @@ std::vector<Individual> PopulationMA::createOffspring() {
     std::vector<Individual> offspring = PopulationGA::createOffspring();
 
     for (Individual& child : offspring) {
-        localSearch(child);
+        if (getRandomDouble(rnd) < localSearchProbability) {
+            localSearch(child);
+        }
     }
 
     return offspring;

@@ -19,6 +19,7 @@ class PopulationMA : virtual public PopulationGA {
 
  protected:
     const std::string heuristicName = "MA";
+    const double localSearchProbability = Settings::get<float>("LOCAL_SEARCH_PROBABILITY");
 
     std::vector<Individual> createOffspring() override;
     const std::string getHeuristicName() const override;
