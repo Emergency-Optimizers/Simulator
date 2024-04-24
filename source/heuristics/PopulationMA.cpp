@@ -32,12 +32,25 @@ std::vector<Individual> PopulationMA::createOffspring() {
 }
 
 void PopulationMA::localSearch(Individual& individual) {
-    const int allocationIndex = getRandomInt(rnd, 0, numTimeSegments - 1);
-
     // double oldFitness = individual.fitness;
 
+    /*int worstPerformingAllocationIndex = -1;
+    double worstPerformanceAllocation = std::numeric_limits<double>::min();
+
+    for (int allocationIndex = 0; allocationIndex < numTimeSegments; allocationIndex++) {
+        const double allocationPerformance = individual.allocationsObjectivePercentageViolations[allocationIndex];
+
+        if (worstPerformingAllocationIndex == -1 || allocationPerformance > worstPerformanceAllocation) {
+            worstPerformingAllocationIndex = allocationIndex;
+            worstPerformanceAllocation = allocationPerformance;
+        }
+    }*/
+
+    // const int allocationIndex = worstPerformingAllocationIndex;
+    const int allocationIndex = getRandomInt(rnd, 0, numTimeSegments - 1);
+
     int worstPerformingDepotIndex = -1;
-    double worstPerformance = std::numeric_limits<double>::min();
+    double worstPerformanceDepot = std::numeric_limits<double>::min();
 
     for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
         double depotPerformance = responseTimeViolations(
@@ -46,9 +59,9 @@ void PopulationMA::localSearch(Individual& individual) {
             depotIndex
         );
 
-        if (worstPerformingDepotIndex == -1 || depotPerformance > worstPerformance) {
+        if (worstPerformingDepotIndex == -1 || depotPerformance > worstPerformanceDepot) {
             worstPerformingDepotIndex = depotIndex;
-            worstPerformance = depotPerformance;
+            worstPerformanceDepot = depotPerformance;
         }
     }
 
