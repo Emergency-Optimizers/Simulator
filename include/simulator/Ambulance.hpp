@@ -22,6 +22,7 @@ struct Ambulance {
     time_t timeBreakStarted = 0;
     int breakLength = 0;
     std::vector<time_t> scheduledBreaks;
+    int currentAllocationIndex = 0;
 
     void checkScheduledBreak(const time_t& currentTime);
 

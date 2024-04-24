@@ -43,6 +43,7 @@ struct Event {
     int64_t incidentGridId = -1LL;
     int depotIndexResponsible = -1;
     int ambulanceIdResponsible = -1;
+    int allocationIndex = -1;
     std::vector<int> reallocation;
     bool utility = false;
 

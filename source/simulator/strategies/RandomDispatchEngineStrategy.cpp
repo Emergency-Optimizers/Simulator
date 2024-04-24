@@ -275,6 +275,11 @@ void RandomDispatchEngineStrategy::reallocating(
         }
     }
 
+    // increment allocation index for each ambulance
+    for (size_t ambulanceIndex = 0; ambulanceIndex < ambulances.size(); ambulanceIndex++) {
+        ambulances[ambulanceIndex].currentAllocationIndex++;
+    }
+
     // set the type to none so it doesn't trigger again
     events[eventIndex].type = EventType::NONE;
 }
