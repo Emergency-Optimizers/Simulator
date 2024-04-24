@@ -227,7 +227,13 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
     );
     std::vector<std::vector<double>> totalIncidents(3, std::vector<double>(2, 0));
 
-    std::vector<double> weightsYear = generateWeights(365);
+    std::vector<double> weightsYear = generateWeights(365, 10);
+
+    /*std::cout << std::endl;
+    for (int i = 0; i < weightsYear.size(); i++) {
+        std::cout << weightsYear[i] << ", ";
+    }
+    std::cout << std::endl;*/
 
     for (int i = 0; i < Incidents::getInstance().size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
