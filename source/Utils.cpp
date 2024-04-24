@@ -169,13 +169,13 @@ std::string objectiveTypeToString(const ObjectiveTypes objective) {
 
 ValueType toHeuristicType(const std::string& str) {
     if (str == "NONE") {
-        return HeuristicType::GA;
+        return HeuristicType::NONE;
     } else if (str == "GA") {
-        return HeuristicType::NSGA2;
+        return HeuristicType::GA;
     } else if (str == "NSGA2") {
-        return HeuristicType::MA;
+        return HeuristicType::NSGA2;
     } else if (str == "MA") {
-        return HeuristicType::MEMETIC_NSGA2;
+        return HeuristicType::MA;
     } else if (str == "MEMETIC_NSGA2") {
         return HeuristicType::MEMETIC_NSGA2;
     } else if (str == "CUSTOM") {
@@ -469,6 +469,43 @@ void writeEvents(const std::string& dirName, std::vector<Event>& events) {
             << std::to_string(event.metrics["duration_dispatching_to_hospital"]) << ","
             << std::to_string(event.metrics["duration_at_hospital"]) << ","
             << std::to_string(event.metrics["duration_dispatching_to_depot"]) << std::endl;
+    }
+
+    outFile.close();
+}
+
+void writeGenotype(const std::string& dirName, const std::vector<std::vector<int>>& genotype) {
+    createDirectory(dirName);
+    std::string filename = "../data/" + dirName + "/" + "genotype" + ".csv";
+    std::ofstream outFile(filename);
+
+    // check if the file stream is open before proceeding
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // write CSV header
+    const size_t numAllocations = genotype.size();
+    const size_t numDepots = genotype[0].size();
+
+    outFile << "allocation_index";
+
+    for (size_t i = 0; i < numDepots; ++i) {
+        outFile << "," << std::to_string(i);
+    }
+
+    outFile << std::endl;
+
+    // write each allocation to the CSV
+    for (size_t i = 0; i < numAllocations; ++i) {
+        outFile << std::to_string(i);
+
+        for (size_t j = 0; j < numDepots; ++j) {
+            outFile << "," << genotype[i][j];
+        }
+
+        outFile << std::endl;
     }
 
     outFile.close();

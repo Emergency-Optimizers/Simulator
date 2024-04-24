@@ -67,12 +67,11 @@ void PopulationNSGA2::evolve() {
     Individual finalIndividual = getFittest();
 
     // write to file
-    saveDataToJson(
-        Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(),
-        "heuristic",
-        metrics
-    );
-    writeEvents(Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName(), finalIndividual.simulatedEvents);
+    const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName();
+
+    saveDataToJson(dirName, "heuristic", metrics);
+    writeEvents(dirName, finalIndividual.simulatedEvents);
+    writeGenotype(dirName, finalIndividual.genotype);
 
     printTimeSegmentedAllocationTable(
         dayShift,

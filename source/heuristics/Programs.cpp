@@ -28,7 +28,7 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 
-void runSimulatorOnce(std::vector<Event> events) {
+void runSimulatorOnce(std::vector<Event>& events) {
     // set allocation
     std::vector<std::vector<int>> allocations;
     allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
@@ -60,7 +60,10 @@ void runSimulatorOnce(std::vector<Event> events) {
     simulatedEvents = simulator.run();
 
     // write events to file
-    writeEvents(Settings::get<std::string>("UNIQUE_RUN_ID") + "_NONE", simulatedEvents);
+    const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_NONE";
+
+    writeEvents(dirName, simulatedEvents);
+    writeGenotype(dirName, allocations);
 
     // print metrics
     double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);

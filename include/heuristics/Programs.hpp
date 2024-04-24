@@ -11,7 +11,7 @@
 /* internal libraries */
 #include "simulator/Event.hpp"
 
-void runSimulatorOnce(std::vector<Event> events);
+void runSimulatorOnce(std::vector<Event>& events);
 void runGeneticAlgorithm(const std::vector<Event>& events);
 void runNSGA2(const std::vector<Event>& events);
 void runMemeticAlgorithm(const std::vector<Event>& events);
