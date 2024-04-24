@@ -10,4 +10,5 @@ enum class MutationType {
     REDISTRIBUTE,
     SCRAMBLE,
     NEIGHBOR_DUPLICATION,
+    SWAP,
 };

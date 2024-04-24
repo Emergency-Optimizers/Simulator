@@ -38,6 +38,7 @@ class Individual {
     void uniformGenotype();
     void proportionateGenotype(const std::string& column, const bool dayShift);
     void redistributeMutation(const double mutationProbability);
+    void swapMutation(const double mutationProbability);
     void scrambleMutation(const double mutationProbability);
     void neighborDuplicationMutation(const double mutationProbability);
     void updateMetrics();

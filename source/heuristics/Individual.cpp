@@ -260,6 +260,9 @@ void Individual::mutate(
         case MutationType::REDISTRIBUTE:
             redistributeMutation(mutationProbability);
             break;
+        case MutationType::SWAP:
+            swapMutation(mutationProbability);
+            break;
         case MutationType::SCRAMBLE:
             scrambleMutation(mutationProbability);
             break;
@@ -297,6 +300,27 @@ void Individual::redistributeMutation(const double mutationProbability) {
             // perform the redistribution
             genotype[allocationIndex][depotIndex]--;
             genotype[allocationIndex][targetDepotIndex]++;
+        }
+    }
+}
+
+void Individual::swapMutation(const double mutationProbability) {
+    for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
+        for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+            // check if depot should be mutated
+            if (getRandomDouble(rnd) > mutationProbability) {
+                continue;
+            }
+
+            // randomly select a target depot index
+            int targetDepotIndex = getRandomInt(rnd, 0, numDepots - 1);
+
+            if (depotIndex == targetDepotIndex) {
+                continue;
+            }
+
+            // swap number of ambulances
+            std::swap(genotype[allocationIndex][depotIndex], genotype[allocationIndex][targetDepotIndex]);
         }
     }
 }

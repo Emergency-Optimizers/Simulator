@@ -180,6 +180,12 @@ void PopulationGA::getPossibleMutations() {
         mutationsTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("MUTATION_TICKETS_SWAP");
+    if (tickets > 0.0) {
+        mutations.push_back(MutationType::SWAP);
+        mutationsTickets.push_back(tickets);
+    }
+
     tickets = Settings::get<double>("MUTATION_TICKETS_SCRAMBLE");
     if (tickets > 0.0) {
         mutations.push_back(MutationType::SCRAMBLE);
