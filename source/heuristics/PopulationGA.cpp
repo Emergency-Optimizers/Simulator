@@ -40,7 +40,7 @@ void PopulationGA::generatePopulation() {
     }
 }
 
-void PopulationGA::evolve() {
+void PopulationGA::evolve(const bool verbose) {
     // sort and store metrics for initial population
     sortIndividuals();
     storeGenerationMetrics();
@@ -50,6 +50,8 @@ void PopulationGA::evolve() {
     startRunTimeClock = std::chrono::high_resolution_clock::now();
 
     bool keepRunning = true;
+    bool autoStopProgressBar = false;
+    bool lastPrintProgressBar = false;
 
     while (keepRunning) {
         generation++;
@@ -70,11 +72,14 @@ void PopulationGA::evolve() {
         storeGenerationMetrics();
 
         keepRunning = !shouldStop();
-        progressBar.update(runTimeDuration, getProgressBarPostfix());
+        progressBar.update(runTimeDuration, getProgressBarPostfix(), autoStopProgressBar, lastPrintProgressBar);
     }
 
-    // get best individual
+    // get best individual and print last progress bar
     Individual finalIndividual = getFittest();
+
+    lastPrintProgressBar = true;
+    progressBar.update(runTimeDuration, getProgressBarPostfix(), autoStopProgressBar, lastPrintProgressBar);
 
     // write to file
     const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName();
@@ -84,36 +89,38 @@ void PopulationGA::evolve() {
     writeGenotype(dirName, finalIndividual.genotype);
     writeAmbulances(dirName, finalIndividual.simulatedAmbulances);
 
-    printTimeSegmentedAllocationTable(
-        dayShift,
-        numTimeSegments,
-        finalIndividual.genotype,
-        finalIndividual.simulatedEvents,
-        finalIndividual.allocationsFitness
-    );
+    if (verbose) {
+        printTimeSegmentedAllocationTable(
+            dayShift,
+            numTimeSegments,
+            finalIndividual.genotype,
+            finalIndividual.simulatedEvents,
+            finalIndividual.allocationsFitness
+        );
 
-    printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
+        printAmbulanceWorkload(finalIndividual.simulatedAmbulances);
 
-    std::cout
-        << "Goal:" << std::endl
-        << "\t A, urban: <12 min" << std::endl
-        << "\t A, rural: <25 min" << std::endl
-        << "\t H, urban: <30 min" << std::endl
-        << "\t H, rural: <40 min" << std::endl
-        << std::endl
-        << "Avg. response time (A, urban): \t\t" << finalIndividual.objectiveAvgResponseTimeUrbanA << "s"
-        << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanA  / 60.0) << "m)" << std::endl
-        << "Avg. response time (A, rural): \t\t" << finalIndividual.objectiveAvgResponseTimeRuralA << "s"
-        << " (" << (finalIndividual.objectiveAvgResponseTimeRuralA / 60.0) << "m)" << std::endl
-        << "Avg. response time (H, urban): \t\t" << finalIndividual.objectiveAvgResponseTimeUrbanH << "s"
-        << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanH / 60.0) << "m)" << std::endl
-        << "Avg. response time (H, rural): \t\t" << finalIndividual.objectiveAvgResponseTimeRuralH << "s"
-        << " (" << (finalIndividual.objectiveAvgResponseTimeRuralH / 60.0) << "m)" << std::endl
-        << "Avg. response time (V1, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanV1 << "s"
-        << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanV1 / 60.0) << "m)" << std::endl
-        << "Avg. response time (V1, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralV1 << "s"
-        << " (" << (finalIndividual.objectiveAvgResponseTimeRuralV1 / 60.0) << "m)" << std::endl
-        << "Percentage violations: \t\t\t" << (finalIndividual.objectivePercentageViolations * 100.0) << "%" << std::endl;
+        std::cout
+            << "Goal:" << std::endl
+            << "\t A, urban: <12 min" << std::endl
+            << "\t A, rural: <25 min" << std::endl
+            << "\t H, urban: <30 min" << std::endl
+            << "\t H, rural: <40 min" << std::endl
+            << std::endl
+            << "Avg. response time (A, urban): \t\t" << finalIndividual.objectiveAvgResponseTimeUrbanA << "s"
+            << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanA  / 60.0) << "m)" << std::endl
+            << "Avg. response time (A, rural): \t\t" << finalIndividual.objectiveAvgResponseTimeRuralA << "s"
+            << " (" << (finalIndividual.objectiveAvgResponseTimeRuralA / 60.0) << "m)" << std::endl
+            << "Avg. response time (H, urban): \t\t" << finalIndividual.objectiveAvgResponseTimeUrbanH << "s"
+            << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanH / 60.0) << "m)" << std::endl
+            << "Avg. response time (H, rural): \t\t" << finalIndividual.objectiveAvgResponseTimeRuralH << "s"
+            << " (" << (finalIndividual.objectiveAvgResponseTimeRuralH / 60.0) << "m)" << std::endl
+            << "Avg. response time (V1, urban): \t" << finalIndividual.objectiveAvgResponseTimeUrbanV1 << "s"
+            << " (" << (finalIndividual.objectiveAvgResponseTimeUrbanV1 / 60.0) << "m)" << std::endl
+            << "Avg. response time (V1, rural): \t" << finalIndividual.objectiveAvgResponseTimeRuralV1 << "s"
+            << " (" << (finalIndividual.objectiveAvgResponseTimeRuralV1 / 60.0) << "m)" << std::endl
+            << "Percentage violations: \t\t\t" << (finalIndividual.objectivePercentageViolations * 100.0) << "%" << std::endl;
+    }
 }
 
 void PopulationGA::getPossibleGenotypeInits() {

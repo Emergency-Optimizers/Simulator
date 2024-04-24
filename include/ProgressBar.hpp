@@ -30,5 +30,5 @@ class ProgressBar {
         const std::string& postfix = ""
     );
 
-    void update(const size_t currentProgress, const std::string& postfix = "");
+    void update(const size_t currentProgress, const std::string& postfix = "", const bool autoStop = true, const bool lastPrint = false);
 };

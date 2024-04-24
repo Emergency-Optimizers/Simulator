@@ -25,7 +25,12 @@ ProgressBar::ProgressBar(
     update(0, postfix);
 }
 
-void ProgressBar::update(const size_t currentProgress, const std::string& postfix) {
+void ProgressBar::update(
+    const size_t currentProgress,
+    const std::string& postfix,
+    const bool autoStop,
+    const bool lastPrint
+) {
     auto now = std::chrono::steady_clock::now();
     auto elapsed = now - startTime;
     double percentage = static_cast<double>(currentProgress) / static_cast<double>(maxProgress);
@@ -64,7 +69,7 @@ void ProgressBar::update(const size_t currentProgress, const std::string& postfi
 
     std::cout << progressBarString;
 
-    if (percentage == 1.0) {
+    if ((autoStop && percentage == 1.0) || lastPrint) {
         std::cout << std::endl;
     }
 }
