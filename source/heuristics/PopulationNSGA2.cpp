@@ -72,6 +72,7 @@ void PopulationNSGA2::evolve() {
     saveDataToJson(dirName, "heuristic", metrics);
     writeEvents(dirName, finalIndividual.simulatedEvents);
     writeGenotype(dirName, finalIndividual.genotype);
+    writeAmbulances(dirName, finalIndividual.simulatedAmbulances);
 
     printTimeSegmentedAllocationTable(
         dayShift,

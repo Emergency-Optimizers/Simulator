@@ -515,6 +515,32 @@ void writeGenotype(const std::string& dirName, const std::vector<std::vector<int
     outFile.close();
 }
 
+void writeAmbulances(const std::string& dirName, const std::vector<Ambulance>& ambulances) {
+    createDirectory(dirName);
+    std::string filename = "../data/" + dirName + "/" + "ambulances" + ".csv";
+    std::ofstream outFile(filename);
+
+    // check if the file stream is open before proceeding
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // write CSV header
+    outFile
+        << "ambulance_id" << ","
+        << "seconds_worked" << std::endl;
+
+    for (size_t i = 0; i < ambulances.size(); ++i) {
+        // write each metric to the CSV
+        outFile
+            << std::to_string(ambulances[i].id) << ","
+            << std::to_string(ambulances[i].timeUnavailable) << std::endl;
+    }
+
+    outFile.close();
+}
+
 
 void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename) {
     auto now = std::chrono::system_clock::now();

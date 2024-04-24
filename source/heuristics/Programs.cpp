@@ -64,6 +64,7 @@ void runSimulatorOnce(std::vector<Event>& events) {
 
     writeEvents(dirName, simulatedEvents);
     writeGenotype(dirName, allocations);
+    writeAmbulances(dirName, ambulanceAllocator.ambulances);
 
     // print metrics
     double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);
