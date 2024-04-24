@@ -1,6 +1,6 @@
 SEED: 42
 
-// can pick between: GA, NSGA2, MA, MEMETIC_NSGA2, NONE (just runs the simulator once with static allocation)
+// can pick between: GA, NSGA2, MA, MEMETIC_NSGA2, NONE (just runs the simulator once with static allocation), CUSTOM
 HEURISTIC: MEMETIC_NSGA2
 
 STOPPING_CRITERIA_TIME_MIN: 10.0
