@@ -72,6 +72,10 @@ class PopulationGA {
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype
     );
+    std::vector<std::vector<std::vector<int>>> segmentSinglePointCrossover(
+        const std::vector<std::vector<int>>& parent1Genotype,
+        const std::vector<std::vector<int>>& parent2Genotype
+    );
     std::vector<std::vector<std::vector<int>>> bestAllocationCrossover(
         const std::vector<std::vector<int>>& parent1Genotype,
         const std::vector<std::vector<int>>& parent2Genotype,

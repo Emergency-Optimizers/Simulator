@@ -231,6 +231,12 @@ void PopulationGA::getPossibleCrossovers() {
         crossoversTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("CROSSOVER_TICKETS_SEGMENT_SINGLE_POINT");
+    if (tickets > 0.0 && numTimeSegments > 1) {
+        crossovers.push_back(CrossoverType::SEGMENT_SINGLE_POINT);
+        crossoversTickets.push_back(tickets);
+    }
+
     tickets = Settings::get<double>("CROSSOVER_TICKETS_BEST_ALLOCATION");
     if (tickets > 0.0 && numTimeSegments > 1) {
         crossovers.push_back(CrossoverType::BEST_ALLOCATION);
@@ -579,6 +585,9 @@ std::vector<Individual> PopulationGA::crossover(const Individual& parent1, const
         case CrossoverType::SEGMENT_SWAP:
             offspringGenotypes = segmentSwapCrossover(parent1.genotype, parent2.genotype);
             break;
+        case CrossoverType::SEGMENT_SINGLE_POINT:
+            offspringGenotypes = segmentSinglePointCrossover(parent1.genotype, parent2.genotype);
+            break;
         case CrossoverType::BEST_ALLOCATION:
             offspringGenotypes = bestAllocationCrossover(
                 parent1.genotype,
@@ -619,10 +628,12 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::singlePointCrossover(
 
         // perform crossover around this randomly chosen midpoint for the current time segment
         for (size_t i = 0; i < numDepots; i++) {
-            if (i <= midpoint) {
-                offspring2Genotype[t][i] = parent1Genotype[t][i];
+            if (t <= midpoint) {
+                offspring1Genotype[t][i] = parent1Genotype[t][i];
+                offspring2Genotype[t][i] = parent2Genotype[t][i];
             } else {
                 offspring1Genotype[t][i] = parent2Genotype[t][i];
+                offspring2Genotype[t][i] = parent1Genotype[t][i];
             }
         }
     }
@@ -645,6 +656,33 @@ std::vector<std::vector<std::vector<int>>> PopulationGA::segmentSwapCrossover(
          // swap entire time segments
         if (getRandomBool(rnd)) {
             std::swap(offspring1Genotype[t], offspring2Genotype[t]);
+        }
+    }
+
+    std::vector<std::vector<std::vector<int>>> offspring = {offspring1Genotype, offspring2Genotype};
+
+    return offspring;
+}
+
+std::vector<std::vector<std::vector<int>>> PopulationGA::segmentSinglePointCrossover(
+    const std::vector<std::vector<int>>& parent1Genotype,
+    const std::vector<std::vector<int>>& parent2Genotype
+) {
+    // initialize offspring genotypes
+    std::vector<std::vector<int>> offspring1Genotype = parent1Genotype;
+    std::vector<std::vector<int>> offspring2Genotype = parent2Genotype;
+
+    // generate random midpoint
+    size_t midpoint = getRandomInt(rnd, 1, numTimeSegments - 2);
+
+    // perform crossover around this randomly chosen midpoint
+    for (size_t t = 0; t < numTimeSegments; t++) {
+        if (t <= midpoint) {
+            offspring1Genotype[t] = parent1Genotype[t];
+            offspring2Genotype[t] = parent2Genotype[t];
+        } else {
+            offspring1Genotype[t] = parent2Genotype[t];
+            offspring2Genotype[t] = parent1Genotype[t];
         }
     }
 
