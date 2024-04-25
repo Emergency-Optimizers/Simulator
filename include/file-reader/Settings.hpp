@@ -86,6 +86,8 @@ class Settings {
         {"STOPPING_CRITERIA_MAX_GENERATIONS", &toInt},
         {"DISPATCH_STRATEGY_RESPONSE_RESTRICTED", &toBool},
         {"STOPPING_CRITERIA_MIN_DIVERSITY", &toInt},
+        {"UNIQUE_RUN_ID", &toString},
+        {"URBAN_METHOD", &toString},
     };
 
  public:

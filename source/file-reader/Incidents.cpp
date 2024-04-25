@@ -8,6 +8,7 @@
 #include <iostream>
 /* internal libraries */
 #include "file-reader/Incidents.hpp"
+#include "file-reader/Settings.hpp"
 
 Incidents::Incidents() {
     schemaMapping = {
@@ -29,7 +30,8 @@ Incidents::Incidents() {
         {"longitude", toFloat},
         {"latitude", toFloat},
         {"region", toString},
-        {"urban_settlement", toBool},
+        {"urban_settlement_ssb", toBool},
+        {"urban_settlement_fhi", toBool},
         {"total_A_incidents_hour_0", toInt},
         {"total_A_incidents_hour_1", toInt},
         {"total_A_incidents_hour_2", toInt},
@@ -108,7 +110,7 @@ Incidents::Incidents() {
 
     for (int i = 0; i < size(); i++) {
         int64_t grid_id = get<int64_t>("grid_id", i);
-        int64_t urban_settlement = get<bool>("urban_settlement", i);
+        int64_t urban_settlement = get<bool>(Settings::get<std::string>("URBAN_METHOD"), i);
 
         gridIdUrban[grid_id] = urban_settlement;
     }

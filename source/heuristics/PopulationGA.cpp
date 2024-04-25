@@ -541,10 +541,10 @@ std::vector<int> PopulationGA::rankSelection(
     std::vector<double> cumulativeProbabilities(N);
 
     // calculate selection probabilities for each rank
-    // assumes population is sorted
+    // assumes population is sorted in descending order (best to worst)
     double totalProbability = 0.0;
     for (int i = 0; i < N; i++) {
-        probabilities[i] = (2 - selectionPressure) / N + 2 * (i + 1) * (selectionPressure - 1) / (N * (N - 1));
+        probabilities[i] = (2 - selectionPressure) / N + 2 * (N - i) * (selectionPressure - 1) / (N * (N - 1));
         totalProbability += probabilities[i];
     }
 
