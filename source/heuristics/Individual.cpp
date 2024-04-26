@@ -75,6 +75,12 @@ void Individual::generateGenotype(
         case GenotypeInitType::INCIDENT_PROPORTIONATE_5KM:
             proportionateGenotype("total_incidents_radius_5km", dayShift);
             break;
+        case GenotypeInitType::POPULATION_PROPORTIONATE_CLUSTER:
+            proportionateGenotype("total_population_cluster", dayShift);
+            break;
+        case GenotypeInitType::INCIDENT_PROPORTIONATE_CLUSTER:
+            proportionateGenotype("total_incidents_cluster", dayShift);
+            break;
     }
 }
 

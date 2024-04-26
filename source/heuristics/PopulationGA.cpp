@@ -167,6 +167,18 @@ void PopulationGA::getPossibleGenotypeInits() {
         genotypeInitsTickets.push_back(tickets);
     }
 
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_POPULATION_PROPORTIONATE_CLUSTER");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::POPULATION_PROPORTIONATE_CLUSTER);
+        genotypeInitsTickets.push_back(tickets);
+    }
+
+    tickets = Settings::get<double>("GENOTYPE_INIT_TICKETS_INCIDENT_PROPORTIONATE_CLUSTER");
+    if (tickets > 0.0) {
+        genotypeInits.push_back(GenotypeInitType::INCIDENT_PROPORTIONATE_CLUSTER);
+        genotypeInitsTickets.push_back(tickets);
+    }
+
     // check if valid
     if (genotypeInits.empty()) {
         throwError("No applicable genotype inits.");

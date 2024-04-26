@@ -25,6 +25,8 @@ Stations::Stations() {
         {"total_population_radius_5km", toInt},
         {"total_incidents_radius_2km", toInt},
         {"total_incidents_radius_5km", toInt},
+        {"total_population_cluster", toInt},
+        {"total_incidents_cluster", toInt},
     };
 
     loadFromFile("../../Data-Processing/data/enhanced/oslo/depots.csv", "Loading stations data");
