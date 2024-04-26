@@ -135,7 +135,16 @@ void Individual::proportionateGenotype(const std::string& column, const bool day
     }
 
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
-        for (int ambulanceIndex = 0; ambulanceIndex < numAmbulances; ambulanceIndex++) {
+        int numAmbulancesToAdd = numAmbulances;
+
+        // add 1 ambulance to each depot
+        for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
+            genotype[allocationIndex][depotIndex]++;
+
+            numAmbulancesToAdd--;
+        }
+
+        for (int ambulanceIndex = 0; ambulanceIndex < numAmbulancesToAdd; ambulanceIndex++) {
             int depotIndex = weightedLottery(rnd, weights, {});
 
             genotype[allocationIndex][depotIndex]++;
