@@ -759,34 +759,14 @@ double averageResponseTime(
     int totalEvents = 0;
     int totalResponseTime = 0;
 
-    int eventIndex = 0;
-    int maxEventIndex = static_cast<int>(simulatedEvents.size());
-
-    if (allocationIndex != -1) {
-        int allocationCount = 0;
-
-        for (int i = 0; i < simulatedEvents.size(); i++) {
-            Event event = simulatedEvents[i];
-
-            if (event.reallocation.empty()) {
-                continue;
-            }
-
-            if (allocationIndex == allocationCount) {
-                maxEventIndex = i + 1;
-
-                break;
-            } else {
-                allocationCount++;
-                eventIndex = i + 1;
-            }
-        }
-    }
-
-    for (; eventIndex < maxEventIndex; eventIndex++) {
+    for (int eventIndex = 0; eventIndex < simulatedEvents.size(); eventIndex++) {
         Event event = simulatedEvents[eventIndex];
 
         if (event.utility) {
+            continue;
+        }
+
+        if (allocationIndex != -1 && simulatedEvents[eventIndex].allocationIndex != allocationIndex) {
             continue;
         }
 
@@ -814,30 +794,6 @@ double responseTimeViolations(
     const int allocationIndex,
     const int depotIndex
 ) {
-    int eventIndex = 0;
-    int maxEventIndex = static_cast<int>(simulatedEvents.size());
-
-    if (allocationIndex != -1) {
-        int allocationCount = 0;
-
-        for (int i = 0; i < simulatedEvents.size(); i++) {
-            Event event = simulatedEvents[i];
-
-            if (event.reallocation.empty()) {
-                continue;
-            }
-
-            if (allocationIndex == allocationCount) {
-                maxEventIndex = i + 1;
-
-                break;
-            } else {
-                allocationCount++;
-                eventIndex = i + 1;
-            }
-        }
-    }
-
     double totalEvents = 0.0;
     double totalViolations = 0.0;
 
@@ -846,8 +802,12 @@ double responseTimeViolations(
     const int urbanUrgentResponseTimeGoalSeconds = 1800;
     const int ruralUrgentResponseTimeGoalSeconds = 2400;
 
-    for (; eventIndex < maxEventIndex; eventIndex++) {
+    for (int eventIndex = 0; eventIndex < simulatedEvents.size(); eventIndex++) {
         if (simulatedEvents[eventIndex].utility) {
+            continue;
+        }
+
+        if (allocationIndex != -1 && simulatedEvents[eventIndex].allocationIndex != allocationIndex) {
             continue;
         }
 
@@ -891,30 +851,6 @@ double responseTimeViolationsUrban(
     const int allocationIndex,
     const int depotIndex
 ) {
-    int eventIndex = 0;
-    int maxEventIndex = static_cast<int>(simulatedEvents.size());
-
-    if (allocationIndex != -1) {
-        int allocationCount = 0;
-
-        for (int i = 0; i < simulatedEvents.size(); i++) {
-            Event event = simulatedEvents[i];
-
-            if (event.reallocation.empty()) {
-                continue;
-            }
-
-            if (allocationIndex == allocationCount) {
-                maxEventIndex = i + 1;
-
-                break;
-            } else {
-                allocationCount++;
-                eventIndex = i + 1;
-            }
-        }
-    }
-
     double totalEvents = 0.0;
     double totalViolations = 0.0;
 
@@ -923,8 +859,12 @@ double responseTimeViolationsUrban(
     const int urbanUrgentResponseTimeGoalSeconds = 1800;
     const int ruralUrgentResponseTimeGoalSeconds = 2400;
 
-    for (; eventIndex < maxEventIndex; eventIndex++) {
+    for (int eventIndex = 0; eventIndex < simulatedEvents.size(); eventIndex++) {
         if (simulatedEvents[eventIndex].utility) {
+            continue;
+        }
+
+        if (allocationIndex != -1 && simulatedEvents[eventIndex].allocationIndex != allocationIndex) {
             continue;
         }
 
