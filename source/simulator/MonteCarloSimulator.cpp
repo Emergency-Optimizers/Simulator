@@ -172,16 +172,19 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
     std::vector<std::vector<double>> totalIncidentsPer(3, std::vector<double>(2, 0));
     std::vector<std::vector<double>> totalIncidents(3, std::vector<double>(2, 0));
 
-    std::vector<double> weightsYear = generateWeights(365);
+    std::vector<std::vector<int>> totalFound(3, std::vector<int>(2, 0));
 
-    for (int i = 0; i < Incidents::getInstance().size(); i++) {
-        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
+    for (int i = 0; i < filteredIncidents.size(); i++) {
+        std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
+            "time_call_received",
+            filteredIncidents[i]
+        ).value();
         int dayDiff = calculateDayDifference(timeCallReceived, month, day);
-        double weight = weightsYear[dayDiff];
+        double weight = weights[dayDiff];
 
-        std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", i);
+        std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", filteredIncidents[i]);
 
-        bool canceled = !Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", i).has_value();
+        bool canceled = !Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", filteredIncidents[i]).has_value();
 
         int indexTriage = -1;
         if (triageImpression == "A") {
@@ -196,14 +199,17 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
         const bool eventBeforeDayShiftEnd = timeCallReceived.tm_hour <= Settings::get<int>("DAY_SHIFT_END");
         int indexShift = eventAfterDayShiftStart && eventBeforeDayShiftEnd ? 0 : 1;
 
-        if (canceled) totalIncidentsPer[indexTriage][indexShift] += weight;
+        if (canceled) {
+            totalIncidentsPer[indexTriage][indexShift] += weight;
+            totalFound[indexTriage][indexShift]++;
+        }
         totalIncidents[indexTriage][indexShift] += weight;
     }
 
     for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
         for (int indexShift = 0; indexShift < 2; indexShift++) {
             double totalIncidentsCanceled = totalIncidentsPer[indexTriage][indexShift];
-            if (totalIncidentsCanceled != 0) {
+            if (totalFound[indexTriage][indexShift] > 1) {
                 double canceledIncidentProbability = totalIncidentsCanceled / totalIncidents[indexTriage][indexShift];
                 newCanceledProbability[indexTriage][indexShift] = canceledIncidentProbability;
             }

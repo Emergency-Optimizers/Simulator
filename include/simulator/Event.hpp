@@ -23,14 +23,14 @@ struct Event {
     std::time_t prevTimer = 0;
     Ambulance* assignedAmbulance = nullptr;
     std::map<std::string, int> metrics = {
-        {"duration_incident_creation", 0},
-        {"duration_resource_appointment", 0},
-        {"duration_resource_preparing_departure", 0},
-        {"duration_dispatching_to_scene", 0},
-        {"duration_at_scene", 0},
-        {"duration_dispatching_to_hospital", 0},
-        {"duration_at_hospital", 0},
-        {"duration_dispatching_to_depot", 0},
+        {"duration_incident_creation", -1},
+        {"duration_resource_appointment", -1},
+        {"duration_resource_preparing_departure", -1},
+        {"duration_dispatching_to_scene", -1},
+        {"duration_at_scene", -1},
+        {"duration_dispatching_to_hospital", -1},
+        {"duration_at_hospital", -1},
+        {"duration_dispatching_to_depot", -1},
     };
     std::string triageImpression;
     std::tm callReceived;

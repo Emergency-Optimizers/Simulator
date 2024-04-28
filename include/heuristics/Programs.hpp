@@ -17,3 +17,4 @@ void runNSGA2(const std::vector<Event>& events);
 void runMemeticAlgorithm(const std::vector<Event>& events);
 void runMemeticNSGA2(const std::vector<Event>& events);
 void runGridSearch1(const std::vector<Event>& events);
+void runDataValidation(std::vector<Event>& events);

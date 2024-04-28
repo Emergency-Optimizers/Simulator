@@ -465,14 +465,14 @@ void writeEvents(const std::string& dirName, std::vector<Event>& events) {
             << std::to_string(event.allocationIndex) << ","
             << std::to_string(event.ambulanceIdResponsible) << ","
             << std::to_string(event.depotIndexResponsible) << ","
-            << std::to_string(event.metrics["duration_incident_creation"]) << ","
-            << std::to_string(event.metrics["duration_resource_appointment"]) << ","
-            << std::to_string(event.metrics["duration_resource_preparing_departure"]) << ","
-            << std::to_string(event.metrics["duration_dispatching_to_scene"]) << ","
-            << std::to_string(event.metrics["duration_at_scene"]) << ","
-            << std::to_string(event.metrics["duration_dispatching_to_hospital"]) << ","
-            << std::to_string(event.metrics["duration_at_hospital"]) << ","
-            << std::to_string(event.metrics["duration_dispatching_to_depot"]) << std::endl;
+            << (event.metrics["duration_incident_creation"] != -1 ? std::to_string(event.metrics["duration_incident_creation"]) : "") << ","
+            << (event.metrics["duration_resource_appointment"] != -1 ? std::to_string(event.metrics["duration_resource_appointment"]) : "") << ","
+            << (event.metrics["duration_resource_preparing_departure"] != -1 ? std::to_string(event.metrics["duration_resource_preparing_departure"]) : "") << ","
+            << (event.metrics["duration_dispatching_to_scene"] != -1 ? std::to_string(event.metrics["duration_dispatching_to_scene"]) : "") << ","
+            << (event.metrics["duration_at_scene"] != -1 ? std::to_string(event.metrics["duration_at_scene"]) : "") << ","
+            << (event.metrics["duration_dispatching_to_hospital"] != -1 ? std::to_string(event.metrics["duration_dispatching_to_hospital"]) : "") << ","
+            << (event.metrics["duration_at_hospital"] != -1 ? std::to_string(event.metrics["duration_at_hospital"]) : "") << ","
+            << (event.metrics["duration_dispatching_to_depot"] != -1 ? std::to_string(event.metrics["duration_dispatching_to_depot"]) : "") << std::endl;
     }
 
     outFile.close();

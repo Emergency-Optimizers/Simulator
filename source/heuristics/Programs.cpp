@@ -28,6 +28,7 @@
 #include "simulator/AmbulanceAllocator.hpp"
 #include "simulator/Simulator.hpp"
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
+#include "simulator/MonteCarloSimulator.hpp"
 
 void runSimulatorOnce(std::vector<Event>& events, const bool verbose, std::vector<std::vector<int>> allocations) {
     // set allocation
@@ -170,4 +171,33 @@ void runGridSearch1(const std::vector<Event>& events) {
         }
     }
     std::cout << std::endl;
+}
+
+void runDataValidation(std::vector<Event>& events) {
+    for (int i = 1; i <= 12; i++) {
+        const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_CUSTOM_" + std::to_string(i);
+
+        Settings::update<int>("SIMULATE_MONTH", i);
+
+        MonteCarloSimulator monteCarloSim;
+        events = monteCarloSim.generateEvents();
+
+        for (auto& event : events) {
+            if (event.utility) {
+                continue;
+            }
+
+            event.updateTimer(static_cast<int>(event.secondsWaitResourcePreparingDeparture), "duration_resource_preparing_departure");
+
+            const bool cancelledEvent = event.secondsWaitDepartureScene == -1;
+            if (!cancelledEvent) {
+                event.updateTimer(static_cast<int>(event.secondsWaitDepartureScene), "duration_at_scene");
+                event.updateTimer(static_cast<int>(event.secondsWaitAvailable), "duration_at_hospital");
+            } else {
+                event.updateTimer(static_cast<int>(event.secondsWaitAvailable), "duration_at_scene");
+            }
+        }
+
+        writeEvents(dirName, events);
+    }
 }

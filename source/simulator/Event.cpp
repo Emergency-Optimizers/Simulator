@@ -15,7 +15,11 @@ void Event::updateTimer(const int increment, const std::string& metric, const bo
     }
 
     if (!metric.empty()) {
-        metrics[metric] += increment;
+        if (metrics[metric] == -1) {
+            metrics[metric] = increment;
+        } else {
+            metrics[metric] += increment;
+        }
 
         bool updateAmbulance = metric == "duration_resource_preparing_departure";
         updateAmbulance |= metric == "duration_dispatching_to_scene";
@@ -24,7 +28,7 @@ void Event::updateTimer(const int increment, const std::string& metric, const bo
         updateAmbulance |= metric == "duration_at_hospital";
         updateAmbulance |= metric == "duration_dispatching_to_depot";
 
-        if (updateAmbulance) {
+        if (assignedAmbulance != nullptr && updateAmbulance) {
             assignedAmbulance->timeUnavailable += increment;
         }
     }
