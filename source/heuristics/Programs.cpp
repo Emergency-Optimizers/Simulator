@@ -30,7 +30,13 @@
 #include "simulator/strategies/DispatchEngineStrategyType.hpp"
 #include "simulator/MonteCarloSimulator.hpp"
 
-void runSimulatorOnce(std::vector<Event>& events, const bool verbose, std::vector<std::vector<int>> allocations) {
+void runSimulatorOnce(
+    std::vector<Event>& events,
+    const bool verbose,
+    const bool saveToFile,
+    std::vector<std::vector<int>> allocations,
+    std::string extraFileName
+) {
     // set allocation
     if (allocations.empty()) {
         allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
@@ -62,13 +68,16 @@ void runSimulatorOnce(std::vector<Event>& events, const bool verbose, std::vecto
     std::vector<Event> simulatedEvents;
     simulatedEvents = simulator.run();
 
-    if (verbose) {
+    if (saveToFile) {
         // write events to file
         const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_NONE";
 
-        writeEvents(dirName, simulatedEvents);
-        writeGenotype(dirName, allocations);
-        writeAmbulances(dirName, ambulanceAllocator.ambulances);
+        writeEvents(dirName, simulatedEvents, "events" + extraFileName);
+        writeGenotype(dirName, allocations, "genotype" + extraFileName);
+        writeAmbulances(dirName, ambulanceAllocator.ambulances, "ambulances" + extraFileName);
+    }
+
+    if (verbose) {
         // print metrics
         double avgResponseTimeAUrban = averageResponseTime(simulatedEvents, "A", true);
         double avgResponseTimeANonurban = averageResponseTime(simulatedEvents, "A", false);
@@ -118,6 +127,7 @@ void runMemeticNSGA2(const std::vector<Event>& events) {
 
 void runGridSearch1(const std::vector<Event>& events) {
     const bool verbose = false;
+    const bool saveToFile = false;
     const int N = 10;
 
     // ...
@@ -157,7 +167,7 @@ void runGridSearch1(const std::vector<Event>& events) {
                 std::vector<Event> copiedEvents = events;
 
                 auto startClock = std::chrono::high_resolution_clock::now();
-                runSimulatorOnce(copiedEvents, verbose, allocations);
+                runSimulatorOnce(copiedEvents, verbose, saveToFile, allocations);
                 auto endClock = std::chrono::high_resolution_clock::now();
 
                 sumDurations += std::chrono::duration_cast<std::chrono::milliseconds>(endClock - startClock).count();
@@ -199,5 +209,59 @@ void runDataValidation(std::vector<Event>& events) {
         }
 
         writeEvents(dirName, events);
+    }
+}
+
+void runSimulationGridSearch(const std::vector<Event>& events) {
+    const bool verbose = false;
+    const bool saveToFile = true;
+
+    // ...
+    std::vector<DispatchEngineStrategyType> possibleStrategies = {
+        DispatchEngineStrategyType::CLOSEST,
+        DispatchEngineStrategyType::RANDOM,
+    };
+
+    std::vector<bool> possiblePrioritizeTriage = {
+        false,
+        true,
+    };
+
+    std::vector<bool> possibleResponseRestricated = {
+        false,
+        true,
+    };
+
+    std::vector<bool> possibleScheduleBreaks = {
+        false,
+        true,
+    };
+
+    for (auto& strategy : possibleStrategies) {
+        for (auto prioritizeTriage : possiblePrioritizeTriage) {
+            for (auto responseRestricated : possibleResponseRestricated) {
+                for (auto scheduleBreaks : possibleScheduleBreaks) {
+                    Settings::update<DispatchEngineStrategyType>("DISPATCH_STRATEGY", strategy);
+                    Settings::update<bool>("DISPATCH_STRATEGY_PRIORITIZE_TRIAGE", prioritizeTriage);
+                    Settings::update<bool>("DISPATCH_STRATEGY_RESPONSE_RESTRICTED", responseRestricated);
+                    Settings::update<bool>("SCHEDULE_BREAKS", scheduleBreaks);
+
+                    std::string extraFileName = "_strategy=";
+                    extraFileName += strategy == DispatchEngineStrategyType::CLOSEST ? "closest" : "random";
+
+                    extraFileName += "_prioritizeTriage=";
+                    extraFileName += prioritizeTriage ? "true" : "false";
+
+                    extraFileName += "_responseRestricted=";
+                    extraFileName += responseRestricated ? "true" : "false";
+
+                    extraFileName += "_scheduleBreaks=";
+                    extraFileName += scheduleBreaks ? "true" : "false";
+
+                    std::vector<Event> copiedEvents = events;
+                    runSimulatorOnce(copiedEvents, verbose, saveToFile, {}, extraFileName);
+                }
+            }
+        }
     }
 }

@@ -90,9 +90,9 @@ int64_t approximateLocation(
     const EventType eventType
 );
 int findEventIndexFromId(const std::vector<Event>& events, const int id);
-void writeEvents(const std::string& dirName, std::vector<Event>& events);
-void writeGenotype(const std::string& dirName, const std::vector<std::vector<int>>& genotype);
-void writeAmbulances(const std::string& dirName, const std::vector<Ambulance>& ambulances);
+void writeEvents(const std::string& dirName, std::vector<Event>& events, std::string fileName = "events");
+void writeGenotype(const std::string& dirName, const std::vector<std::vector<int>>& genotype, std::string fileName = "genotype");
+void writeAmbulances(const std::string& dirName, const std::vector<Ambulance>& ambulances, std::string fileName = "ambulances");
 void saveDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);
 void save1dDistributionToFile(const std::vector<double>& distribution, const std::string& baseFilename);
 void save2dDistributionToFile(const std::vector<std::vector<double>>& distribution, const std::string& baseFilename);

@@ -412,9 +412,9 @@ int getRandomInt(std::mt19937& rnd, const int min, const int max) {
     return dist(rnd);
 }
 
-void writeEvents(const std::string& dirName, std::vector<Event>& events) {
+void writeEvents(const std::string& dirName, std::vector<Event>& events, std::string fileName) {
     createDirectory(dirName);
-    std::string filename = "../data/" + dirName + "/" + "events" + ".csv";
+    std::string filename = "../data/" + dirName + "/" + fileName + ".csv";
     std::ofstream outFile(filename);
 
     // check if the file stream is open before proceeding
@@ -478,9 +478,9 @@ void writeEvents(const std::string& dirName, std::vector<Event>& events) {
     outFile.close();
 }
 
-void writeGenotype(const std::string& dirName, const std::vector<std::vector<int>>& genotype) {
+void writeGenotype(const std::string& dirName, const std::vector<std::vector<int>>& genotype, std::string fileName) {
     createDirectory(dirName);
-    std::string filename = "../data/" + dirName + "/" + "genotype" + ".csv";
+    std::string filename = "../data/" + dirName + "/" + fileName + ".csv";
     std::ofstream outFile(filename);
 
     // check if the file stream is open before proceeding
@@ -515,9 +515,9 @@ void writeGenotype(const std::string& dirName, const std::vector<std::vector<int
     outFile.close();
 }
 
-void writeAmbulances(const std::string& dirName, const std::vector<Ambulance>& ambulances) {
+void writeAmbulances(const std::string& dirName, const std::vector<Ambulance>& ambulances, std::string fileName) {
     createDirectory(dirName);
-    std::string filename = "../data/" + dirName + "/" + "ambulances" + ".csv";
+    std::string filename = "../data/" + dirName + "/" + fileName + ".csv";
     std::ofstream outFile(filename);
 
     // check if the file stream is open before proceeding
