@@ -406,7 +406,13 @@ int weightedLottery(
     return originalIndex;
 }
 
-int getRandomInt(std::mt19937& rnd, const int min, const int max) {
+int getRandomInt(std::mt19937& rnd, int min, int max) {
+    if (min > max) {
+        int tmp = min;
+        min = max;
+        max = tmp;
+    }
+
     std::uniform_int_distribution<> dist(min, max);
 
     return dist(rnd);
