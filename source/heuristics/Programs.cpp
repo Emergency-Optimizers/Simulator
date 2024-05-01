@@ -265,3 +265,21 @@ void runSimulationGridSearch(const std::vector<Event>& events) {
         }
     }
 }
+
+void runExperimentTimeSegments(const std::vector<Event>& events) {
+    std::string uniqueRunId = Settings::get<std::string>("UNIQUE_RUN_ID");
+
+    std::vector<int> possibleTimeSegments(24, 0);
+    std::iota(possibleTimeSegments.begin(), possibleTimeSegments.end(), 1);
+
+    for (auto timeSegments : possibleTimeSegments) {
+        Settings::update<int>("NUM_TIME_SEGMENTS", timeSegments);
+        Settings::update<std::string>("UNIQUE_RUN_ID", uniqueRunId + "_ts=" + std::to_string(timeSegments));
+
+        std::vector<Event> copiedEvents = events;
+
+        PopulationGA population(copiedEvents);
+        population.evolve(false);
+        std::cout << std::endl;
+    }
+}

@@ -72,7 +72,7 @@ int weightedLottery(
     const std::vector<double>& weights,
     const std::vector<std::pair<int, int>>& ranges = {}
 );
-int getRandomInt(std::mt19937& rnd, const int min, const int max);
+int getRandomInt(std::mt19937& rnd, int min, int max);
 double getRandomDouble(std::mt19937& rnd, const double min = 0.0, const double max = 1.0);
 bool getRandomBool(std::mt19937& rnd);
 double calculateMean(const std::vector<int>& numbers);
