@@ -39,7 +39,7 @@ void runSimulatorOnce(
 ) {
     // set allocation
     if (allocations.empty()) {
-        allocations.push_back({2, 4, 2, 2, 2, 4, 2, 3, 3, 3, 3, 5, 4, 3, 3});
+        allocations.push_back({2, 3, 2, 2, 2, 4, 2, 3, 3, 4, 4, 4, 4, 3, 3});
 
         if (Settings::get<bool>("SIMULATE_DAY_SHIFT")) {
             int allocationSize = static_cast<int>(allocations.size());
