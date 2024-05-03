@@ -91,6 +91,7 @@ class Settings {
         {"STOPPING_CRITERIA_MIN_DIVERSITY", &toInt},
         {"UNIQUE_RUN_ID", &toString},
         {"URBAN_METHOD", &toString},
+        {"INCIDENTS_TO_GENERATE_FACTOR", &toDouble},
     };
 
  public:

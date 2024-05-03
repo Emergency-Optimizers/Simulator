@@ -283,3 +283,27 @@ void runExperimentTimeSegments(const std::vector<Event>& events) {
         std::cout << std::endl;
     }
 }
+
+void runExtremeConditionTest() {
+    const bool verbose = false;
+    const bool saveToFile = true;
+
+    std::vector<double> possibleIncidentsToGenerateFactors = {
+        0.50,
+        0.75,
+        1.00,
+        1.25,
+        1.50
+    };
+
+    for (auto incidentsToGenerateFactor : possibleIncidentsToGenerateFactors) {
+        Settings::update<double>("INCIDENTS_TO_GENERATE_FACTOR", incidentsToGenerateFactor);
+
+        MonteCarloSimulator monteCarloSim;
+        std::vector<Event> events = monteCarloSim.generateEvents();
+
+        std::string extraFileName = "_numIncidentsFactor=" + std::to_string(incidentsToGenerateFactor);
+
+        runSimulatorOnce(events, verbose, saveToFile, {}, extraFileName);
+    }
+}

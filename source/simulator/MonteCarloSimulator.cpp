@@ -184,7 +184,10 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 
         std::string triageImpression = Incidents::getInstance().get<std::string>("triage_impression_during_call", filteredIncidents[i]);
 
-        bool canceled = !Incidents::getInstance().get<std::optional<std::tm>>("time_ambulance_dispatch_to_hospital", filteredIncidents[i]).has_value();
+        bool canceled = !Incidents::getInstance().get<std::optional<std::tm>>(
+            "time_ambulance_dispatch_to_hospital",
+            filteredIncidents[i]
+        ).has_value();
 
         int indexTriage = -1;
         if (triageImpression == "A") {
@@ -485,7 +488,11 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
         }
     }
 
-    return dayShift ? totalDay : totalMorning + totalNight;
+    int numEventsToGenerate = dayShift ? totalDay : totalMorning + totalNight;
+
+    numEventsToGenerate = static_cast<int>(static_cast<double>(numEventsToGenerate) * Settings::get<double>("INCIDENTS_TO_GENERATE_FACTOR"));
+
+    return numEventsToGenerate;
 }
 
 std::vector<Event> MonteCarloSimulator::generateEvents() {
