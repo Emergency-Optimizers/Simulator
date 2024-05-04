@@ -290,9 +290,7 @@ void runExtremeConditionTest() {
 
     std::vector<double> possibleIncidentsToGenerateFactors = {
         0.50,
-        0.75,
         1.00,
-        1.25,
         1.50
     };
 
