@@ -18,12 +18,16 @@ file(GLOB_RECURSE SOURCES "source/*.cpp")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  CXX_EXTENSIONS OFF
+)
 
 # adjusting compile options based on the compiler
 if(MSVC)
   # use MSVC-specific warning levels and flags
-  target_compile_options(${PROJECT_NAME} PRIVATE "/W4" "/wd4100" "/wd4250")
+  target_compile_options(${PROJECT_NAME} PRIVATE "/std:c++17" "/W4" "/wd4100" "/wd4250")
   set(CMAKE_CXX_FLAGS_DEBUG "/Zi /Od /D_DEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/Zi /O2 /D_DEBUG")
