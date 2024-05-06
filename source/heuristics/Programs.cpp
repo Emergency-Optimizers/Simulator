@@ -125,14 +125,12 @@ void runMemeticNSGA2(const std::vector<Event>& events) {
     population.evolve();
 }
 
-void runGridSearch1(const std::vector<Event>& events) {
+void runTimeEvaluation(const std::vector<Event>& events) {
     const bool verbose = false;
     const bool saveToFile = false;
     const int N = 10;
 
-    // ...
-    std::vector<int> possibleTimeSegments(24, 0);
-    std::iota(possibleTimeSegments.begin(), possibleTimeSegments.end(), 1);
+    std::vector<int> possibleTimeSegments = { 1, 6, 12, 18, 24 };
 
     std::vector<DispatchEngineStrategyType> possibleStrategies = {
         DispatchEngineStrategyType::CLOSEST,

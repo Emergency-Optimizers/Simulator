@@ -23,7 +23,7 @@ void runGeneticAlgorithm(const std::vector<Event>& events);
 void runNSGA2(const std::vector<Event>& events);
 void runMemeticAlgorithm(const std::vector<Event>& events);
 void runMemeticNSGA2(const std::vector<Event>& events);
-void runGridSearch1(const std::vector<Event>& events);
+void runTimeEvaluation(const std::vector<Event>& events);
 void runDataValidation(std::vector<Event>& events);
 void runSimulationGridSearch(const std::vector<Event>& events);
 void runExperimentTimeSegments(const std::vector<Event>& events);
