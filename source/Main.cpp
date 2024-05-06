@@ -71,7 +71,7 @@ int main() {
 
             break;
         case HeuristicType::CUSTOM:
-            runTimeEvaluation(events);
+            runSimulationGridSearch(events);
 
             break;
     }
