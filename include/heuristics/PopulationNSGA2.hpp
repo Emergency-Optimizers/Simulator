@@ -48,5 +48,5 @@ class PopulationNSGA2 : virtual public PopulationGA {
 
  public:
     explicit PopulationNSGA2(const std::vector<Event>& events);
-    void evolve(const bool verbose = true) override;
+    void evolve(const bool verbose = true, std::string extraFileName = "") override;
 };

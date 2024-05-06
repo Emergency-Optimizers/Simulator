@@ -134,5 +134,5 @@ class PopulationGA {
 
  public:
     explicit PopulationGA(const std::vector<Event>& events);
-    virtual void evolve(const bool verbose = true);
+    virtual void evolve(const bool verbose = true, std::string extraFileName = "");
 };

@@ -40,7 +40,7 @@ void PopulationGA::generatePopulation() {
     }
 }
 
-void PopulationGA::evolve(const bool verbose) {
+void PopulationGA::evolve(const bool verbose, std::string extraFileName) {
     // sort and store metrics for initial population
     sortIndividuals();
     storeGenerationMetrics();
@@ -84,10 +84,10 @@ void PopulationGA::evolve(const bool verbose) {
     // write to file
     const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName();
 
-    saveDataToJson(dirName, "heuristic", metrics);
-    writeEvents(dirName, finalIndividual.simulatedEvents);
-    writeGenotype(dirName, finalIndividual.genotype);
-    writeAmbulances(dirName, finalIndividual.simulatedAmbulances);
+    saveDataToJson(dirName, "heuristic" + extraFileName, metrics);
+    writeEvents(dirName, finalIndividual.simulatedEvents, "events" + extraFileName);
+    writeGenotype(dirName, finalIndividual.genotype, "genotype" + extraFileName);
+    writeAmbulances(dirName, finalIndividual.simulatedAmbulances, "ambulances" + extraFileName);
 
     if (verbose) {
         printTimeSegmentedAllocationTable(
