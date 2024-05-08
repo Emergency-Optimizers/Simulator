@@ -125,7 +125,7 @@ void runMemeticNSGA2(const std::vector<Event>& events) {
     population.evolve();
 }
 
-void runTimeEvaluation(const std::vector<Event>& events) {
+void runTimeEvaluation() {
     const bool verbose = false;
     const bool saveToFile = false;
     const int N = 10;
@@ -136,6 +136,10 @@ void runTimeEvaluation(const std::vector<Event>& events) {
         DispatchEngineStrategyType::CLOSEST,
         DispatchEngineStrategyType::RANDOM,
     };
+
+    // generate events
+    MonteCarloSimulator monteCarloSim;
+    std::vector<Event> events = monteCarloSim.generateEvents();
 
     for (auto& strategy : possibleStrategies) {
         for (auto& timeSegments : possibleTimeSegments) {
