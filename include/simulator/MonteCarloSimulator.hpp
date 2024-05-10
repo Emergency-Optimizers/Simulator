@@ -22,7 +22,7 @@ class MonteCarloSimulator {
     std::mt19937 rnd = std::mt19937(Settings::get<int>("SEED"));
     std::vector<int> filteredIncidents;
     const int windowSize = Settings::get<int>("SIMULATION_GENERATION_WINDOW_SIZE");
-    const int year = Settings::get<int>("SIMULATE_YEAR");
+    const int year = 2019;
     const int month = Settings::get<int>("SIMULATE_MONTH");
     const int day = Settings::get<int>("SIMULATE_DAY");
     const bool dayShift = Settings::get<bool>("SIMULATE_DAY_SHIFT");

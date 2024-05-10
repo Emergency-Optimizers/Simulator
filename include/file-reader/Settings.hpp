@@ -26,7 +26,6 @@ class Settings {
         {"TOTAL_AMBULANCES_DURING_NIGHT", &toInt},
         {"MUTATION_PROBABILITY", &toFloat},
         {"LOCAL_SEARCH_PROBABILITY", &toFloat},
-        {"SIMULATE_YEAR", &toInt},
         {"SIMULATE_MONTH", &toInt},
         {"SIMULATE_DAY", &toInt},
         {"SIMULATE_DAY_SHIFT", &toBool},
