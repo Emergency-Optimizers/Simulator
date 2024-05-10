@@ -36,8 +36,6 @@ class PopulationGA {
     std::vector<double> parentSelectionsTickets;
     std::vector<SelectionType> survivorSelections;
     std::vector<double> survivorSelectionsTickets;
-    int numThreads = std::thread::hardware_concurrency() - 2;
-    bool multiThread = Settings::get<bool>("MULTI_THREAD");
 
     void generatePopulation();
     void getPossibleGenotypeInits();
