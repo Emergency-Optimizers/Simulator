@@ -84,13 +84,27 @@ class Settings {
         {"STOPPING_CRITERIA_MAX_GENERATIONS", &toInt},
         {"DISPATCH_STRATEGY_RESPONSE_RESTRICTED", &toBool},
         {"STOPPING_CRITERIA_MIN_DIVERSITY", &toInt},
-        {"UNIQUE_RUN_ID", &toString},
         {"URBAN_METHOD", &toString},
         {"INCIDENTS_TO_GENERATE_FACTOR", &toDouble},
     };
 
  public:
     static void LoadSettings() {
+        // add current time as unique run ID for file saving
+        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+        std::tm bt = getLocalTime(now_time);
+        std::ostringstream oss;
+        oss << std::put_time(&bt, "%Y_%m_%d_%H_%M_%S");
+        std::string timestamp = oss.str();
+
+        // convert and store the value according to the schema
+        auto it_schema = schema.find("UNIQUE_RUN_ID");
+        if (it_schema != schema.end()) {
+            configValues["UNIQUE_RUN_ID"] = it_schema->second(timestamp);
+        }
+
         const std::string& filename = "../settings.txt";
         std::ifstream file(filename);
 
@@ -136,21 +150,6 @@ class Settings {
         }
 
         file.close();
-
-        // add current time as unique run ID for file saving
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
-
-        std::tm bt = getLocalTime(now_time);
-        std::ostringstream oss;
-        oss << std::put_time(&bt, "%Y_%m_%d_%H_%M_%S");
-        std::string timestamp = oss.str();
-
-        // convert and store the value according to the schema
-        auto it = schema.find("UNIQUE_RUN_ID");
-        if (it != schema.end()) {
-            configValues["UNIQUE_RUN_ID"] = it->second(timestamp);
-        }
     }
 
     template<typename T>

@@ -26,7 +26,7 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
         calculateCrowdingDistance(front);
     }
 
-    sortIndividuals();
+    // sortIndividuals();
     storeGenerationMetrics();
 
     // init progress bar
@@ -56,9 +56,9 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
 
         // survivor selection
         individuals = survivorSelection();
-        sortIndividuals();
 
         // update progress bar
+        // sortIndividuals();
         storeGenerationMetrics();
 
         keepRunning = !shouldStop();
