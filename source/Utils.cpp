@@ -839,6 +839,8 @@ double responseTimeViolations(
             } else if (!urban && responseTime > ruralUrgentResponseTimeGoalSeconds) {
                 totalViolations++;
             }
+        } else if (triage == "V1") {
+            continue;
         }
 
         totalEvents++;
@@ -899,6 +901,8 @@ double responseTimeViolationsUrban(
             } else if (!urban && responseTime > ruralUrgentResponseTimeGoalSeconds) {
                 totalViolations++;
             }
+        } else if (triage == "V1") {
+            continue;
         }
 
         totalEvents++;

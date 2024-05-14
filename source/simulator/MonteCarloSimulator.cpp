@@ -157,7 +157,10 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
 
     for (int indexHour = 0; indexHour < 24; indexHour++) {
         for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
-            double triageIncidentProbability = totalIncidentsPerTriage[indexHour][indexTriage] / totalIncidents[indexHour];
+            double triageIncidentProbability = 0.0;
+            if (totalIncidents[indexHour] != 0) {
+                triageIncidentProbability = totalIncidentsPerTriage[indexHour][indexTriage] / totalIncidents[indexHour];
+            }
             newTriageProbabilityDistribution[indexHour][indexTriage] = triageIncidentProbability;
         }
     }
@@ -574,9 +577,8 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         // setup timer
         event.timer = std::mktime(&event.callReceived);
 
-        // remove event.secondsWaitAppointingResource
         event.updateTimer(static_cast<int>(event.secondsWaitCallAnswered), "duration_incident_creation");
-        event.updateTimer(static_cast<int>(event.secondsWaitAppointingResource), "duration_resource_appointment");
+        event.updateTimer(static_cast<int>(event.secondsWaitAppointingResource / 2.0), "duration_resource_appointment");
 
         event.incidentGridId = event.gridId;
 

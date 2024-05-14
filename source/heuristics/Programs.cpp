@@ -101,7 +101,9 @@ void runSimulatorOnce(
             << "Avg. response time (H, non-urban): \t" << avgResponseTimeHNonurban << "s (" << avgResponseTimeHNonurban / 60 << "m)" << std::endl
             << "Avg. response time (V1, urban): \t" << avgResponseTimeV1Urban << "s (" << avgResponseTimeV1Urban / 60 << "m)" << std::endl
             << "Avg. response time (V1, non-urban): \t" << avgResponseTimeV1Nonurban << "s (" << avgResponseTimeV1Nonurban / 60 << "m)" << std::endl
-            << "Percentage violations: \t\t\t" << responseTimeViolations(simulatedEvents) * 100 << "%" << std::endl;
+            << "Percentage violations: \t\t\t" << responseTimeViolations(simulatedEvents) * 100 << "%" << std::endl
+            << "Percentage violations (U): \t\t" << responseTimeViolationsUrban(simulatedEvents, true) * 100 << "%" << std::endl
+            << "Percentage violations (R): \t\t" << responseTimeViolationsUrban(simulatedEvents, false) * 100 << "%" << std::endl;
     }
 }
 
