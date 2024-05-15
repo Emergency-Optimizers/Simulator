@@ -73,8 +73,8 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
 
     // write to file
     const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_" + getHeuristicName();
+    saveDataToJson(dirName, "heuristic" + extraFileName, metrics);
     for (int i = 0; i < individuals.size(); i++) {
-        saveDataToJson(dirName, "heuristic" + extraFileName + "_ind_" + std::to_string(i), metrics);
         writeEvents(dirName, finalIndividual.simulatedEvents, "events" + extraFileName + "_ind_" + std::to_string(i));
         writeGenotype(dirName, finalIndividual.genotype, "genotype" + extraFileName + "_ind_" + std::to_string(i));
         writeAmbulances(dirName, finalIndividual.simulatedAmbulances, "ambulances" + extraFileName + "_ind_" + std::to_string(i));
