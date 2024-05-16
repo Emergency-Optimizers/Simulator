@@ -866,9 +866,9 @@ bool PopulationGA::shouldStop() {
         } else {
             generationsSinceImprovment--;
         }
-    }
 
-    stoppingCriteria |= generationsSinceImprovment <= 0;
+        stoppingCriteria |= generationsSinceImprovment <= 0;
+    }
 
     return stoppingCriteria;
 }
