@@ -853,5 +853,22 @@ bool PopulationGA::shouldStop() {
     // check min diversity criteria
     stoppingCriteria |= minDiversity != -1 && countUnique() < minDiversity;
 
+    // check min imrpovement
+    if (Settings::get<int>("STOPPING_CRITERIA_MIN_GEN_IMPROVEMENT") != -1) {
+        double currentBestViolationsUrban = individuals[0].objectivePercentageViolationsUrban;
+        double currentBestViolationsRural = individuals[0].objectivePercentageViolationsRural;
+
+        if (currentBestViolationsUrban < bestVioUrban || currentBestViolationsRural < bestVioRural) {
+            bestVioUrban = currentBestViolationsUrban;
+            bestVioRural = currentBestViolationsRural;
+
+            generationsSinceImprovment = Settings::get<int>("STOPPING_CRITERIA_MIN_GEN_IMPROVEMENT");
+        } else {
+            generationsSinceImprovment--;
+        }
+    }
+
+    stoppingCriteria |= generationsSinceImprovment <= 0;
+
     return stoppingCriteria;
 }

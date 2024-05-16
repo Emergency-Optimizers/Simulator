@@ -98,6 +98,9 @@ class PopulationGA {
     std::vector<MutationType> mutations;
     std::vector<double> mutationsTickets;
     const std::string heuristicName = "GA";
+    double bestVioUrban = 1.0;
+    double bestVioRural = 1.0;
+    int generationsSinceImprovment = Settings::get<int>("STOPPING_CRITERIA_MIN_GEN_IMPROVEMENT");
     std::map<std::string, std::vector<std::vector<double>>> metrics = {
         {"fitness", {}},
         {"diversity", {}},

@@ -86,6 +86,8 @@ class Settings {
         {"STOPPING_CRITERIA_MIN_DIVERSITY", &toInt},
         {"URBAN_METHOD", &toString},
         {"INCIDENTS_TO_GENERATE_FACTOR", &toDouble},
+        {"STOPPING_CRITERIA_MIN_GEN_IMPROVEMENT", &toInt},
+        {"CUSTOM_STRING_VALUE", &toString},
     };
 
  public:
