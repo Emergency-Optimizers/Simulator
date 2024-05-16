@@ -310,32 +310,21 @@ void runExtremeConditionTest() {
 void runAmbulanceExperiment(const std::vector<Event>& events) {
     const bool verbose = false;
 
-    std::vector<double> possibleAmbulanceFactors = {
-        1.75,
-        1.50,
-        1.25,
-        1.00,
-        0.75,
-        0.50,
-        0.25,
-    };
+    std::vector<int> possibleResourceSize;
+    for (int i = 30; i <= 60; i++) {
+        possibleResourceSize.push_back(i);
+    }
 
-    int defaultResourceSize = Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY");
-
-    for (auto ambulanceFactor : possibleAmbulanceFactors) {
-        int newResourceSize = static_cast<int>(round(static_cast<double>(defaultResourceSize) * ambulanceFactor));
-        if (newResourceSize <= 0) {
-            newResourceSize = 1;
-        }
-
-        Settings::update<int>("TOTAL_AMBULANCES_DURING_DAY", newResourceSize);
-        std::string extraFileName = "_numAmbulanceFactor=" + std::to_string(ambulanceFactor);
+    for (auto resourceSize : possibleResourceSize) {
+        Settings::update<int>("TOTAL_AMBULANCES_DURING_DAY", resourceSize);
+        std::string extraFileName = "_numAmbulances=" + std::to_string(resourceSize);
 
         std::vector<Event> copiedEvents = events;
 
         // change to correct heuristic
-        PopulationGA population(copiedEvents);
+        PopulationNSGA2 population(copiedEvents);
         population.evolve(verbose, extraFileName);
+
         std::cout << std::endl;
     }
 }
