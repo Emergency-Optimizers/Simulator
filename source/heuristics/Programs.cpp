@@ -373,3 +373,87 @@ void runExperimentHeuristics(const std::vector<Event>& events) {
         std::cout << std::endl;
     }
 }
+
+void runExperimentAllocations(const std::vector<Event>& events) {
+    const bool verbose = false;
+    const bool saveToFile = true;
+
+    std::vector<int> possibleSeeds(10, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    std::map<std::string, std::vector<std::vector<int>>> possibleAllocations = {
+        {"ACC", {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0}}},
+        {"U", {{3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}}},
+        {"PP", {{1, 1, 1, 1, 3, 1, 2, 2, 3, 4, 3, 5, 3, 2, 2, 3, 3, 2, 3}}},
+        {"SLS", {{2, 1, 1, 2, 2, 3, 1, 2, 2, 3, 3, 5, 2, 2, 2, 2, 2, 4, 2}}},
+        {"GA", {{2, 3, 1, 2, 3, 1, 2, 2, 1, 3, 4, 4, 3, 2, 3, 3, 3, 2, 1}}},
+        {"MA", {{2, 1, 1, 3, 2, 1, 0, 2, 3, 3, 3, 2, 3, 4, 5, 2, 2, 4, 3}}},
+        {"OUH", {{2, 3, 2, 2, 2, 4, 2, 3, 3, 4, 4, 4, 4, 3, 3, 0, 0, 0, 0}}},
+    };
+
+    for (auto allocationInfo : possibleAllocations) {
+        std::string allocationName = allocationInfo.first;
+        std::vector<std::vector<int>> allocation = allocationInfo.second;
+
+        std::cout << allocationName << std::endl;
+
+        for (auto seed : possibleSeeds) {
+            Settings::update<int>("SEED", seed);
+
+            std::vector<Event> copiedEvents = events;
+            std::string extraFileName = "_" + allocationName + "_seed=" + std::to_string(seed);
+
+            runSimulatorOnce(copiedEvents, verbose, saveToFile, allocation, extraFileName);
+        }
+    }
+}
+
+void runExperimentCustomAllocations(const std::vector<Event>& events) {
+    /*const bool verbose = false;
+    const bool saveToFile = true;
+
+    Settings::update<int>("NUM_TIME_SEGMENTS", 1);
+
+    std::vector<int> possibleSeeds(10, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    std::vector<std::string> possibleAllocations {"R", "UR", "IP"};
+
+    for (auto allocationName : possibleAllocations) {
+        std::cout << allocationName << std::endl;
+
+        for (auto seed : possibleSeeds) {
+            Settings::update<int>("SEED", seed);
+
+            std::mt19937 rd(seed);
+
+            Individual ind(
+                rd,
+                45,
+                1,
+                19,
+                true,
+                true,
+                {},
+                {}
+            );
+
+            std::vector<std::vector<int>> allocation = {};
+
+            if (allocationName == "R") {
+                ind.randomGenotype();
+            } else if (allocationName == "UR") {
+                ind.uniformGenotype();
+            } else if (allocationName == "IP") {
+                ind.proportionateGenotype("total_incidents_cluster", true);
+            }
+
+            allocation = ind.genotype;
+
+            std::vector<Event> copiedEvents = events;
+            std::string extraFileName = "_" + allocationName + "_seed=" + std::to_string(seed);
+
+            runSimulatorOnce(copiedEvents, verbose, saveToFile, allocation, extraFileName);
+        }
+    }*/
+}
