@@ -28,3 +28,5 @@ void runDataValidation(std::vector<Event>& events);
 void runSimulationGridSearch(const std::vector<Event>& events);
 void runExperimentTimeSegments(const std::vector<Event>& events);
 void runExtremeConditionTest();
+void runAmbulanceExperiment(const std::vector<Event>& events);
+void runExperimentHeuristics(const std::vector<Event>& events);

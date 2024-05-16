@@ -306,3 +306,70 @@ void runExtremeConditionTest() {
         runSimulatorOnce(events, verbose, saveToFile, {}, extraFileName);
     }
 }
+
+void runAmbulanceExperiment(const std::vector<Event>& events) {
+    const bool verbose = false;
+
+    std::vector<double> possibleAmbulanceFactors = {
+        1.75,
+        1.50,
+        1.25,
+        1.00,
+        0.75,
+        0.50,
+        0.25,
+    };
+
+    int defaultResourceSize = Settings::get<int>("TOTAL_AMBULANCES_DURING_DAY");
+
+    for (auto ambulanceFactor : possibleAmbulanceFactors) {
+        int newResourceSize = static_cast<int>(round(static_cast<double>(defaultResourceSize) * ambulanceFactor));
+        if (newResourceSize <= 0) {
+            newResourceSize = 1;
+        }
+
+        Settings::update<int>("TOTAL_AMBULANCES_DURING_DAY", newResourceSize);
+        std::string extraFileName = "_numAmbulanceFactor=" + std::to_string(ambulanceFactor);
+
+        std::vector<Event> copiedEvents = events;
+
+        // change to correct heuristic
+        PopulationGA population(copiedEvents);
+        population.evolve(verbose, extraFileName);
+        std::cout << std::endl;
+    }
+}
+
+void runExperimentHeuristics(const std::vector<Event>& events) {
+    const bool verbose = false;
+
+    std::string heuristic = Settings::get<std::string>("CUSTOM_STRING_VALUE");
+
+    std::vector<int> possibleSeeds(10, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    for (auto seed : possibleSeeds) {
+        Settings::update<int>("SEED", seed);
+
+        std::vector<Event> copiedEvents = events;
+        std::string extraFileName = "_seed=" + std::to_string(seed);
+
+        if (heuristic == "GA") {
+            PopulationGA population(copiedEvents);
+            population.evolve(verbose, extraFileName);
+        } else if (heuristic == "NSGA2") {
+            PopulationNSGA2 population(copiedEvents);
+            population.evolve(verbose, extraFileName);
+        } else if (heuristic == "MA") {
+            PopulationMA population(copiedEvents);
+            population.evolve(verbose, extraFileName);
+        } else if (heuristic == "MEMETIC_NSGA2") {
+            PopulationMemeticNSGA2 population(copiedEvents);
+            population.evolve(verbose, extraFileName);
+        } else {
+            throwError("Unknown CUSTOM_STRING_VALUE");
+        }
+
+        std::cout << std::endl;
+    }
+}
