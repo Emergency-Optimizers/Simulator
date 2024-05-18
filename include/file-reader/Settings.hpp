@@ -88,6 +88,7 @@ class Settings {
         {"INCIDENTS_TO_GENERATE_FACTOR", &toDouble},
         {"STOPPING_CRITERIA_MIN_GEN_IMPROVEMENT", &toInt},
         {"CUSTOM_STRING_VALUE", &toString},
+        {"SKIP_STATION_INDEX", &toInt},
     };
 
  public:

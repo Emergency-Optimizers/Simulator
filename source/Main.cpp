@@ -71,7 +71,7 @@ int main() {
 
             break;
         case HeuristicType::CUSTOM:
-            runAmbulanceExperiment(events);
+            runExperimentDepots(events);
 
             break;
     }

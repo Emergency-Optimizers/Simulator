@@ -446,3 +446,31 @@ void runExperimentCustomAllocations(const std::vector<Event>& events) {
         }
     }*/
 }
+
+void runExperimentDepots(const std::vector<Event>& events) {
+    const bool verbose = false;
+
+    std::string heuristic = Settings::get<std::string>("CUSTOM_STRING_VALUE");
+
+    std::vector<int> possibleSeeds(5, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    std::vector<int> possibleDepotToRemove(19, 0);
+    std::iota(possibleDepotToRemove.begin(), possibleDepotToRemove.end(), 0);
+
+    for (auto depotToRemove : possibleDepotToRemove) {
+        for (auto seed : possibleSeeds) {
+            Settings::update<int>("SEED", seed);
+            Settings::update<int>("SKIP_STATION_INDEX", depotToRemove);
+
+            std::vector<Event> copiedEvents = events;
+            std::string extraFileName = "_depot=" + std::to_string(depotToRemove) + "_seed=" + std::to_string(seed);
+
+            PopulationNSGA2 population(copiedEvents);
+            population.evolve(verbose, extraFileName);
+
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+}

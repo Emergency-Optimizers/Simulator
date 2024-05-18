@@ -8,6 +8,7 @@
 #include <iostream>
 /* internal libraries */
 #include "file-reader/Stations.hpp"
+#include "file-reader/Settings.hpp"
 
 Stations::Stations() {
     schemaMapping = {
@@ -36,6 +37,10 @@ std::vector<unsigned> Stations::getDepotIndices(const bool useExtraDepots) {
     std::vector<unsigned> depotIndices;
 
     for (int i = 0; i < size(); i++) {
+        if (Settings::get<int>("SKIP_STATION_INDEX") == i) {
+            continue;
+        }
+
         std::string type = get<std::string>("type", i);
         if (type == "Depot" || (useExtraDepots && type == "Beredskapspunkt")) {
             depotIndices.push_back(i);
