@@ -455,8 +455,8 @@ void runExperimentDepots(const std::vector<Event>& events) {
     std::vector<int> possibleSeeds(5, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
-    std::vector<int> possibleDepotToRemove(19, 0);
-    std::iota(possibleDepotToRemove.begin(), possibleDepotToRemove.end(), 0);
+    std::vector<int> possibleDepotToRemove(20, 0);
+    std::iota(possibleDepotToRemove.begin(), possibleDepotToRemove.end(), -1);
 
     for (auto depotToRemove : possibleDepotToRemove) {
         for (auto seed : possibleSeeds) {
