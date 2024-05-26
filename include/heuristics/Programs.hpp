@@ -33,3 +33,5 @@ void runExperimentHeuristics(const std::vector<Event>& events);
 void runExperimentAllocations(const std::vector<Event>& events);
 void runExperimentCustomAllocations(const std::vector<Event>& events);
 void runExperimentDepots(const std::vector<Event>& events);
+void runExperimentTimeSegmentsVerification(const std::vector<Event>& events);
+void runExperimentPrediction(const std::vector<Event>& events);

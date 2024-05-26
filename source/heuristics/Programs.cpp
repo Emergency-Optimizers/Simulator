@@ -474,3 +474,45 @@ void runExperimentDepots(const std::vector<Event>& events) {
         std::cout << std::endl;
     }
 }
+
+void runExperimentTimeSegmentsVerification(const std::vector<Event>& events) {
+    std::vector<int> possibleSeeds(10, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    std::vector<int> possibleTimeSegments = { 1, 4 };
+
+    for (auto timeSegments : possibleTimeSegments) {
+        for (auto seed : possibleSeeds) {
+            Settings::update<int>("SEED", seed);
+            Settings::update<int>("NUM_TIME_SEGMENTS", timeSegments);
+
+            std::vector<Event> copiedEvents = events;
+            std::string extraFileName = "_ts=" + std::to_string(timeSegments) + "_seed=" + std::to_string(seed);
+
+            PopulationNSGA2 population(copiedEvents);
+            population.evolve(false, extraFileName);
+
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+}
+
+void runExperimentPrediction(const std::vector<Event>& events) {
+    const bool verbose = false;
+
+    std::vector<int> possibleSeeds(10, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    for (auto seed : possibleSeeds) {
+        Settings::update<int>("SEED", seed);
+
+        std::vector<Event> copiedEvents = events;
+        std::string extraFileName = "_seed=" + std::to_string(seed);
+
+        PopulationNSGA2 population(copiedEvents);
+        population.evolve(verbose, extraFileName);
+
+        std::cout << std::endl;
+    }
+}

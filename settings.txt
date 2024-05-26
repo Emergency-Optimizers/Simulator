@@ -1,7 +1,7 @@
 SEED: 42
 
 // can pick between: GA, NSGA2, MA, MEMETIC_NSGA2, NONE (just runs the simulator once with static allocation), CUSTOM
-HEURISTIC: CUSTOM
+HEURISTIC: NONE
 
 // a string variable used by some of the custom methods. use case can vary
 CUSTOM_STRING_VALUE: GA
@@ -79,7 +79,7 @@ SIMULATE_MONTH: 08
 SIMULATE_DAY: 04
 SIMULATE_DAY_SHIFT: true
 SIMULATION_GENERATION_WINDOW_SIZE: 2
-// hour 18 means 18:00 to 18:59
+// hour 18 means all incidents within 18:00 to 18:59
 DAY_SHIFT_START: 7
 DAY_SHIFT_END: 18
 SIMULATE_1_HOUR_BEFORE: true
