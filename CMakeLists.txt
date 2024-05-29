@@ -34,7 +34,7 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS_MINSIZEREL "/Os")
 else()
   # assume GCC or Clang is being used
-  target_compile_options(${PROJECT_NAME} PRIVATE "-Wall" "-Wextra")
+  target_compile_options(${PROJECT_NAME} PRIVATE)
   set(CMAKE_CXX_FLAGS_DEBUG "-g")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
