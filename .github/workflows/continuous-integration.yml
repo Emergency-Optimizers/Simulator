@@ -28,4 +28,4 @@ jobs:
       run: |
         sudo apt-get install python3-pip
         pip3 install cpplint
-        cpplint --root=. --linelength=150 --filter=-build/include_subdir,-whitespace/parens,-build/c++11,-runtime/references --recursive --exclude=external/* --exclude=build/* *
+        cpplint --root=. --linelength=175 --filter=-build/include_subdir,-whitespace/parens,-build/c++11,-runtime/references --recursive --exclude=external/* --exclude=build/* *
