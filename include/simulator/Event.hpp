@@ -14,6 +14,7 @@
 /* internal libraries */
 #include "simulator/EventType.hpp"
 
+// pre defined for avoiding cyclic imports
 struct Ambulance;
 
 struct Event {

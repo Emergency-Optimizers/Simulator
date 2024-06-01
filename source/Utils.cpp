@@ -1013,10 +1013,8 @@ void saveDataToJson(
     createDirectory(dirName);
     std::ofstream outFile("../data/" + dirName + "/" + fileName + ".json");
 
-    // set to the classic "C" locale to ensure numbers are formatted without thousands separators
     outFile.imbue(std::locale("C"));
 
-    // begin JSON object
     outFile << "{" << std::endl;
 
     // iterator over map for serialization
@@ -1036,7 +1034,6 @@ void saveDataToJson(
         outFile << std::endl;
     }
 
-    // end JSON object
     outFile << "}" << std::endl;
 
     outFile.close();
@@ -1058,11 +1055,10 @@ double inverseFitness(const double fitness) {
 
 std::tm getLocalTime(const time_t& time_val) {
     std::tm buf;
+    // thread-safe localtime function for both Windows and POSIX
 #ifdef _WIN32
-    // Windows-specific thread-safe localtime function
     localtime_s(&buf, &time_val);
 #else
-    // POSIX-specific thread-safe localtime function
     localtime_r(&time_val, &buf);
 #endif
     return buf;

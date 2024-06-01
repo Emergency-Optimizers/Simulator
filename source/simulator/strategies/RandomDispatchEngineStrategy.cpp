@@ -149,8 +149,6 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         break;
     }
 
-    /// TODO: Add some time before checking again (maybe 1 second after next event
-    /// so we constantly check for available ambulances) or tell the simulator to make an ambulance available.
     if (availableAmbulanceIndicies.empty()) {
         int waitTime = 60;
 

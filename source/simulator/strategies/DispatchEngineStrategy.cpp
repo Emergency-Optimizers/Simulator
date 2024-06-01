@@ -15,7 +15,7 @@ bool DispatchEngineStrategy::assigningAmbulance(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    /// TODO: code here
+    // done by each strategy
     return false;
 }
 
@@ -81,7 +81,7 @@ void DispatchEngineStrategy::dispatchingToHospital(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    /// TODO: code here
+    // done by each strategy
 }
 
 void DispatchEngineStrategy::dispatchingToDepot(
@@ -151,5 +151,5 @@ void DispatchEngineStrategy::reallocating(
     std::vector<Event>& events,
     const int eventIndex
 ) {
-    /// TODO: code here
+    // done by each strategy
 }

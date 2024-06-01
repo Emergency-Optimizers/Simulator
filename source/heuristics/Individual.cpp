@@ -230,6 +230,7 @@ void Individual::updateMetrics() {
         allocationsFitness[allocationIndex] += allocationsObjectivePercentageViolationsRural[allocationIndex] * weightPercentageViolationsRural;
     }
 
+    // get the inverse fitness for selection methods
     for (int i = 0; i < objectives.size(); i++) {
         switch (objectiveTypes[i]) {
             case ObjectiveTypes::AVG_RESPONSE_TIME_URBAN_A:

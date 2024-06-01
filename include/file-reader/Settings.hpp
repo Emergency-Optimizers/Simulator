@@ -143,6 +143,7 @@ class Settings {
                     // remove leading and trailing whitespace
                     value_str.erase(0, value_str.find_first_not_of(" \t"));
                     value_str.erase(value_str.find_last_not_of(" \t") + 1);
+
                     // convert and store the value according to the schema
                     auto it = schema.find(key);
                     if (it != schema.end()) {
@@ -178,7 +179,6 @@ class Settings {
             throwError("Variable '" + key + "' not found in settings.");
         }
 
-        // Check if the current type in the map matches the new type provided
         if (!std::holds_alternative<T>(it->second)) {
             throwError("Type mismatch for variable '" + key + "'. Expected another type.");
         }

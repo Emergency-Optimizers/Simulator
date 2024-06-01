@@ -25,9 +25,7 @@ struct Ambulance {
     int currentAllocationIndex = 0;
 
     void checkScheduledBreak(const time_t& currentTime);
-
     void setBreak(const int newBreakLength, const time_t& currentTime);
-
     bool isAvailable(
         const std::vector<Event>& events,
         const std::vector<Ambulance>& ambulances,
@@ -35,7 +33,6 @@ struct Ambulance {
         const time_t& currentTime,
         const std::string& currentEventTriageImpression
     );
-
     void scheduleBreaks(
         const time_t& shiftStart,
         const time_t& shiftEnd,

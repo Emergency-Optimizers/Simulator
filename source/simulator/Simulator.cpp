@@ -33,6 +33,7 @@ std::vector<Event> Simulator::run() {
         );
 
         if (sortAllEvents) {
+            // can get triggered by reallocation event
             eventHandler.sortEvents();
         } else {
             eventHandler.sortEvent(eventIndex);

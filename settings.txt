@@ -1,6 +1,6 @@
 SEED: 42
 
-// can pick between: GA, NSGA2, MA, MEMETIC_NSGA2, NONE (just runs the simulator once with static allocation), CUSTOM
+// can pick between: GA, NSGA2, MA, MEMETIC_NSGA2, CUSTOM (run custom method in Main.cpp), NONE (just runs the simulator once with static allocation)
 HEURISTIC: NONE
 
 // a string variable used by some of the custom methods. use case can vary
@@ -29,7 +29,6 @@ SURVIVOR_SELECTION_TICKETS_RANK: 100
 // this keeps the n best regardless of survivor selection, doesn't do anything if elitism selection is used
 SURVIVOR_SELECTION_KEEP_N_BEST: 1
 
-// a larger tournament size increases selection pressure
 PARENT_SELECTION_TOURNAMENT_SIZE: 3
 SURVIVOR_SELECTION_TOURNAMENT_SIZE: 3
 // SP can be between 1.0 and 2.0
@@ -83,7 +82,9 @@ SIMULATION_GENERATION_WINDOW_SIZE: 2
 // hour 18 means all incidents within 18:00 to 18:59
 DAY_SHIFT_START: 7
 DAY_SHIFT_END: 18
+// warm up
 SIMULATE_1_HOUR_BEFORE: true
+// used for experiments
 INCIDENTS_TO_GENERATE_FACTOR: 1.0
 SKIP_STATION_INDEX: -1
 

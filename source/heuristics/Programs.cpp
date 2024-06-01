@@ -220,7 +220,6 @@ void runSimulationGridSearch(const std::vector<Event>& events) {
     const bool verbose = false;
     const bool saveToFile = true;
 
-    // ...
     std::vector<DispatchEngineStrategyType> possibleStrategies = {
         DispatchEngineStrategyType::CLOSEST,
         DispatchEngineStrategyType::RANDOM,
@@ -398,6 +397,9 @@ void runExperimentAllocations(const std::vector<Event>& events) {
 }
 
 void runExperimentCustomAllocations(const std::vector<Event>& events) {
+    // requires modifications to Individual.hpp where
+    // randomGenotype(), uniformGenotype(), and proportionateGenotype() are made public
+
     /*const bool verbose = false;
     const bool saveToFile = true;
 

@@ -134,14 +134,6 @@ void saveDataToJson(
 void createDirectory(const std::string& dirName);
 double inverseFitness(const double fitness);
 double gaussian_kernel(const double x, const double mu, const double sigma);
-
-/**
- * Get a tm struct from a time_t value in a thread-safe manner.
- * This function works on both Windows and POSIX systems.
- *
- * @param time_val A time_t value representing the time.
- * @return A tm struct corresponding to the given time_t value.
- */
 std::tm getLocalTime(const time_t& time_val);
 
 template <typename T>
