@@ -23,6 +23,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install gcc g++ cmake
 
+    - name: Install dependencies
+      working-directory: build
+      run: cmake ..
+
+    - name: Build program
+      working-directory: build
+      run: cmake --build .
+
     - name: Syntax checker
       working-directory: source
       run: |

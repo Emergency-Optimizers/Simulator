@@ -72,6 +72,7 @@ LOCAL_SEARCH_PROBABILITY: 0.2
 TOTAL_AMBULANCES_DURING_DAY: 45
 TOTAL_AMBULANCES_DURING_NIGHT: 29
 
+// date format: YYYY-MM-DD
 // least active day: YYYY-08-04
 // avg active day: YYYY-05-30
 // most active day: YYYY-11-12
@@ -93,4 +94,4 @@ SCHEDULE_BREAKS: true
 
 URBAN_METHOD: urban_settlement_ssb
 
-// UNIQUE_RUN_ID: ex_6_least
+// UNIQUE_RUN_ID: mv_uhu_cds_least_uhu=true

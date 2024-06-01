@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <map>
 #include <ctime>
+#include <algorithm>
 #ifdef _WIN32
 #include <cstdlib>
 #endif
