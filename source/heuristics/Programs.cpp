@@ -170,9 +170,9 @@ void runTimeEvaluation() {
                 // run simulator and clock the run time
                 std::vector<Event> copiedEvents = events;
 
-                auto startClock = std::chrono::high_resolution_clock::now();
+                auto startClock = std::chrono::steady_clock::now();
                 runSimulatorOnce(copiedEvents, verbose, saveToFile, allocations);
-                auto endClock = std::chrono::high_resolution_clock::now();
+                auto endClock = std::chrono::steady_clock::now();
 
                 sumDurations += std::chrono::duration_cast<std::chrono::milliseconds>(endClock - startClock).count();
             }

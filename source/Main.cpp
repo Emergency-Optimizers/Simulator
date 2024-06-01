@@ -29,7 +29,7 @@
 #include "heuristics/Programs.hpp"
 
 int main() {
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
 
     std::locale::global(std::locale("en_US.utf8"));
 
@@ -76,7 +76,7 @@ int main() {
             break;
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "\n\nProgram took " << ((duration / 1000) / 60) << " minutes to complete." << std::endl;
 

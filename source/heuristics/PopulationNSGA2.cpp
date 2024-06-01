@@ -31,7 +31,7 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
 
     // init progress bar
     ProgressBar progressBar(maxRunTimeSeconds, "Running " + getHeuristicName(), getProgressBarPostfix());
-    startRunTimeClock = std::chrono::high_resolution_clock::now();
+    startRunTimeClock = std::chrono::steady_clock::now();
 
     bool keepRunning = true;
     bool autoStopProgressBar = false;
