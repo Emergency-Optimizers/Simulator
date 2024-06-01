@@ -1,6 +1,8 @@
 # Simulator
 This repository contains the Monte Carlo Simulator and the Discrete Event Simulator.
 
+The results from experiments conducted in the thesis can be found under the [data](https://github.com/Emergency-Optimizers/Simulator/tree/main/data) folder.
+
 ## Setup
 ### Required Directory Structure
 To operate the program, ensure the following directory structure is in place:
