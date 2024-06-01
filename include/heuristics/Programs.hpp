@@ -35,3 +35,4 @@ void runExperimentCustomAllocations(const std::vector<Event>& events);
 void runExperimentDepots(const std::vector<Event>& events);
 void runExperimentTimeSegmentsVerification(const std::vector<Event>& events);
 void runExperimentPrediction(const std::vector<Event>& events);
+void runSimulationMultipleTimes(const std::vector<Event>& events);

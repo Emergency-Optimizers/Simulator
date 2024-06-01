@@ -71,7 +71,7 @@ int main() {
 
             break;
         case HeuristicType::CUSTOM:
-            runExperimentPrediction(events);
+            runSimulationMultipleTimes(events);
 
             break;
     }

@@ -516,3 +516,20 @@ void runExperimentPrediction(const std::vector<Event>& events) {
         std::cout << std::endl;
     }
 }
+
+void runSimulationMultipleTimes(const std::vector<Event>& events) {
+    const bool verbose = false;
+    const bool saveToFile = true;
+
+    std::vector<int> possibleSeeds(10, 0);
+    std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
+
+    for (auto seed : possibleSeeds) {
+        Settings::update<int>("SEED", seed);
+
+        std::vector<Event> copiedEvents = events;
+        std::string extraFileName = "_seed=" + std::to_string(seed);
+
+        runSimulatorOnce(copiedEvents, verbose, saveToFile, {}, extraFileName);
+    }
+}
