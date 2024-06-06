@@ -61,6 +61,7 @@ void CSVReader::parseRow(const std::string& line) {
     std::vector<ValueType> row;
 
     std::size_t columnIndex = 0;
+    // store all data fields in the row
     while (std::getline(ss, cell, ',') && columnIndex < headers.size()) {
         const auto& header = headers[columnIndex++];
         row.push_back(schemaMapping[header](cell));

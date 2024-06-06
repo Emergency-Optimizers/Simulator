@@ -1,5 +1,5 @@
 # Simulator
-This repository contains the Monte Carlo Simulator and the Discrete Event Simulator.
+This repository contains the Monte Carlo Simulaton model and the Discrete Event Simulaton model.
 
 The results from experiments conducted in the thesis can be found under the [data](https://github.com/Emergency-Optimizers/Simulator/tree/main/data) folder.
 
