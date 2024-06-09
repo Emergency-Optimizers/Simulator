@@ -19,6 +19,7 @@ MonteCarloSimulator::MonteCarloSimulator() {
     ProgressBar progressBar(12, "Generating MCS");
     size_t progress = 0;
 
+    // get subset within window size defined in settings.txt
     filteredIncidents = Incidents::getInstance().rowsWithinTimeFrame(month, day, windowSize);
     progressBar.update(++progress);
 
@@ -36,6 +37,7 @@ MonteCarloSimulator::MonteCarloSimulator() {
     }
     progressBar.update(++progress);
 
+    // generate distributions
     generateHourlyIncidentProbabilityDistribution();
     progressBar.update(++progress);
 
@@ -48,6 +50,7 @@ MonteCarloSimulator::MonteCarloSimulator() {
     generateLocationProbabilityDistribution();
     progressBar.update(++progress);
 
+    // generate KDE data for each delay
     generateDurationsData("time_call_received", "time_incident_created");
     progressBar.update(++progress);
 
@@ -92,7 +95,7 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
     std::vector<double> totalIncidentsPerHour(24, 0);
     double totalIncidents = 0;
 
-    // get total incidents per hour for each row in the filtered dataset
+    // count occurrences, weighted by distance from target date (window size)
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
             "time_call_received",
@@ -107,7 +110,7 @@ void MonteCarloSimulator::generateHourlyIncidentProbabilityDistribution() {
         totalIncidents += weight;
     }
 
-    // get the probability per hour
+    // calculate probabilities from occurrences
     for (int i = 0; i < totalIncidentsPerHour.size(); i++) {
         newHourlyIncidentProbabilityDistribution[i] = totalIncidentsPerHour[i] / totalIncidents;
     }
@@ -124,6 +127,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
 
     std::vector<std::string> triageImpressions = {"A", "H", "V1"};
 
+    // count occurrences, weighted by distance from target date (window size)
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
             "time_call_received",
@@ -154,6 +158,7 @@ void MonteCarloSimulator::generateTriageProbabilityDistribution() {
         }
     }
 
+    // calculate probabilities from occurrences
     for (int indexHour = 0; indexHour < 24; indexHour++) {
         for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
             double triageIncidentProbability = 0.0;
@@ -175,6 +180,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
 
     std::vector<std::vector<int>> totalFound(3, std::vector<int>(2, 0));
 
+    // count occurrences, weighted by distance from target date (window size)
     for (int i = 0; i < filteredIncidents.size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>(
             "time_call_received",
@@ -210,6 +216,7 @@ void MonteCarloSimulator::generateCanceledProbabilityDistribution() {
         totalIncidents[indexTriage][indexShift] += weight;
     }
 
+    // calculate probabilities from occurrences
     for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
         for (int indexShift = 0; indexShift < 2; indexShift++) {
             double totalIncidentsCanceled = totalIncidentsPer[indexTriage][indexShift];
@@ -245,6 +252,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
     }
     std::cout << std::endl;*/
 
+    // count occurrences, weighted by distance from target date (window size)
     for (int i = 0; i < Incidents::getInstance().size(); i++) {
         std::tm timeCallReceived = Incidents::getInstance().get<std::optional<std::tm>>("time_call_received", i).value();
         int dayDiff = calculateDayDifference(timeCallReceived, month, day);
@@ -271,6 +279,7 @@ void MonteCarloSimulator::generateLocationProbabilityDistribution() {
         totalIncidents[indexTriage][indexShift] += weight;
     }
 
+    // calculate probabilities from occurrences
     for (int indexTriage = 0; indexTriage < 3; indexTriage++) {
         for (int indexShift = 0; indexShift < 2; indexShift++) {
             for (int indexGridId = 0; indexGridId < gridIdSize; indexGridId++) {
@@ -291,6 +300,7 @@ void MonteCarloSimulator::generateDurationsData(
 ) {
     preProcessedKDEData[std::pair(fromEventColumn, toEventColumn)] = std::vector<std::vector<KDEData>>(TRIAGES.size(), std::vector<KDEData>(2));
 
+    // generate kde data for delay for each triage and shift
     for (size_t indexTriage = 0; indexTriage < TRIAGES.size(); indexTriage++) {
         for (size_t indexShift = 0; indexShift < 2; indexShift++) {
             KDEData kdeData;
@@ -384,10 +394,12 @@ void MonteCarloSimulator::precomputeKDE(KDEData& kdeData) {
     double maxVal = *std::max_element(data.begin(), data.end());
     double total_weight = std::accumulate(kdeWeights.begin(), kdeWeights.end(), 0.0);
 
+    // generate possible points to sample from with 1 second interval (between min delay and max delay)
     for (double i = minVal; i <= maxVal; i += 1.0) {
         kdeData.points.push_back(i);
     }
 
+    // set densities using gaussian kernel
     kdeData.densities.resize(kdeData.points.size(), 0.0);
     for (size_t i = 0; i < kdeData.points.size(); i++) {
         double weighted_sum = 0.0;
@@ -405,6 +417,7 @@ double MonteCarloSimulator::sampleFromData(const KDEData& kdeData) {
 
     std::discrete_distribution<> dist(kdeData.densities.begin(), kdeData.densities.end());
 
+    // sample delay
     return kdeData.points[dist(rnd)];
 }
 
@@ -428,6 +441,7 @@ int MonteCarloSimulator::getTotalIncidentsToGenerate() {
             continue;
         }
 
+        // sum each triage occurance to get total incidents
         if (timeCallReceived.tm_yday == date.tm_yday - 1 && totalNight == -1) {
             int hour = Settings::get<int>("DAY_SHIFT_END") + 1 - static_cast<int>(Settings::get<bool>("SIMULATE_1_HOUR_BEFORE"));
             totalNight = 0;
@@ -504,6 +518,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
     std::vector<std::string> triageImpressions = { "A", "H", "V1" };
     int indexShift = dayShift ? 0 : 1;
 
+    // if warm-up hour is used, generate incidents for one hour earlier than shift start
     int warmupHour = static_cast<int>(Settings::get<bool>("SIMULATE_1_HOUR_BEFORE"));
     std::vector<std::pair<int, int>> indexRangesHour = dayShift ?
         std::vector<std::pair<int, int>>{{Settings::get<int>("DAY_SHIFT_START") - warmupHour, Settings::get<int>("DAY_SHIFT_END")}} :
@@ -529,6 +544,7 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.callReceived.tm_sec = callReceivedSec;
         mktime(&event.callReceived);
 
+        // if warm-up hour is applied and current event falls under that, set it as utility event to not influence metrics
         if (Settings::get<bool>("SIMULATE_1_HOUR_BEFORE")) {
             bool eventHappensDuringDayShiftWarmup = dayShift && callReceivedHour == Settings::get<int>("DAY_SHIFT_START") - warmupHour;
             bool eventHappensDuringNightShiftWarmup = !dayShift && callReceivedHour == Settings::get<int>("DAY_SHIFT_END") + 1 - warmupHour;
@@ -576,8 +592,11 @@ std::vector<Event> MonteCarloSimulator::generateEvents() {
         event.timer = std::mktime(&event.callReceived);
 
         event.updateTimer(static_cast<int>(event.secondsWaitCallAnswered), "duration_incident_creation");
+        // only apply half of the delay here, rest will come organically through the simulator
+        // if using another dataset (or new version of OUH dataset), see if this delay is more accurate and remove the divison by 2
         event.updateTimer(static_cast<int>(event.secondsWaitAppointingResource / 2.0), "duration_resource_appointment");
 
+        // event location (event.gridId) will update as it is processed, set this for events.csv file
         event.incidentGridId = event.gridId;
 
         events.push_back(event);
