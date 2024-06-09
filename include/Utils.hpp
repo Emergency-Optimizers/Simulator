@@ -138,6 +138,7 @@ std::tm getLocalTime(const time_t& time_val);
 
 template <typename T>
 int findIndex(const std::vector<T>& vec, const T& value) {
+    // helper function that returns the index of where the value is in the vector
     auto it = std::find(vec.begin(), vec.end(), value);
 
     if (it != vec.end()) {
