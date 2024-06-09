@@ -47,7 +47,7 @@ int main() {
 
     std::cout << std::endl;
 
-    // run heuristic
+    // run heuristic specified in settings.txt (can also run simulator once or an experiment defined in Programs.hpp)
     const HeuristicType heuristic = Settings::get<HeuristicType>("HEURISTIC");
     switch (heuristic) {
         case HeuristicType::NONE:
@@ -71,11 +71,12 @@ int main() {
 
             break;
         case HeuristicType::CUSTOM:
+            // change this to any of the functions defined in Programs.hpp
             runSimulationMultipleTimes(events);
 
             break;
     }
-
+    
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "\n\nProgram took " << ((duration / 1000) / 60) << " minutes to complete." << std::endl;
