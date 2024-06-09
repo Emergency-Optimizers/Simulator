@@ -26,7 +26,6 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
         calculateCrowdingDistance(front);
     }
 
-    // sortIndividuals();
     storeGenerationMetrics();
 
     // init progress bar
@@ -57,15 +56,18 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
         // survivor selection
         individuals = survivorSelection();
 
-        // update progress bar
-        // sortIndividuals();
+        // store generation metrics for analysis
         storeGenerationMetrics();
 
+        // check stopping criteria
         keepRunning = !shouldStop();
+
+        // update progress bar
         progressBar.update(runTimeDuration, getProgressBarPostfix(), autoStopProgressBar, lastPrintProgressBar);
     }
 
     // get best individual and print last progress bar
+    // there might be better individuals in first front, analyze heursitc.json, see Data-Processing repo for how we did it
     Individual finalIndividual = getFittest();
 
     lastPrintProgressBar = true;
@@ -80,7 +82,7 @@ void PopulationNSGA2::evolve(const bool verbose, std::string extraFileName) {
         writeAmbulances(dirName, finalIndividual.simulatedAmbulances, "ambulances" + extraFileName + "_ind_" + std::to_string(i));
     }
 
-
+    // print metrics to terminal
     if (verbose) {
         printTimeSegmentedAllocationTable(
             dayShift,
@@ -206,18 +208,24 @@ std::vector<Individual> PopulationNSGA2::survivorSelection() {
     int count = 0;
     for (auto& front : fronts) {
         if (count + front.size() <= populationSize) {
+            // add all individuals from the current front to the next generation
             for (auto& individual : front) {
                 nextGeneration.push_back(*individual);
             }
+
             count += static_cast<int>(front.size());
         } else {
+            // sort the remaining individuals in the current front based on crowding distance
             std::sort(front.begin(), front.end(), [](const Individual* a, const Individual* b) {
                 return a->crowdingDistance > b->crowdingDistance;
             });
+
+            // add individuals until full
             int toAdd = populationSize - count;
-            for (int i = 0; i < toAdd; ++i) {
+            for (int i = 0; i < toAdd; i++) {
                 nextGeneration.push_back(*front[i]);
             }
+
             break;
         }
     }
@@ -229,6 +237,7 @@ std::vector<Individual> PopulationNSGA2::tournamentSelection(const int k, const 
     std::vector<Individual> selected;
     while (selected.size() < k) {
         Individual winner = individuals[getRandomInt(rnd, 0, static_cast<int>(individuals.size()) - 1)];
+
         for (int i = 1; i < tournamentSize; i++) {
             Individual contender = individuals[getRandomInt(rnd, 0, static_cast<int>(individuals.size()) - 1)];
             winner = tournamentWinner(winner, contender);
@@ -239,6 +248,7 @@ std::vector<Individual> PopulationNSGA2::tournamentSelection(const int k, const 
 }
 
 Individual PopulationNSGA2::tournamentWinner(Individual& individual1, Individual& individual2) {
+    // decide winner based on front, crowding distance if from same front
     if (individual1.frontNumber < individual2.frontNumber) {
         return individual1;
     } else if (individual1.frontNumber > individual2.frontNumber) {
@@ -253,6 +263,7 @@ Individual PopulationNSGA2::tournamentWinner(Individual& individual1, Individual
 }
 
 void PopulationNSGA2::sortIndividuals() {
+    // hard coded objectives to sort by, was only used for testing
     std::sort(
         individuals.begin(),
         individuals.end(),
