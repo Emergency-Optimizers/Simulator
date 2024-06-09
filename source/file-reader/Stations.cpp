@@ -11,6 +11,7 @@
 #include "file-reader/Settings.hpp"
 
 Stations::Stations() {
+    // define the schema: header and function that converts string to specific type
     schemaMapping = {
         {"name", toString},
         {"type", toString},
@@ -36,11 +37,13 @@ Stations::Stations() {
 std::vector<unsigned> Stations::getDepotIndices(const bool useExtraDepots) {
     std::vector<unsigned> depotIndices;
 
+    // gets all indices for depots in the depots.csv file (the file contains both depots and hospitals)
     for (int i = 0; i < size(); i++) {
         if (Settings::get<int>("SKIP_STATION_INDEX") == i) {
             continue;
         }
 
+        // if simulating day shift, use rapid response points like OUH
         std::string type = get<std::string>("type", i);
         if (type == "Depot" || (useExtraDepots && type == "Beredskapspunkt")) {
             depotIndices.push_back(i);
@@ -53,6 +56,7 @@ std::vector<unsigned> Stations::getDepotIndices(const bool useExtraDepots) {
 std::vector<unsigned> Stations::getHospitalIndices() {
     std::vector<unsigned> hospitalIndices;
 
+    // gets all indices for hospitals in the depots.csv file (the file contains both depots and hospitals)
     for (int i = 0; i < size(); i++) {
         if (get<std::string>("type", i) == "Hospital") {
             hospitalIndices.push_back(i);
