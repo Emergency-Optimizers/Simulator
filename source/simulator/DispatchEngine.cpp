@@ -16,6 +16,7 @@ bool DispatchEngine::dispatch(
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    // process event based on strategy defined in settings.txt
     switch (strategy) {
         case DispatchEngineStrategyType::CLOSEST:
             return ClosestDispatchEngineStrategy::run(
