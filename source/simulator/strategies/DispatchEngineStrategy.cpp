@@ -61,6 +61,8 @@ void DispatchEngineStrategy::dispatchingToScene(
 
     events[eventIndex].assignedAmbulance->currentGridId = events[eventIndex].gridId;
 
+    // set event type to travel directly to depot if event is set to cancelled
+    // cancelled here is defined as a mission which doesn't bring the patient to the hospital
     const bool cancelledEvent = events[eventIndex].secondsWaitDepartureScene == -1;
     if (!cancelledEvent) {
         incrementSeconds = static_cast<int>(events[eventIndex].secondsWaitDepartureScene);
