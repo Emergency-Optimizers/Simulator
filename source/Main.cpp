@@ -76,7 +76,7 @@ int main() {
 
             break;
     }
-    
+
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "\n\nProgram took " << ((duration / 1000) / 60) << " minutes to complete." << std::endl;
