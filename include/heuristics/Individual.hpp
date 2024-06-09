@@ -108,6 +108,7 @@ class Individual {
     bool dominates(const Individual& other) const;
 
     Individual& operator=(const Individual& other) {
+        // copies individual, helper function needed for some methods in population files
         if (this != &other) {
             rnd = other.rnd;
             numAmbulances = other.numAmbulances;
