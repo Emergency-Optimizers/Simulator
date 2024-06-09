@@ -32,10 +32,10 @@ void CSVReader::loadFromFile(const std::string& filename, const std::string& pri
     // setup progressBar
     ProgressBar progressBar(totalLines, printPrefix);
 
-    // start processing file
     std::string line;
     int linesRead = 0;
 
+    // process header line
     if (std::getline(file, line)) {
         std::stringstream headerStream(line);
         std::string column;
@@ -46,6 +46,7 @@ void CSVReader::loadFromFile(const std::string& filename, const std::string& pri
         progressBar.update(++linesRead);
     }
 
+    // process rows
     while (std::getline(file, line)) {
         parseRow(line);
 
