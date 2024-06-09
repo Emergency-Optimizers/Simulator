@@ -17,7 +17,7 @@
 #include "simulator/MonteCarloSimulator.hpp"
 
 PopulationGA::PopulationGA(const std::vector<Event>& events) : events(events) {
-    // generate list of possible genotype inits, mutations, crossovers
+    // generate list of possible genotype inits, mutations, crossovers (defined in settings.txt)
     getPossibleGenotypeInits();
     getPossibleMutations();
     getPossibleCrossovers();
@@ -68,10 +68,13 @@ void PopulationGA::evolve(const bool verbose, std::string extraFileName) {
         individuals = survivorSelection();
         sortIndividuals();
 
-        // update progress bar
+        // store generation metrics for analysis
         storeGenerationMetrics();
 
+        // check stopping criteria
         keepRunning = !shouldStop();
+
+        // update progress bar
         progressBar.update(runTimeDuration, getProgressBarPostfix(), autoStopProgressBar, lastPrintProgressBar);
     }
 
@@ -89,6 +92,7 @@ void PopulationGA::evolve(const bool verbose, std::string extraFileName) {
     writeGenotype(dirName, finalIndividual.genotype, "genotype" + extraFileName);
     writeAmbulances(dirName, finalIndividual.simulatedAmbulances, "ambulances" + extraFileName);
 
+    // print metrics to terminal
     if (verbose) {
         printTimeSegmentedAllocationTable(
             dayShift,
@@ -344,6 +348,7 @@ std::vector<Individual> PopulationGA::createOffspring() {
         std::vector<Individual> parents = parentSelection();
 
         if (getRandomDouble(rnd) < crossoverProbability) {
+            // generate children from crossover (mutation happens in the crossover function)
             std::vector<Individual> children = crossover(parents[0], parents[1]);
 
             for (auto& child : children) {
@@ -377,6 +382,7 @@ std::vector<Individual> PopulationGA::parentSelection() {
     const int individualsToSelect = 2;
     std::vector<int> selectedIndices;
 
+    // perform parent selection based on tickets (defined in settings.txt)
     switch(parentSelections[weightedLottery(rnd, parentSelectionsTickets, {})]) {
         case SelectionType::TOURNAMENT:
             selectedIndices = tournamentSelection(
@@ -426,6 +432,7 @@ std::vector<Individual> PopulationGA::survivorSelection() {
     const int individualsToSelect = std::min(populationSize - startIndex, static_cast<int>(individuals.size()));
     std::vector<int> selectedIndices;
 
+    // perform survivor selection based on tickets (defined in settings.txt)
     switch(survivorSelections[weightedLottery(rnd, survivorSelectionsTickets, {})]) {
         case SelectionType::TOURNAMENT:
             selectedIndices = tournamentSelection(
@@ -455,14 +462,14 @@ std::vector<Individual> PopulationGA::survivorSelection() {
             break;
     }
 
-    // return selected individuals
     std::vector<Individual> selectedSurvivors;
 
-    // add the n best individuals
+    // add the n best individuals (defined in settings.txt)
     for (int i = 0; i < Settings::get<int>("SURVIVOR_SELECTION_KEEP_N_BEST"); i++) {
         selectedSurvivors.push_back(individuals[i]);
     }
 
+    // add the rest of survivors
     for (int i = 0; i < selectedIndices.size(); i++) {
         selectedSurvivors.push_back(individuals[selectedIndices[i]]);
     }
@@ -473,7 +480,9 @@ std::vector<Individual> PopulationGA::survivorSelection() {
 std::vector<std::pair<int, double>> PopulationGA::generateIndexFitnessPair(const int startIndex) {
     std::vector<std::pair<int, double>> populationIndices;
 
+    // generate population pair holding index and fitness for each individual
     for (int individualIndex = startIndex; individualIndex < individuals.size(); individualIndex++) {
+        // fitness is inversed so selection methods can maximize fitness
         populationIndices.push_back({individualIndex, inverseFitness(individuals[individualIndex].fitness)});
     }
 
@@ -539,7 +548,6 @@ std::vector<int> PopulationGA::elitismSelection(
 ) {
     std::vector<int> selected;
 
-    // assumes population is already sorted by fitness (best to worst)
     for (int individualIndex = 0; individualIndex < k && individualIndex < population.size(); individualIndex++) {
         selected.push_back(population[individualIndex].first);
     }
@@ -559,7 +567,6 @@ std::vector<int> PopulationGA::rankSelection(
     std::vector<double> cumulativeProbabilities(N);
 
     // calculate selection probabilities for each rank
-    // assumes population is sorted in descending order (best to worst)
     double totalProbability = 0.0;
     for (int i = 0; i < N; i++) {
         probabilities[i] = (2 - selectionPressure) / N + 2 * (N - i) * (selectionPressure - 1) / (N * (N - 1));
@@ -590,6 +597,7 @@ std::vector<int> PopulationGA::rankSelection(
 std::vector<Individual> PopulationGA::crossover(const Individual& parent1, const Individual& parent2) {
     std::vector<std::vector<std::vector<int>>> offspringGenotypes;
 
+    // generate genotypes from crossover based on tickets (defined in settings.txt)
     switch(crossovers[weightedLottery(rnd, crossoversTickets, {})]) {
         case CrossoverType::SINGLE_POINT:
             offspringGenotypes = singlePointCrossover(parent1.genotype, parent2.genotype);
@@ -610,6 +618,7 @@ std::vector<Individual> PopulationGA::crossover(const Individual& parent1, const
             break;
     }
 
+    // repair and mutate each child
     const bool isChild = true;
     std::vector<Individual> offspring;
     for (int i = 0; i < offspringGenotypes.size(); i++) {
@@ -837,6 +846,7 @@ int PopulationGA::countUnique() const {
 }
 
 bool PopulationGA::shouldStop() {
+    // stopping criteria defined in settings.txt
     bool stoppingCriteria = false;
 
     // check run time criteria
