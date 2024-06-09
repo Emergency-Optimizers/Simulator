@@ -125,12 +125,13 @@ class Settings {
         // setup progressBar
         ProgressBar progressBar(totalLines, "Loading settings");
 
+        // process file
         std::string line;
         int linesRead = 0;
 
         while (getline(file, line)) {
             progressBar.update(++linesRead);
-
+            // skips '//' to allow comments in settings file
             if (line == "" || line[0] == '/') {
                 continue;
             }
@@ -169,6 +170,7 @@ class Settings {
             throw std::bad_variant_access();
         }
 
+        // returns value given key
         return std::get<T>(value);
     }
 
@@ -183,6 +185,7 @@ class Settings {
             throwError("Type mismatch for variable '" + key + "'. Expected another type.");
         }
 
+        // updates value given key and new value
         it->second = newValue;
     }
 };
