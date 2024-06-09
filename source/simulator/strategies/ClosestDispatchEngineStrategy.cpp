@@ -23,6 +23,7 @@ bool ClosestDispatchEngineStrategy::run(
 ) {
     bool sortAllEvents = false;
 
+    // process event based on type
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
             sortAllEvents = assigningAmbulance(rnd, ambulances, events, eventIndex);
@@ -43,6 +44,7 @@ bool ClosestDispatchEngineStrategy::run(
             finishingEvent(rnd, ambulances, events, eventIndex);
             break;
         case EventType::REALLOCATE:
+            // handles reallocation events
             reallocating(rnd, ambulances, events, eventIndex);
             break;
     }
@@ -58,6 +60,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
 ) {
     bool sortAllEvents = false;
 
+    // get pool of available ambulances
     std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
         ambulances,
         events,
@@ -65,6 +68,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         events[eventIndex].triageImpression
     );
 
+    // if no ambulances are available, wait until after next event in queue is processed
     if (availableAmbulanceIndicies.empty()) {
         int waitTime = 60;
 
@@ -80,7 +84,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         return sortAllEvents;
     }
 
-    // find closest ambulance
+    // find closest ambulance by iterating through each ambulance in pool
     int closestAmbulanceIndex = -1;
     int64_t closestAmbulanceGridId = -1;
     int closestAmbulanceTravelTime = std::numeric_limits<int>::max();
@@ -91,6 +95,8 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         int64_t ambulanceGridId;
 
         if (ambulances[availableAmbulanceIndicies[i]].assignedEventId != -1) {
+            // if ambulance is already assigned to an event, approximate its location
+            // can only happen when travelling to scene (policy), or travelling to depot
             int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[availableAmbulanceIndicies[i]].assignedEventId);
 
             ambulanceGridId = approximateLocation(
@@ -103,6 +109,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].type
             );
 
+            // if apporximated location is not available in sparse OD cost matrix, skip this ambulance
             if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
                 continue;
             }
@@ -119,6 +126,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
             events[eventIndex].timer
         );
 
+        // same distance calculation used by OUH, only used for testing
         /*std::pair<int, int> utm2 = idToUtm(ambulanceGridId);
         travelTime = calculateEuclideanDistance(
             static_cast<double>(utm1.first),
@@ -127,6 +135,8 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
             static_cast<double>(utm2.second)
         );*/
 
+        // check if this ambulance is closer than the current best
+        // sort by UHU if equally close
         const int ambulanceWorkedTime = ambulances[availableAmbulanceIndicies[i]].timeUnavailable;
 
         const bool closer = travelTime < closestAmbulanceTravelTime;
@@ -141,6 +151,8 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         }
     }
 
+    // check again if no ambulances are available, wait until after next event in queue is processed
+    // can trigger if the ambulances in the pool approximated location is not in OD cost matrix
     if (closestAmbulanceIndex == -1) {
         int waitTime = 60;
 
@@ -156,11 +168,13 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         return sortAllEvents;
     }
 
+    // special handling if ambulance was already assigned to an event
     if (ambulances[closestAmbulanceIndex].assignedEventId != -1) {
         int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[closestAmbulanceIndex].assignedEventId);
         int incrementSeconds;
 
         if (events[currentAmbulanceEventIndex].type == EventType::DISPATCHING_TO_DEPOT) {
+            // use prevTimer here to only get the traffic influence at previous step
             incrementSeconds = ODMatrix::getInstance().getTravelTime(
                 rnd,
                 ambulances[closestAmbulanceIndex].currentGridId,
@@ -184,7 +198,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].prevTimer
             );
 
-            // set old event metrics to resource appointment resetting the event
+            // set old event metrics to resource appointment (wait time in queue)
             int oldMetrics = events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"];
             events[currentAmbulanceEventIndex].metrics["duration_resource_preparing_departure"] = 0;
 
@@ -214,6 +228,7 @@ bool ClosestDispatchEngineStrategy::assigningAmbulance(
         ambulances[closestAmbulanceIndex].currentGridId = closestAmbulanceGridId;
     }
 
+    // assign ambulance to event
     events[eventIndex].assignAmbulance(ambulances[closestAmbulanceIndex]);
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
@@ -282,14 +297,14 @@ void ClosestDispatchEngineStrategy::reallocating(
     );
     std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
 
-    // get the new allocation
+    // get the new allocation from reallocation event
     std::vector<int> allocation = events[eventIndex].reallocation;
 
     // create a vector of ambulance indices
     std::vector<int> ambulanceIndices(ambulances.size());
     std::iota(ambulanceIndices.begin(), ambulanceIndices.end(), 0);
 
-    // remove ambulances from possible reallocation if at correct depot
+    // remove ambulances from possible reallocation if already at correct depot
     for (size_t depotIndex = 0; depotIndex < depotIndices.size(); depotIndex++) {
         for (int ambulanceIndex = 0; ambulanceIndex < ambulances.size(); ambulanceIndex++) {
             if (allocation[depotIndex] <= 0) {
@@ -357,6 +372,7 @@ void ClosestDispatchEngineStrategy::reallocating(
                 newEvent.timer = events[eventIndex].timer;
                 newEvent.prevTimer = events[eventIndex].timer;
                 newEvent.assignAmbulance(ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]]);
+                // set to V1 to force traffic factor on travel time
                 newEvent.triageImpression = "V1";
                 newEvent.gridId = ambulances[sortedAmbulanceIndices[currentAmbulanceIndex]].currentGridId;
                 newEvent.utility = true;
