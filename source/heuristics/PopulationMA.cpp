@@ -22,6 +22,7 @@ PopulationMA::PopulationMA(const std::vector<Event>& events) : PopulationGA(even
 std::vector<Individual> PopulationMA::createOffspring() {
     std::vector<Individual> offspring = PopulationGA::createOffspring();
 
+    // perform local search on offspring
     for (Individual& child : offspring) {
         if (getRandomDouble(rnd) < localSearchProbability) {
             localSearch(child);
@@ -47,8 +48,11 @@ void PopulationMA::localSearch(Individual& individual) {
     }*/
 
     // const int allocationIndex = worstPerformingAllocationIndex;
+
+    // get random time segment in allocation to perform local search on
     const int allocationIndex = getRandomInt(rnd, 0, numTimeSegments - 1);
 
+    // find the worst performing depot in the allocation
     int worstPerformingDepotIndex = -1;
     double worstPerformanceDepot = std::numeric_limits<double>::min();
 
@@ -65,6 +69,7 @@ void PopulationMA::localSearch(Individual& individual) {
         }
     }
 
+    // try to move an ambulance from each depot to the worst performing depot
     for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
         if (individual.genotype[allocationIndex][depotIndex] < 1) {
             continue;
@@ -86,6 +91,7 @@ void PopulationMA::localSearch(Individual& individual) {
             << " (current: " << responseTimeViolations(newIndividual.simulatedEvents, allocationIndex, depotIndex)
             << ", worst: " << responseTimeViolations(newIndividual.simulatedEvents, allocationIndex, worstPerformingDepotIndex) << ")\n";*/
 
+        // replace genotype if local search found better solution
         if (newIndividual.fitness < individual.fitness) {
             individual = newIndividual;
 
