@@ -15,6 +15,7 @@ EventHandler::EventHandler(std::vector<Event>& events) : events(events) {
 }
 
 int EventHandler::getNextEventIndex() {
+    // iterate through queue until event which isn't finsihed appears
     for (; currentIndex < events.size(); currentIndex++) {
         if (events[currentIndex].type != EventType::NONE) return currentIndex;
     }
@@ -23,6 +24,7 @@ int EventHandler::getNextEventIndex() {
 }
 
 void EventHandler::sortEvent(size_t eventIndex) {
+    // only sort specific event by moving it backwards in queue if needed
     std::vector<Event>::iterator newPosition = std::lower_bound(
         events.begin() + eventIndex,
         events.end(),
@@ -36,6 +38,7 @@ void EventHandler::sortEvent(size_t eventIndex) {
 }
 
 void EventHandler::sortEvents() {
+    // sort all events
     std::sort(events.begin(), events.end(), [](const Event& a, const Event& b) {
         return a.timer < b.timer;
     });
