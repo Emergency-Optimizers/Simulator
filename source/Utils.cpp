@@ -267,6 +267,7 @@ std::vector<unsigned> getAvailableAmbulanceIndicies(
 ) {
     std::vector<unsigned> availableAmbulanceIndicies;
 
+    // populates pool with available ambulances
     for (unsigned i = 0; i < ambulances.size(); i++) {
         int eventIndex = -1;
 
@@ -275,6 +276,7 @@ std::vector<unsigned> getAvailableAmbulanceIndicies(
             eventIndex = findEventIndexFromId(events, ambulances[i].assignedEventId);
         }
 
+        // check with ambulance if it is available
         if (ambulances[i].isAvailable(events, ambulances, eventIndex, currentTime, currentEventTriageImpression)) {
             availableAmbulanceIndicies.push_back(i);
         }
@@ -284,6 +286,8 @@ std::vector<unsigned> getAvailableAmbulanceIndicies(
 }
 
 int calculateDayDifference(const std::tm& baseDate, const int targetMonth, const int targetDay) {
+    // method used in MCS distribution generations
+    // needed to find out which weight to use for date based on distance from target date (defined in settings.txt)
     int year = baseDate.tm_year;
     bool isLeapYear = (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
     int totalDaysInYear = isLeapYear ? 365 : 364;
@@ -358,6 +362,7 @@ int weightedLottery(
 
     std::vector<double> adjustedWeights;
 
+    // used for limiting lottery to only a specific section of the vector
     if (ranges.empty()) {
         // if ranges is empty, use the entire weights vector
         adjustedWeights = weights;
@@ -665,6 +670,7 @@ double calculateEuclideanDistance(const double x1, const double y1, const double
 }
 
 std::pair<int, int> idToUtm(const int64_t& grid_id) {
+    // converts SSB grid id to easting and northing
     int x = static_cast<int>(std::floor(static_cast<double>(grid_id) * std::pow(10, -7)) - (2 * std::pow(10, 6)));
     int y = static_cast<int>(static_cast<double>(grid_id) - (std::floor(static_cast<double>(grid_id) * std::pow(10, -7)) * std::pow(10, 7)));
 
@@ -672,6 +678,7 @@ std::pair<int, int> idToUtm(const int64_t& grid_id) {
 }
 
 int64_t utmToId(const std::pair<int, int>& utm, const int cellSize, const int offset) {
+    // converts easting and northing to SSB grid id
     int64_t xCorner = static_cast<int64_t>(std::floor((utm.first + offset) / cellSize) * cellSize - offset);
     int64_t yCorner = static_cast<int64_t>(std::floor(utm.second / cellSize) * cellSize);
 
@@ -702,6 +709,7 @@ int64_t approximateLocation(
         timeAtStart
     );
 
+    // use interpolation to find approximate location
     time_t timeTravelled = timeNow - timeAtStart;
 
     double proportion = static_cast<double>(timeTravelled) / static_cast<double>(timeToReachGoal);
@@ -768,18 +776,22 @@ double averageResponseTime(
     for (int eventIndex = 0; eventIndex < simulatedEvents.size(); eventIndex++) {
         Event event = simulatedEvents[eventIndex];
 
+        // skip utility events (warmp-up, reallocation)
         if (event.utility) {
             continue;
         }
 
+        // if specified, limit calculation to specific allocation (events handled at specific time segment)
         if (allocationIndex != -1 && simulatedEvents[eventIndex].allocationIndex != allocationIndex) {
             continue;
         }
 
+        // if specified, limit calculation to specific depot
         if (depotIndex != -1 && event.depotIndexResponsible != depotIndex) {
             continue;
         }
 
+        // limit to specific triage and urbanization
         if (event.triageImpression != triageImpression || Incidents::getInstance().gridIdUrban[event.incidentGridId] != urban) {
             continue;
         }
@@ -792,6 +804,7 @@ double averageResponseTime(
         return 0;
     }
 
+    // calculate mean response time (MRT)
     return static_cast<double>(totalResponseTime) / static_cast<double>(totalEvents);
 }
 
@@ -809,19 +822,23 @@ double responseTimeViolations(
     const int ruralUrgentResponseTimeGoalSeconds = 2400;
 
     for (int eventIndex = 0; eventIndex < simulatedEvents.size(); eventIndex++) {
+        // skip utility events (warmp-up, reallocation)
         if (simulatedEvents[eventIndex].utility) {
             continue;
         }
 
+        // if specified, limit calculation to specific allocation (events handled at specific time segment)
         if (allocationIndex != -1 && simulatedEvents[eventIndex].allocationIndex != allocationIndex) {
             continue;
         }
 
+        // if specified, limit calculation to specific depot
         if (depotIndex != -1 && simulatedEvents[eventIndex].depotIndexResponsible != depotIndex) {
             totalEvents++;
             continue;
         }
 
+        // get response time and check if it violates the guidelines
         int responseTime = simulatedEvents[eventIndex].getResponseTime();
 
         bool urban = Incidents::getInstance().gridIdUrban[simulatedEvents[eventIndex].incidentGridId];
@@ -850,6 +867,7 @@ double responseTimeViolations(
         return 0.0;
     }
 
+    // returns percentage of incidents that violated guidelines
     return totalViolations / totalEvents;
 }
 
@@ -859,6 +877,7 @@ double responseTimeViolationsUrban(
     const int allocationIndex,
     const int depotIndex
 ) {
+    // same method as above, but allows for limiting to urbanization as well
     double totalEvents = 0.0;
     double totalViolations = 0.0;
 
@@ -992,6 +1011,7 @@ void printAmbulanceWorkload(const std::vector<Ambulance>& ambulances) {
         }
     }
 
+    // the standard deviation is calculated for seconds, not hours
     std::cout
         << std::endl << "Total: " << std::setprecision(2) << totalHours << " hours, "
         << "Standard deviation: " << calculateStandardDeviation(times)
@@ -1017,7 +1037,7 @@ void saveDataToJson(
 
     outFile << "{" << std::endl;
 
-    // iterator over map for serialization
+    // iterator over map for serialization (saves heuristic metrics for each individual for each generation)
     for (auto it = dataMap.begin(); it != dataMap.end(); ++it) {
         outFile << "  \"" << it->first << "\": [";
         for (size_t i = 0; i < it->second.size(); ++i) {
