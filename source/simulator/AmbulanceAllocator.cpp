@@ -23,6 +23,7 @@ void AmbulanceAllocator::allocate(
 
     std::vector<unsigned> depotIndices = Stations::getInstance().getDepotIndices(dayshift);
 
+    // convert genotype to ambulances, init to first time segment
     int ambulanceId = 0;
     for (int depotId = 0; depotId < allocations[0].size(); depotId++) {
         int depotIndex = depotIndices[depotId];
@@ -39,6 +40,7 @@ void AmbulanceAllocator::allocate(
         }
     }
 
+    // get shift start and end timers
     std::tm shiftStartTm = getLocalTime(events[events.size() - 1].timer);
 
     shiftStartTm.tm_hour = Settings::get<int>("DAY_SHIFT_START");
@@ -55,6 +57,7 @@ void AmbulanceAllocator::allocate(
         shiftEnd -= shiftLengthSeconds;
     }
 
+    // schedule breaks if policy is on
     if (Settings::get<bool>("SCHEDULE_BREAKS")) {
         allocateAndScheduleBreaks(shiftStart, shiftEnd);
     }
