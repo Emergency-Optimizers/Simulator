@@ -11,6 +11,7 @@
 #include "file-reader/Settings.hpp"
 
 Incidents::Incidents() {
+    // define the schema: header and function that converts string to specific type
     schemaMapping = {
         {"triage_impression_during_call", toString},
         {"resource_id", toString},
@@ -106,8 +107,10 @@ Incidents::Incidents() {
         {"total_V1_incidents_hour_23", toInt},
     };
 
+    // hard coded path, important to follow steps in README.md to be able to run
     loadFromFile("../../Data-Processing/data/enhanced/oslo/incidents.csv", "Loading incidents data");
 
+    // cache each grid id's urbanization
     for (int i = 0; i < size(); i++) {
         int64_t grid_id = get<int64_t>("grid_id", i);
         int64_t urban_settlement = get<bool>(Settings::get<std::string>("URBAN_METHOD"), i);
@@ -124,8 +127,9 @@ double Incidents::timeDifferenceBetweenHeaders(const std::string& header1, const
 }
 
 std::vector<int> Incidents::rowsWithinTimeFrame(const int month, const int day, const int windowSize) {
-    std::vector<int> indicies;
+    std::vector<int> indices;
 
+    // gets all indices within window size to be used in the MCS distribution generation
     for (int i = 0; i < rows.size(); i++) {
         std::tm timeCallReceived = get<std::optional<std::tm>>("time_call_received", i).value();
 
@@ -134,9 +138,9 @@ std::vector<int> Incidents::rowsWithinTimeFrame(const int month, const int day, 
         bool withinWindowSize = dayDiff <= windowSize;
 
         if (withinWindowSize) {
-            indicies.push_back(i);
+            indices.push_back(i);
         }
     }
 
-    return indicies;
+    return indices;
 }
