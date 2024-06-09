@@ -37,10 +37,11 @@ void runSimulatorOnce(
     std::vector<std::vector<int>> allocations,
     std::string extraFileName
 ) {
-    // set allocation
+    // set allocation to simplified OUH version
     if (allocations.empty()) {
         allocations.push_back({2, 3, 2, 2, 2, 4, 2, 3, 3, 4, 4, 4, 4, 3, 3});
 
+        // set rapid response points to 0 if day shift
         if (Settings::get<bool>("SIMULATE_DAY_SHIFT")) {
             int allocationSize = static_cast<int>(allocations.size());
             for (int allocationIndex = 0; allocationIndex < allocationSize; allocationIndex++) {
@@ -132,6 +133,7 @@ void runTimeEvaluation() {
     const bool saveToFile = false;
     const int N = 10;
 
+    // configurations to run
     std::vector<int> possibleTimeSegments = { 1, 6, 12, 18, 24 };
 
     std::vector<DispatchEngineStrategyType> possibleStrategies = {
@@ -145,6 +147,7 @@ void runTimeEvaluation() {
 
     for (auto& strategy : possibleStrategies) {
         for (auto& timeSegments : possibleTimeSegments) {
+            // set configuration and run program
             Settings::update<int>("NUM_TIME_SEGMENTS", timeSegments);
             Settings::update<DispatchEngineStrategyType>("DISPATCH_STRATEGY", strategy);
 
@@ -189,6 +192,7 @@ void runTimeEvaluation() {
 
 void runDataValidation(std::vector<Event>& events) {
     for (int i = 1; i <= 12; i++) {
+        // set configuration and run program
         const std::string dirName = Settings::get<std::string>("UNIQUE_RUN_ID") + "_CUSTOM_" + std::to_string(i);
 
         Settings::update<int>("SIMULATE_MONTH", i);
@@ -220,6 +224,7 @@ void runSimulationGridSearch(const std::vector<Event>& events) {
     const bool verbose = false;
     const bool saveToFile = true;
 
+    // configurations to run
     std::vector<DispatchEngineStrategyType> possibleStrategies = {
         DispatchEngineStrategyType::CLOSEST,
         DispatchEngineStrategyType::RANDOM,
@@ -244,6 +249,7 @@ void runSimulationGridSearch(const std::vector<Event>& events) {
         for (auto prioritizeTriage : possiblePrioritizeTriage) {
             for (auto responseRestricated : possibleResponseRestricated) {
                 for (auto scheduleBreaks : possibleScheduleBreaks) {
+                    // set configuration and run program
                     Settings::update<DispatchEngineStrategyType>("DISPATCH_STRATEGY", strategy);
                     Settings::update<bool>("DISPATCH_STRATEGY_PRIORITIZE_TRIAGE", prioritizeTriage);
                     Settings::update<bool>("DISPATCH_STRATEGY_RESPONSE_RESTRICTED", responseRestricated);
@@ -270,10 +276,12 @@ void runSimulationGridSearch(const std::vector<Event>& events) {
 }
 
 void runExperimentTimeSegments(const std::vector<Event>& events) {
+    // configurations to run
     std::vector<int> possibleTimeSegments(24, 0);
     std::iota(possibleTimeSegments.begin(), possibleTimeSegments.end(), 1);
 
     for (auto timeSegments : possibleTimeSegments) {
+        // set configuration and run program
         Settings::update<int>("NUM_TIME_SEGMENTS", timeSegments);
 
         std::vector<Event> copiedEvents = events;
@@ -288,6 +296,7 @@ void runExtremeConditionTest() {
     const bool verbose = false;
     const bool saveToFile = true;
 
+    // configurations to run
     std::vector<double> possibleIncidentsToGenerateFactors = {
         0.50,
         1.00,
@@ -295,6 +304,7 @@ void runExtremeConditionTest() {
     };
 
     for (auto incidentsToGenerateFactor : possibleIncidentsToGenerateFactors) {
+        // set configuration and run program
         Settings::update<double>("INCIDENTS_TO_GENERATE_FACTOR", incidentsToGenerateFactor);
 
         MonteCarloSimulator monteCarloSim;
@@ -309,12 +319,14 @@ void runExtremeConditionTest() {
 void runAmbulanceExperiment(const std::vector<Event>& events) {
     const bool verbose = false;
 
+    // configurations to run
     std::vector<int> possibleResourceSize;
     for (int i = 30; i <= 60; i++) {
         possibleResourceSize.push_back(i);
     }
 
     for (auto resourceSize : possibleResourceSize) {
+        // set configuration and run program
         Settings::update<int>("TOTAL_AMBULANCES_DURING_DAY", resourceSize);
         std::string extraFileName = "_numAmbulances=" + std::to_string(resourceSize);
 
@@ -331,12 +343,15 @@ void runAmbulanceExperiment(const std::vector<Event>& events) {
 void runExperimentHeuristics(const std::vector<Event>& events) {
     const bool verbose = false;
 
+    // decides heuristic to run based on settings.txt
     std::string heuristic = Settings::get<std::string>("CUSTOM_STRING_VALUE");
 
+    // configurations to run
     std::vector<int> possibleSeeds(10, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
     for (auto seed : possibleSeeds) {
+        // set configuration and run program
         Settings::update<int>("SEED", seed);
 
         std::vector<Event> copiedEvents = events;
@@ -366,6 +381,7 @@ void runExperimentAllocations(const std::vector<Event>& events) {
     const bool verbose = false;
     const bool saveToFile = true;
 
+    // configurations to run
     std::vector<int> possibleSeeds(10, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
@@ -380,6 +396,7 @@ void runExperimentAllocations(const std::vector<Event>& events) {
     };
 
     for (auto allocationInfo : possibleAllocations) {
+        // set configuration and run program
         std::string allocationName = allocationInfo.first;
         std::vector<std::vector<int>> allocation = allocationInfo.second;
 
@@ -452,8 +469,7 @@ void runExperimentCustomAllocations(const std::vector<Event>& events) {
 void runExperimentDepots(const std::vector<Event>& events) {
     const bool verbose = false;
 
-    std::string heuristic = Settings::get<std::string>("CUSTOM_STRING_VALUE");
-
+    // configurations to run
     std::vector<int> possibleSeeds(5, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
@@ -461,6 +477,7 @@ void runExperimentDepots(const std::vector<Event>& events) {
     std::iota(possibleDepotToRemove.begin(), possibleDepotToRemove.end(), -1);
 
     for (auto depotToRemove : possibleDepotToRemove) {
+        // set configuration and run program
         for (auto seed : possibleSeeds) {
             Settings::update<int>("SEED", seed);
             Settings::update<int>("SKIP_STATION_INDEX", depotToRemove);
@@ -478,12 +495,14 @@ void runExperimentDepots(const std::vector<Event>& events) {
 }
 
 void runExperimentTimeSegmentsVerification(const std::vector<Event>& events) {
+    // configurations to run
     std::vector<int> possibleSeeds(10, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
     std::vector<int> possibleTimeSegments = { 1, 4 };
 
     for (auto timeSegments : possibleTimeSegments) {
+        // set configuration and run program
         for (auto seed : possibleSeeds) {
             Settings::update<int>("SEED", seed);
             Settings::update<int>("NUM_TIME_SEGMENTS", timeSegments);
@@ -503,10 +522,12 @@ void runExperimentTimeSegmentsVerification(const std::vector<Event>& events) {
 void runExperimentPrediction(const std::vector<Event>& events) {
     const bool verbose = false;
 
+    // configurations to run
     std::vector<int> possibleSeeds(10, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
     for (auto seed : possibleSeeds) {
+        // set configuration and run program
         Settings::update<int>("SEED", seed);
 
         std::vector<Event> copiedEvents = events;
@@ -523,10 +544,12 @@ void runSimulationMultipleTimes(const std::vector<Event>& events) {
     const bool verbose = false;
     const bool saveToFile = true;
 
+    // configurations to run
     std::vector<int> possibleSeeds(10, 0);
     std::iota(possibleSeeds.begin(), possibleSeeds.end(), 0);
 
     for (auto seed : possibleSeeds) {
+        // set configuration and run program
         Settings::update<int>("SEED", seed);
 
         std::vector<Event> copiedEvents = events;
