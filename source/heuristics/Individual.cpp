@@ -38,6 +38,7 @@ Individual::Individual(
     allocationsObjectivePercentageViolationsUrban(numAllocations, 0.0),
     allocationsObjectivePercentageViolationsRural(numAllocations, 0.0),
     allocationsFitness(numAllocations, 0.0) {
+    // init genotype
     generateGenotype(isChild, dayShift, genotypeInits, genotypeInitsTickets);
 }
 
@@ -55,7 +56,7 @@ void Individual::generateGenotype(
         return;
     }
 
-    // get random init from tickets
+    // get random init from tickets (defined in settings.txt)
     switch (inits[weightedLottery(rnd, tickets, {})]) {
         case GenotypeInitType::RANDOM:
             randomGenotype();
@@ -118,7 +119,7 @@ void Individual::uniformGenotype() {
         // shuffle the depot indices to randomize which depots get the remainder ambulances
         std::shuffle(depotIndices.begin(), depotIndices.end(), rnd);
 
-        // evenly and randomly distribute the remainder ambulances to the depots
+        // randomly distribute the remainder ambulances to the depots
         for (int remainderIndex = 0; remainderIndex < remainder; remainderIndex++) {
             int depotIndex = depotIndices[remainderIndex];
             genotype[allocationIndex][depotIndex]++;
@@ -129,6 +130,7 @@ void Individual::uniformGenotype() {
 void Individual::proportionateGenotype(const std::string& column, const bool dayShift) {
     std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
 
+    // define weights based on column (total population or incidents in radius or cluster defined in data analysis)
     std::vector<double> weights(numDepots, 0.0);
     for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
         weights[depotIndex] = static_cast<double>(Stations::getInstance().get<int>(column, depotIndices[depotIndex]));
@@ -137,13 +139,14 @@ void Individual::proportionateGenotype(const std::string& column, const bool day
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         int numAmbulancesToAdd = numAmbulances;
 
-        // add 1 ambulance to each depot
+        // add at least 1 ambulance to each depot
         for (int depotIndex = 0; depotIndex < numDepots; depotIndex++) {
             genotype[allocationIndex][depotIndex]++;
 
             numAmbulancesToAdd--;
         }
 
+        // randomly distribute the rest of the ambulances based on weights
         for (int ambulanceIndex = 0; ambulanceIndex < numAmbulancesToAdd; ambulanceIndex++) {
             int depotIndex = weightedLottery(rnd, weights, {});
 
@@ -157,6 +160,7 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
     AmbulanceAllocator ambulanceAllocator;
     ambulanceAllocator.allocate(events, genotype, dayShift);
 
+    // run simulator with allocation and unprocessed events
     Simulator simulator(
         ambulanceAllocator,
         dispatchStrategy,
@@ -166,7 +170,7 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
     simulatedEvents = simulator.run();
     simulatedAmbulances = ambulanceAllocator.ambulances;
 
-    // sort simulated events
+    // sort simulated/processed events
     std::sort(simulatedEvents.begin(), simulatedEvents.end(), [](const Event& a, const Event& b) {
         std::tm aTimeStruct = a.callReceived;
         std::tm bTimeStruct = b.callReceived;
@@ -206,6 +210,7 @@ void Individual::evaluate(std::vector<Event> events, const bool dayShift, const 
 }
 
 void Individual::updateMetrics() {
+    // update fitness, apply objective weights defined in settings.txt
     fitness = 0.0;
     fitness += objectiveAvgResponseTimeUrbanA * weightAvgResponseTimeUrbanA;
     fitness += objectiveAvgResponseTimeUrbanH * weightAvgResponseTimeUrbanH;
@@ -217,6 +222,7 @@ void Individual::updateMetrics() {
     fitness += objectivePercentageViolationsUrban * weightPercentageViolationsUrban;
     fitness += objectivePercentageViolationsRural * weightPercentageViolationsRural;
 
+    // update fitness per allocation
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         allocationsFitness[allocationIndex] = 0.0;
         allocationsFitness[allocationIndex] += allocationsObjectiveAvgResponseTimeUrbanA[allocationIndex] * weightAvgResponseTimeUrbanA;
@@ -271,7 +277,7 @@ void Individual::mutate(
     const std::vector<MutationType>& mutations,
     const std::vector<double>& tickets
 ) {
-    // get random mutation from tickets
+    // do random mutation from tickets (defined in settings.txt)
     switch (mutations[weightedLottery(rnd, tickets, {})]) {
         case MutationType::REDISTRIBUTE:
             redistributeMutation(mutationProbability);
@@ -357,7 +363,6 @@ void Individual::scrambleMutation(const double mutationProbability) {
 
         // shuffle the subset and place it back into the genotype
         std::shuffle(subsetToScramble.begin(), subsetToScramble.end(), rnd);
-
         std::copy(subsetToScramble.begin(), subsetToScramble.end(), genotype[allocationIndex].begin() + start);
     }
 }
@@ -384,6 +389,7 @@ void Individual::neighborDuplicationMutation(const double mutationProbability) {
 }
 
 void Individual::repair() {
+    // repair genotype if needed, can happen after crossovers
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         int totalAmbulancesInSegment = std::accumulate(genotype[allocationIndex].begin(), genotype[allocationIndex].end(), 0);
 
@@ -406,6 +412,7 @@ void Individual::repair() {
 }
 
 bool Individual::isValid() const {
+    // check if genotype is valid, can be invalid after crossovers
     for (int allocationIndex = 0; allocationIndex < numAllocations; allocationIndex++) {
         // sum all ambulances allocated for segment and verify it
         int totalAmbulances = std::accumulate(genotype[allocationIndex].begin(), genotype[allocationIndex].end(), 0);
@@ -431,6 +438,7 @@ void Individual::printGenotype() const {
 }
 
 bool Individual::dominates(const Individual& other) const {
+    // for NSGA-II, checks domination based on objectives used (defined in settings.txt)
     bool anyBetter = false;
     for (size_t i = 0; i < objectives.size(); ++i) {
         if (objectives[i] < other.objectives[i]) {
