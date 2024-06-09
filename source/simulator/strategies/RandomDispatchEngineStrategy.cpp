@@ -22,6 +22,7 @@ bool RandomDispatchEngineStrategy::run(
 ) {
     bool sortAllEvents = false;
 
+    // process event based on type, according to RDS (Random Dispatch Strategy)
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
             sortAllEvents = assigningAmbulance(rnd, ambulances, events, eventIndex);
@@ -42,6 +43,7 @@ bool RandomDispatchEngineStrategy::run(
             finishingEvent(rnd, ambulances, events, eventIndex);
             break;
         case EventType::REALLOCATE:
+            // handles reallocation events
             reallocating(rnd, ambulances, events, eventIndex);
             break;
     }
@@ -57,6 +59,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
 ) {
     bool sortAllEvents = false;
 
+    // get pool of available ambulances
     std::vector<unsigned> availableAmbulanceIndicies = getAvailableAmbulanceIndicies(
         ambulances,
         events,
@@ -64,13 +67,15 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         events[eventIndex].triageImpression
     );
 
+    // try to get random ambulance from pool
     int randomAmbulanceIndex = -1;
     while (!availableAmbulanceIndicies.empty()) {
         int randomAvailableAmbulanceIndex = getRandomInt(rnd, 0, static_cast<int>(availableAmbulanceIndicies.size()) - 1);
         randomAmbulanceIndex = availableAmbulanceIndicies[randomAvailableAmbulanceIndex];
 
-        // branch if the randomly selected ambulance is assigned to an event, and perform extra checks
         if (ambulances[randomAmbulanceIndex].assignedEventId != -1) {
+            // if ambulance is already assigned to an event, approximate its location
+            // can only happen when travelling to scene (policy), or travelling to depot
             int currentAmbulanceEventIndex = findEventIndexFromId(events, ambulances[randomAmbulanceIndex].assignedEventId);
 
             int64_t ambulanceGridId = approximateLocation(
@@ -83,6 +88,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
                 events[currentAmbulanceEventIndex].type
             );
 
+            // if apporximated location is not available in sparse OD cost matrix, skip this ambulance
             if (!ODMatrix::getInstance().gridIdExists(ambulanceGridId)) {
                 availableAmbulanceIndicies.erase(availableAmbulanceIndicies.begin() + randomAvailableAmbulanceIndex);
                 continue;
@@ -149,6 +155,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         break;
     }
 
+    // if no ambulances are available, wait until after next event in queue is processed
     if (availableAmbulanceIndicies.empty()) {
         int waitTime = 60;
 
@@ -164,6 +171,7 @@ bool RandomDispatchEngineStrategy::assigningAmbulance(
         return sortAllEvents;
     }
 
+    // assign ambulance to event
     events[eventIndex].assignAmbulance(ambulances[randomAmbulanceIndex]);
     events[eventIndex].type = EventType::PREPARING_DISPATCH_TO_SCENE;
     events[eventIndex].updateTimer(
@@ -180,6 +188,7 @@ void RandomDispatchEngineStrategy::dispatchingToHospital(
     std::vector<Event>& events,
     const int eventIndex
 ) {
+    // get random hospital
     events[eventIndex].gridId = Stations::getInstance().get<int64_t>(
         "grid_id",
         getRandomElement(rnd, Stations::getInstance().getHospitalIndices())
@@ -217,7 +226,7 @@ void RandomDispatchEngineStrategy::reallocating(
     );
     std::vector<unsigned int> depotIndices = Stations::getInstance().getDepotIndices(dayShift);
 
-    // get the new allocation
+    // get the new allocation from reallocation event
     std::vector<int> allocation = events[eventIndex].reallocation;
 
     // create a vector of ambulance indices
@@ -242,7 +251,7 @@ void RandomDispatchEngineStrategy::reallocating(
     // shuffle the indicies to adhere to the random strategy
     std::shuffle(ambulanceIndices.begin(), ambulanceIndices.end(), rnd);
 
-    // reallocate by assigning the ambulance indicies to the depot according to allocation vector
+    // reallocate by assigning the ambulance indices to the depot according to allocation vector
     size_t currentAmbulanceIndex = 0;
     for (size_t depotIndex = 0; depotIndex < depotIndices.size() && currentAmbulanceIndex < ambulanceIndices.size(); depotIndex++) {
         unsigned int allocatedToDepot = allocation[depotIndex];
@@ -262,6 +271,7 @@ void RandomDispatchEngineStrategy::reallocating(
                 newEvent.timer = events[eventIndex].timer;
                 newEvent.prevTimer = events[eventIndex].timer;
                 newEvent.assignAmbulance(ambulances[ambulanceIndices[currentAmbulanceIndex]]);
+                // set to V1 to force traffic factor on travel time
                 newEvent.triageImpression = "V1";
                 newEvent.gridId = ambulances[ambulanceIndices[currentAmbulanceIndex]].currentGridId;
                 newEvent.utility = true;

@@ -23,7 +23,7 @@ bool ClosestDispatchEngineStrategy::run(
 ) {
     bool sortAllEvents = false;
 
-    // process event based on type
+    // process event based on type, according to CDS (Closest Dispatch Strategy)
     switch (events[eventIndex].type) {
         case EventType::RESOURCE_APPOINTMENT:
             sortAllEvents = assigningAmbulance(rnd, ambulances, events, eventIndex);
@@ -352,7 +352,7 @@ void ClosestDispatchEngineStrategy::reallocating(
         }
     }
 
-    // reallocate by assigning the ambulance indicies to the depot according to allocation vector
+    // reallocate by assigning the ambulance indices to the depot according to allocation vector
     size_t currentAmbulanceIndex = 0;
     for (size_t depotIndex = 0; depotIndex < depotIndices.size() && currentAmbulanceIndex < sortedAmbulanceIndices.size(); depotIndex++) {
         unsigned int allocatedToDepot = allocation[depotIndex];
